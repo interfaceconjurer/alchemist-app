@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="396" height="385" viewBox="0 0 396 385">
+  <defs>
+    <circle id="artboard-copy-7-a" cx="149.816" cy="149.887" r="130.397"/>
+  </defs>
+  <g fill="none" fill-rule="evenodd" transform="translate(44.291 43.416)">
+    <g transform="translate(.234 .02)">
+      <polygon stroke="#000" points=".259 179.385 265.943 50.96 99.236 293.829 127.031 .19 241.948 271.235 11.658 93.032 299.828 131.662 27.883 243.833 212.581 12.153 162.152 295.789 58.908 28.344 290.292 203.329"/>
+      <use fill="#FFF" xlink:href="#artboard-copy-7-a"/>
+    </g>
+    <polygon stroke="#000" points="37.353 171.676 237.651 74.858 111.972 257.954 132.926 36.582 219.561 240.921 45.947 106.575 263.196 135.698 58.179 220.263 197.421 45.601 159.403 259.432 81.568 57.807 256.007 189.727"/>
+    <polygon stroke="#000" points="27.578 173.725 245.215 68.525 108.656 267.472 131.424 26.936 225.559 248.964 36.916 102.988 272.972 134.632 50.206 226.518 201.503 36.736 160.194 269.077 75.621 49.999 265.16 193.338"/>
+    <circle cx="150.024" cy="150.103" r="103.57" stroke="#000" stroke-width="3"/>
+    <circle cx="150.024" cy="150.103" r="90.608" stroke="#000"/>
+    <circle cx="150.024" cy="150.103" r="41.786" fill="#5A5959" fill-opacity=".5" stroke="#000" stroke-width="3"/>
+    <circle cx="150.024" cy="150.103" r="71.753" stroke="#000"/>
+    <circle cx="191.155" cy="56.978" r="20.653" fill="#A6A6A6" fill-opacity=".5" stroke="#000" stroke-width="3"/>
+    <circle cx="191.155" cy="56.978" r="39.717" stroke="#000"/>
+    <circle cx="228.521" cy="252.835" r="21.397" stroke="#000"/>
+    <circle cx="169.818" cy="21.804" r="13.34" stroke="#000"/>
+    <circle cx="26.33" cy="199.603" r="13.34" stroke="#000"/>
+    <circle cx="66.437" cy="212.268" r="41.558" stroke="#000"/>
+    <circle cx="67.966" cy="211.608" r="21.667" fill="#A6A6A6" fill-opacity=".5" stroke="#000" stroke-width="3"/>
+    <circle cx="130.087" cy="117.361" r="28.209" fill="#A6A6A6" fill-opacity=".5" stroke="#000"/>
+    <circle cx="188.419" cy="196.148" r="17.516" fill="#A6A6A6" fill-opacity=".5" stroke="#000"/>
+  </g>
+</svg>
