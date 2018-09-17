@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "ajv": "^6.5.1",
+    "ally.js": "^1.4.1",
     "gsap": "^2.0.1",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",

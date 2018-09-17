@@ -6,7 +6,7 @@ class Button extends Component {
     
     render() {
         return(
-          <button className='button'>{this.props.label}</button>
+          <button autoFocus={this.props.focus} onClick={this.props.onClick} className='button'>{this.props.label}</button>
         );
     } 
 }

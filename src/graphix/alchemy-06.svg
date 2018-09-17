@@ -10,10 +10,10 @@
       <circle class="reaction-class-1" cx="169.584" cy="169.59" r="46.802" fill="#353535" fill-opacity=".5" stroke-width="2"/>
       <circle class="reaction-class-3" cx="236.258" cy="100.085" r="31.422" fill="#949494" fill-opacity=".5" stroke-width="2"/>
       <circle class="reaction-class-2" cx="101.529" cy="238.068" r="31.422" fill="#949494" fill-opacity=".5" stroke-width="2"/>
-      <circle cx="12.74" cy="169.373" r="11.411" fill="#949494" fill-opacity=".5" stroke-width="2"/>
-      <circle cx="325.217" cy="169.373" r="11.411" fill="#949494" fill-opacity=".5" stroke-width="2"/>
-      <circle cx="169.194" cy="12.548" r="11.411" fill="#949494" fill-opacity=".5" stroke-width="2"/>
-      <circle cx="169.194" cy="325.693" r="11.411" fill="#949494" fill-opacity=".5" stroke-width="2"/>
+      <circle class="reaction-class-4" cx="12.74" cy="169.373" r="11.411" fill="#949494" fill-opacity=".5" stroke-width="2"/>
+      <circle class="reaction-class-4" cx="325.217" cy="169.373" r="11.411" fill="#949494" fill-opacity=".5" stroke-width="2"/>
+      <circle class="reaction-class-4" cx="169.194" cy="12.548" r="11.411" fill="#949494" fill-opacity=".5" stroke-width="2"/>
+      <circle class="reaction-class-4" cx="169.194" cy="325.693" r="11.411" fill="#949494" fill-opacity=".5" stroke-width="2"/>
     </g>
   </g>
 </svg>

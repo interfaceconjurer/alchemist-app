@@ -1,0 +1,15 @@
+import React, {Component} from 'react';
+import './view.css';
+
+class View extends Component{
+
+    render(){
+        return(
+            <ul>
+                {this.props.workItems}
+            </ul>
+        );
+    }
+}
+
+export default View;
