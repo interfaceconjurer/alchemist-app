@@ -3,11 +3,10 @@ import './view.css';
 import Disabled from 'ally.js/src/maintain/disabled';
 import TabFocus from 'ally.js/src/maintain/tab-focus';
 
-
-
 class View extends Component{
 
   componentDidMount(){
+    this.props.animateInCall();
     this.disableFocus = Disabled({
       context: '.main',
       filter: '.modal',
@@ -16,8 +15,6 @@ class View extends Component{
     this.handleFocus = TabFocus({
       context: '.modal',
     });
-
-    console.log(this.props.modalData);
   }
 
   componentWillUnmount(){
@@ -27,24 +24,20 @@ class View extends Component{
   }
     
     render(){
-      let workItem = this.props.modalData.workItem;
-      let imageSrc = workItem.images.hidpi ? workItem.images.hidpi : workItem.images.normal;
-      let workItemTags = [];
-      for(let i = 0;i < workItem.tags.length; i++){
-        workItemTags.push(<i key={[i]}>{workItem.tags[i]}</i>);
-      }
-      let datePublished = new Date(workItem.published_at).toDateString();
+      const {workItem, imageSrc, workItemTags, datePublished} = this.props;
       return (
+        <div className="modal-background">
           <div role="dialog" aria-modal="true" className="modal">
           {this.props.button}
             <img src={imageSrc} />
+            {workItemTags}
             <dl>
               <dt>{workItem.title}</dt>
-              <dd>{workItem.description}</dd>
+              <dd>{workItem.description.replace(/<\/?p[^>]*>/g, "")}</dd>
               <dd className="date-published">{datePublished}</dd>
             </dl>
-            {workItemTags}
           </div>
+        </div>
       );
     }
 }

@@ -12,13 +12,6 @@
   display: block;
 }
 
-.animating{
-  
-}
-
-.App-header {
-}
-
 .App-title {
   font-size: 1.5em;
   text-align: center;
@@ -30,6 +23,16 @@
   text-align: center;
   margin: 0;
 }
+
+.main{
+  transition: all .4s ease;
+}
+
+.main.modalVisible{
+  filter: blur(10px);
+  pointer-events: none;
+}
+
 
 
 /* ====== nav ====== */
@@ -71,7 +74,3 @@
 /* ====== /divider ======= */
 
 
-.main.modalVisible{
-  filter: blur(10px);
-  pointer-events: none;
-}

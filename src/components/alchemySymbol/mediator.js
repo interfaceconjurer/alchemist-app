@@ -13,7 +13,7 @@ class AlchemySymbol extends Component {
       }
 
     componentDidMount(){
-        this.symbolElement.addEventListener('load', this.animateSvg.bind(this));
+        // this.symbolElement.addEventListener('load', this.animateSvg.bind(this));
     }
 
     updateSymbolIndex() {
