@@ -1,8 +1,8 @@
-import React, {
-  Component
-} from 'react';
-import View from './view';
-import pubSub from '../../pubSub';
+import React, { Component } from 'react';
+import { withRouter } from "react-router";
+import View from './View';
+import WorkItem from '../WorkItem/WorkItem';
+import workItemAPI from '../../workItemAPI';
 
 class WorkLayout extends Component {
   constructor() {
@@ -13,51 +13,34 @@ class WorkLayout extends Component {
   }
 
   componentDidMount() {
-    this.fetchData();
-  }
-
-  fetchData() {
-    const key = '5cecd738e40e30f52442e8753d4cd5f05148782252c87c63c62101f24fd3d6fa'
-    const url = 'https://api.dribbble.com/v2/user/shots';
-    fetch(url + '?access_token=' + key)
-      .then((resp) => resp.json()) // Transform the data into json
-      .then(data => this.setState({
+    const resolveAPIPromise = async () => {
+      let data = await workItemAPI.getAllWorkItems();
+      this.setState({
         data: data
-      }));
+      });
+    }
+    resolveAPIPromise();
   }
 
-  handleClick(workItem, event) {
-    let modalConfig = {
-      actionType: 'SHOW_MODAL',
-      actionConfig: {
-        workItem: workItem,
-        targetSource: event.target
-      }
-    };
-    pubSub.fire('toggleModal', modalConfig);
+  handleClick = (workItem) => {
+    this.props.history.push({
+      pathname: `/workItem/${workItem.id}`
+    });
   }
 
   getWorkItems(){
     const data = this.state.data;
-    if(this.state.data){
-      const allWork = Object.keys(data).map((workItem) => {
-        let imageSrc = data[workItem].images.hidpi ? data[workItem].images.hidpi : data[workItem].images.normal;
-        return <li key={workItem.toString()}><input onClick={this.handleClick.bind(this, data[workItem])} type='image' alt={data[workItem].description} src={imageSrc} /></li>;
-      });
-      return allWork;
-    } else{
-        // create loading UI state
-    }   
+    const allWork = Object.keys(data).map((workItem) => {
+      let imageSrc = data[workItem].images.hidpi ? data[workItem].images.hidpi : data[workItem].images.normal;
+      return <WorkItem key={workItem.toString()} workItemClick={this.handleClick} workItem={data[workItem]} imageSrc={imageSrc} />
+    });
+    return allWork;
 }
-
   render() {
-    return ( <
-      View workItems = {
-        this.getWorkItems()
-      }
-      />
+    return ( 
+      <View workItems={this.getWorkItems()} />
     );
   }
 }
 
-export default WorkLayout;
+export default withRouter(WorkLayout);

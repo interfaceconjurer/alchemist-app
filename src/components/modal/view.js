@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import './view.css';
+import './View.css';
 import Disabled from 'ally.js/src/maintain/disabled';
 import TabFocus from 'ally.js/src/maintain/tab-focus';
 
@@ -20,23 +20,26 @@ class View extends Component{
   componentWillUnmount(){
     this.handleFocus.disengage();
     this.disableFocus.disengage();
-    this.props.modalData.targetSource.focus();
+    let id = this.props.modalData.workItem.id;
+    document.querySelector(`.buttonId-${id}`).focus();
+    
   }
     
     render(){
       const {workItem, imageSrc, workItemTags, datePublished} = this.props;
       return (
         <div className="modal-background">
-          <div role="dialog" aria-modal="true" className="modal">
-          {this.props.button}
-            <img src={imageSrc} />
-            {workItemTags}
+          <section role="dialog" aria-modal="true" className="modal">
+            {this.props.buttonIcon}
             <dl>
               <dt>{workItem.title}</dt>
               <dd>{workItem.description.replace(/<\/?p[^>]*>/g, "")}</dd>
               <dd className="date-published">{datePublished}</dd>
             </dl>
-          </div>
+            <img src={imageSrc} alt={workItem.title}/>
+            <div className="tags">{workItemTags}</div>
+            {this.props.button}
+          </section>
         </div>
       );
     }

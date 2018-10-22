@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import symbols from '../symbols/symbols';
-import View from './view';
-import helper from './helper';
+import View from './View';
+import Helper from './Helper';
 
 class AlchemySymbol extends Component {
     constructor(){
@@ -13,7 +13,7 @@ class AlchemySymbol extends Component {
       }
 
     componentDidMount(){
-        // this.symbolElement.addEventListener('load', this.animateSvg.bind(this));
+        this.symbolElement.addEventListener('load', this.animateSvg.bind(this));
     }
 
     updateSymbolIndex() {
@@ -25,7 +25,7 @@ class AlchemySymbol extends Component {
     }
 
     animateSvg() {
-        helper.animateSymbol(this.symbolElement, this.state.symbolsIndex, this.updateSymbolIndex.bind(this));
+      Helper.animateSymbol(this.symbolElement, this.state.symbolsIndex, this.updateSymbolIndex.bind(this));
     }
 
     render() {
