@@ -1,10 +1,23 @@
-ul {
-    width: 100%;
-    min-height: 300px;
-    display: flex;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    flex-wrap: wrap;
-    justify-content: center;
+.work-layout{
+  width: 100%;
+  min-height: 300px;
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  opacity: 0;
+  animation: showWorkLayout .5s ease;
+  animation-delay: .6s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes showWorkLayout {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

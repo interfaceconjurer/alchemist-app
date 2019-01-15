@@ -17,7 +17,7 @@ class Modal extends Component{
         visibility:false,
         modalData: ''
       }
-    this.modalDOMNode = ''
+    this.modalDOMNode = '';
   }
   
   componentWillMount(){
@@ -43,12 +43,14 @@ class Modal extends Component{
   }
 
   componentDidMount(){
-      let modalConfig = {
-        actionType: 'SHOW_MODAL',
-        actionConfig: {}
-      };
-      PubSub.fire('toggleModal', modalConfig);
+    let modalConfig = {
+      actionType: 'SHOW_MODAL',
+      actionConfig: {}
+    };
+    PubSub.fire('toggleModal', modalConfig);
   }
+
+  
 
   HandleModalUIState = (config) => {
     const modalAction = {
@@ -74,15 +76,20 @@ class Modal extends Component{
     const modal = document.querySelector('.modal');
     this.modalDOMNode = modal;
     const runGsap = () => {
-      TweenMax.to(modal, .4, {opacity:1, transform: "translateY(0)",  delay:0, ease: Back.easeOut.config(1.7)});
+      TweenMax.to(modal, .4, {autoAlpha:1, transform: "translateY(0)",  delay:0, ease: Back.easeOut.config(1.7)});
       main.removeEventListener("transitionend", runGsap);
     }
-    main.addEventListener("transitionend", runGsap);
+    if(this.props.history.action === "PUSH"){
+      main.addEventListener("transitionend", runGsap);
+    } else{
+      runGsap();
+    }
+    
   }
 
 
   animateOut = (hideModalCall) => {
-    TweenMax.to(this.modalDOMNode, .4, {opacity:0, transform: "translateY(-10%)", onComplete:hideModalCall, delay:0, ease: Back.easeIn.config(1.7)});
+    TweenMax.to(this.modalDOMNode, .4, {autoAlpha:0, transform: "translateY(-10%)", onComplete:hideModalCall, delay:0, ease: Back.easeIn.config(1.7)});
   }
 
   handleClick = () => {
@@ -98,6 +105,7 @@ class Modal extends Component{
   }
 
   render(){
+    
     if(this.state.visibility){
       const getViewData = () => {
         let viewData = {};
@@ -114,12 +122,17 @@ class Modal extends Component{
       const closeButton = <Button onClick={this.handleClick} label="Close"/>;
       const closeButtonIcon = <ButtonIcon focus={true} onClick={this.handleClick} title="Close Modal" icon={<Icon icon={ICONS.CLOSE}/>}/>;
       return (
-          <View {...viewData} animateInCall={this.animateIn} modalData={this.state.modalData} buttonIcon={closeButtonIcon} button={closeButton}/>
+        <View {...viewData} 
+          animateInCall={this.animateIn} 
+          modalData={this.state.modalData} 
+          closeModal={this.handleClick} 
+          buttonIcon={closeButtonIcon} 
+          button={closeButton}/>
       );
     }else{
       return null;
     }    
   }
+  
 }
-
 export default withRouter(Modal);

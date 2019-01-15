@@ -4,8 +4,8 @@ export const workItemAPI = {
     let data;
     if(this.workItemData.length === 0){
       const key = '5cecd738e40e30f52442e8753d4cd5f05148782252c87c63c62101f24fd3d6fa'
-      const url = 'https://api.dribbble.com/v2/user/shots';
-      const response = await fetch(url + '?access_token=' + key);
+      const url = 'https://api.dribbble.com/v2/user/shots?page=1&per_page=100';
+      const response = await fetch(url + '&access_token=' + key);
       data = await response.json();
       this.workItemData = data;
     } else{
