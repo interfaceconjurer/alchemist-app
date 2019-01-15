@@ -5,7 +5,7 @@ class View extends Component{
 
     render(){
         return(
-            <ul>
+            <ul className="work-layout">
                 {this.props.workItems}
             </ul>
         );

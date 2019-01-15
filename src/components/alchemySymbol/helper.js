@@ -12,11 +12,6 @@ export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) =
     const reactionClass7 = symbolElement.contentDocument.querySelectorAll('.reaction-class-7');
     const reactionClass8 = symbolElement.contentDocument.querySelectorAll('.reaction-class-8');
     const reactionClass9 = symbolElement.contentDocument.querySelectorAll('.reaction-class-9');
-
-
-    // animate the whole symbol first
-    TweenMax.fromTo(symbolElement, .6, {scale:0, rotation:-180, opacity:0}, 
-      {scale:1, rotation:0, opacity:1, ease:Back.easeOut.config(1.7)});
   
     const animationMethods = {
 
@@ -42,7 +37,7 @@ export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) =
               .to(reactionClass7, 2, {x:9, y:129})
               .to(reactionClass7, 2, {x:9, y:140.7});
             // animate out 
-            animationMethods.exitAnimation(symbolElement);
+            // animationMethods.exitAnimation(symbolElement);
           }
           // animate the center triangel
           TweenMax.from(reactionClass1, .6, {transformOrigin: '44.5% 45%', delay:.2, scale:.8, opacity:.6, ease:Back.easeOut.config(3)});
@@ -56,7 +51,6 @@ export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) =
               {transformOrigin: '50% 50%', x:0, y:0, delay:.4, opacity:1, 
               ease:Back.easeOut.config(2), onComplete: startLoopingAnimation});
         },
-
         animateSymbol_02: (symbolElement) => {
 
           const startLoopingAnimation = () => {
@@ -77,7 +71,7 @@ export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) =
               .to(reactionClass8, .2, {scale:1.2, opacity:0})
               .to(reactionClass8, .2, {scale:1, opacity:1, ease:Power0.easeNone});
 
-            animationMethods.exitAnimation(symbolElement);
+            // animationMethods.exitAnimation(symbolElement);
           }
           // animate the top triangles and adjacent lines
           TweenMax.from(reactionClass1, .6, {delay:.3, scale:.8, x:30, y:100, opacity:.6, ease:Back.easeOut.config(3)});
@@ -98,7 +92,7 @@ export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) =
             tl_reactionClass2.to(reactionClass2, 2, {transformOrigin: '50% 50%', scale:2.7})
               .to(reactionClass2, 2, {transformOrigin: '50% 50%', scale:1, ease:Power1.easeIn});
             
-            animationMethods.exitAnimation(symbolElement);
+            // animationMethods.exitAnimation(symbolElement);
           }
 
 
@@ -129,7 +123,7 @@ export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) =
             const tl_reactionClass9 = new TimelineMax({repeat:-1, delay:0, repeatDelay:0});
             tl_reactionClass9.to(reactionClass9, 10, {transformOrigin: '85% 100%', rotation:-360, ease:Power0.easeNone});
             
-            animationMethods.exitAnimation(symbolElement);
+            // animationMethods.exitAnimation(symbolElement);
           }
 
 
@@ -155,7 +149,7 @@ export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) =
             .to(reactionClass5, 2, {transformOrigin: '50% 50%', y:-6.5, x:17});
             
             
-            animationMethods.exitAnimation(symbolElement);
+            // animationMethods.exitAnimation(symbolElement);
           }
 
           TweenMax.from(reactionClass1, .6, {transformOrigin: '50% 50%', delay:.4, scale:.7, opacity:0, ease:Back.easeOut.config(3)});
@@ -163,7 +157,6 @@ export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) =
           TweenMax.from(reactionClass6, .6, {transformOrigin: '50% 50%', delay:.4, opacity:0, ease:Back.easeOut.config(3)});
 
         },
-
         animateSymbol_06: (symbolElement) => {
           
           const startLoopingAnimation = () => {
@@ -181,7 +174,7 @@ export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) =
               .to(reactionClass4, 2, {opacity:.1})
               .to(reactionClass4, 2, {opacity:1});
 
-            animationMethods.exitAnimation(symbolElement);
+            // animationMethods.exitAnimation(symbolElement);
           }
           // animate the center circle
           TweenMax.from(reactionClass1, .6, {transformOrigin: '44.5% 45%', delay:.2, scale:.8, opacity:.6, ease:Back.easeOut.config(3)});
@@ -204,7 +197,7 @@ export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) =
             tl_reactionClass4.to(reactionClass4, 2, {transformOrigin: '50% 50%', opacity:0, scale:1.3, ease:Power0.easeNone})
               .to(reactionClass4, 2, {transformOrigin: '50% 50%', opacity:1, scale:1, ease:Power0.easeNone});
 
-            animationMethods.exitAnimation(symbolElement);
+            // animationMethods.exitAnimation(symbolElement);
           }
 
           TweenMax.from(reactionClass1, .6, {transformOrigin: '50% 50%', delay:.4, scale:.7, opacity:0, ease:Back.easeOut.config(3)});
@@ -217,7 +210,7 @@ export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) =
             const tl_reactionClass4 = new TimelineMax({repeat:-1, delay:0, repeatDelay:0});
             tl_reactionClass4.to(reactionClass4, 2, {transformOrigin: '50% 50%', scale:1.25, ease:Power0.easeNone})
               .to(reactionClass4, 2, {transformOrigin: '50% 50%', scale:1, ease:Power0.easeNone});
-            animationMethods.exitAnimation(symbolElement);
+            // animationMethods.exitAnimation(symbolElement);
           }
 
           TweenMax.from(reactionClass1, .6, {transformOrigin: '50% 50%', delay:.4, scale:.7, opacity:0, ease:Back.easeOut.config(3)});
@@ -227,16 +220,20 @@ export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) =
         },
         exitAnimation: (symbolElement) => {
           // allow animation to run for 8 secs then transition symbol
-          setTimeout(() => {
-            TweenMax.to(symbolElement, .6, 
+          TweenMax.to(symbolElement, .6, 
             {scale:0, rotation:-30, opacity:0,ease:Back.easeIn.config(1.7), onComplete: animationEndedCall});
-          },8000);
-           
         }
+        
     };
-    animationMethods['animateSymbol_0' + symbolIndex](symbolElement);
+      // animate the whole symbol first
+      TweenMax.fromTo(symbolElement, .6, {scale:0, rotation:-180, opacity:0}, 
+        {scale:1, rotation:0.01, opacity:1, force3D:true, ease:Back.easeOut.config(1.7)});
+
+      animationMethods['animateSymbol_0' + symbolIndex](symbolElement);
+
+      return animationMethods.exitAnimation;
 }
 
 export default {
-    animateSymbol: _animateSymbol
+    animateSymbol: _animateSymbol  
 }
