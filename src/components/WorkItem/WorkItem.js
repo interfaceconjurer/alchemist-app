@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import './WorkItem.css';
-import LazyImage from "../LazyImage/View";
+import './workItem.css';
+import LazyImage from "../lazyImage/vew";
 
 
 class WorkItem extends Component {

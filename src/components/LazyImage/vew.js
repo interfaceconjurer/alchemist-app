@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import LazyLoad from "vanilla-lazyload";
-import './View.css';
+import './view.css';
 
 // Only initialize it one time for the entire application
 if (!document.lazyLoadInstance) {

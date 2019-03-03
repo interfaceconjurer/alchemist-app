@@ -2,11 +2,11 @@ import React, { Component } from 'react';
 import { Route, Switch} from "react-router-dom";
 import ReactGA from 'react-ga';
 import './App.css';
-import Icon from './components/Icon/Icon';
-import { ICONS } from './components/Icon/iconList';
+import Icon from './components/icon/icon';
+import { ICONS } from './components/icon/iconList';
 import AlchemySymbol from './components/alchemySymbol/mediator';
-import WorkLayout from './components/WorkLayout/Mediator';
-import Modal from './components/Modal/Mediator';
+import WorkLayout from './components/workLayout/mediator';
+import Modal from './components/modal/mediator';
 import PubSub from './pubSub';
 
 ReactGA.initialize('UA-128600521-1');
