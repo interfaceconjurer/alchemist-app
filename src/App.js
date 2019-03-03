@@ -3,7 +3,7 @@ import { Route, Switch} from "react-router-dom";
 import ReactGA from 'react-ga';
 import './App.css';
 import Icon from './components/icon/view';
-import { icons } from './components/icon/iconList';
+import { icons } from './components/iconList/iconList';
 import AlchemySymbol from './components/alchemySymbol/mediator';
 import WorkLayout from './components/workLayout/mediator';
 import Modal from './components/modal/mediator';
