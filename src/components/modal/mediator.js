@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import { withRouter } from "react-router";
 import workItemAPI from '../../workItemAPI';
 import View from './View';
-import PubSub from '../../PubSub';
+import PubSub from '../../pubSub';
 import Button from '../Button/Button';
 import ButtonIcon from '../ButtonIcon/ButtonIcon';
 import Icon from '../Icon/Icon';
