@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import symbols from '../symbols/symbols';
 import View from './View';
-import Helper from './Helper';
+import Helper from './helper';
 
 class AlchemySymbol extends Component {
   constructor() {
