@@ -3,7 +3,7 @@ import { Route, Switch} from "react-router-dom";
 import ReactGA from 'react-ga';
 import './App.css';
 import Icon from './components/icon/icon';
-import { ICONS } from './components/icon/iconList';
+import { icons } from './components/icon/iconList';
 import AlchemySymbol from './components/alchemySymbol/mediator';
 import WorkLayout from './components/workLayout/mediator';
 import Modal from './components/modal/mediator';
@@ -60,11 +60,11 @@ class App extends Component {
           <nav className='nav'>
             <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="http://www.linkedin.com/in/jordan-l-wright-91b17321">
               <span>LinkedIn</span>
-              <Icon title="Out-Bound Link" icon={ICONS.OUTBOUNDLINK} assistiveText="Out-Bound Link"/>
+              <Icon title="Out-Bound Link" icon={icons.OUTBOUNDLINK} assistiveText="Out-Bound Link"/>
             </a>
             <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="http://digitalchem.ist/resume/Jordan_L_Wright.pdf">
               <span>Resume</span>
-              <Icon title="Out-Bound Link" icon={ICONS.OUTBOUNDLINK} assistiveText="Out-Bound Link"/>
+              <Icon title="Out-Bound Link" icon={icons.OUTBOUNDLINK} assistiveText="Out-Bound Link"/>
             </a>
           </nav>
           <div className='divider'></div>

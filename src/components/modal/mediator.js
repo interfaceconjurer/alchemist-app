@@ -6,7 +6,7 @@ import PubSub from '../../pubSub';
 import Button from '../button/button';
 import ButtonIcon from '../buttonIcon/buttonIcon';
 import Icon from '../icon/icon';
-import { ICONS } from '../icon/iconList';
+import { icons } from '../icon/iconList';
 
 import TweenMax, { Back } from 'gsap';
 
@@ -120,7 +120,7 @@ class Modal extends Component{
       }
       const viewData = getViewData();
       const closeButton = <Button onClick={this.handleClick} label="Close"/>;
-      const closeButtonIcon = <ButtonIcon focus={true} onClick={this.handleClick} title="Close Modal" icon={<Icon icon={ICONS.CLOSE}/>}/>;
+      const closeButtonIcon = <ButtonIcon focus={true} onClick={this.handleClick} title="Close Modal" icon={<Icon icon={icons.CLOSE}/>}/>;
       return (
         <View {...viewData} 
           animateInCall={this.animateIn} 
