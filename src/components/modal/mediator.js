@@ -5,7 +5,7 @@ import View from './view';
 import PubSub from '../../pubSub';
 import Button from '../button/button';
 import ButtonIcon from '../buttonIcon/buttonIcon';
-import Icon from '../icon/icon';
+import Icon from '../icon/view';
 import { icons } from '../icon/iconList';
 
 import TweenMax, { Back } from 'gsap';
