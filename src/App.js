@@ -4,7 +4,7 @@ import ReactGA from 'react-ga';
 import './App.css';
 import Icon from './components/Icon/Icon';
 import { ICONS } from './components/Icon/iconList';
-import AlchemySymbol from './components/alchemySymbol/Mediator';
+import AlchemySymbol from './components/AlchemySymbol/Mediator';
 import WorkLayout from './components/WorkLayout/Mediator';
 import Modal from './components/Modal/Mediator';
 import PubSub from './pubSub';
