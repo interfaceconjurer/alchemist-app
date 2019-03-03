@@ -120,7 +120,7 @@ class Modal extends Component{
       }
       const viewData = getViewData();
       const closeButton = <Button onClick={this.handleClick} label="Close"/>;
-      const closeButtonIcon = <ButtonIcon focus={true} onClick={this.handleClick} title="Close Modal" icon={<Icon icon={icons.CLOSE}/>}/>;
+      const closeButtonIcon = <ButtonIcon focus={true} onClick={this.handleClick} title="Close Modal" icon={<Icon icon={icons.close}/>}/>;
       return (
         <View {...viewData} 
           animateInCall={this.animateIn} 
