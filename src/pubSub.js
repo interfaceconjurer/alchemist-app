@@ -1,6 +1,6 @@
 
 
-export const events = {
+export const PubSub = {
     events: {},
     addListener: function(eventName, fn){
         this.events[eventName] = this.events[eventName] || [];
@@ -25,4 +25,4 @@ export const events = {
     }
 }
 
-export default events;
+export default PubSub;
