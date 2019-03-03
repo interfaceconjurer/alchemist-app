@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Route, Switch} from "react-router-dom";
 import ReactGA from 'react-ga';
 import './App.css';
+import Resume from './resume/Jordan_L_Wright.pdf';
 import Icon from './components/icon/view';
 import { icons } from './components/iconList/iconList';
 import AlchemySymbol from './components/alchemySymbol/mediator';
@@ -62,7 +63,7 @@ class App extends Component {
               <span>LinkedIn</span>
               <Icon title="Out-Bound Link" icon={icons.outboundlink} assistiveText="Out-Bound Link"/>
             </a>
-            <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="http://digitalchem.ist/resume/Jordan_L_Wright.pdf">
+            <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href={Resume}>
               <span>Resume</span>
               <Icon title="Out-Bound Link" icon={icons.outboundlink} assistiveText="Out-Bound Link"/>
             </a>
