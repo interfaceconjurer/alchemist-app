@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { withRouter } from "react-router";
-import View from './View';
-import WorkItem from '../WorkItem/WorkItem';
+import View from './view';
+import WorkItem from '../workItem/workItem';
 import workItemAPI from '../../workItemAPI';
 
 class WorkLayout extends Component {

@@ -1,12 +1,12 @@
 import React, {Component} from 'react';
 import { withRouter } from "react-router";
 import workItemAPI from '../../workItemAPI';
-import View from './View';
+import View from './view';
 import PubSub from '../../pubSub';
-import Button from '../Button/Button';
-import ButtonIcon from '../ButtonIcon/ButtonIcon';
-import Icon from '../Icon/Icon';
-import { ICONS } from '../Icon/iconList';
+import Button from '../button/button';
+import ButtonIcon from '../buttonIcon/buttonIcon';
+import Icon from '../icon/icon';
+import { ICONS } from '../icon/iconList';
 
 import TweenMax, { Back } from 'gsap';
 

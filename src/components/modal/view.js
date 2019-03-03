@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import './View.css';
+import './view.css';
 import Disabled from 'ally.js/src/maintain/disabled';
 import TabFocus from 'ally.js/src/maintain/tab-focus';
 import Key from 'ally.js/src/when/key';
