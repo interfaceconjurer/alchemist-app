@@ -18,6 +18,9 @@
     },
     "PAPERTRAIL_API_TOKEN": {
       "required": true
+    },
+    "REACT_APP_DRIBBBLE_TOKEN": {
+      "required": true
     }
   },
   "formation": {
