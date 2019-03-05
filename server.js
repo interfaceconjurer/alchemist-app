@@ -1,4 +1,5 @@
 const express = require('express');
+
 const app = express()
 
 if(process.env.NODE_ENV === 'production') {
@@ -9,3 +10,6 @@ if(process.env.NODE_ENV === 'production') {
       next()
   })
 }
+
+// Priority serve any static files.
+app.use(express.static(path.resolve(__dirname, './client/build')));
