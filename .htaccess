@@ -1,4 +1,0 @@
-RewriteEngine On
-RewriteCond %{HTTP_HOST} ^digitalchem.ist [NC]
-RewriteRule ^(.*)$ https://www.digitalchem.ist/$1 [L,R=301]
-
