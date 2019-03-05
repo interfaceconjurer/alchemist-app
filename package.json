@@ -1,35 +1,20 @@
 {
   "name": "alchemist-app",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "ajv": "^6.6.2",
-    "ally.js": "^1.4.1",
-    "gsap": "^2.0.2",
-    "react": "^16.7.0",
-    "react-dom": "^16.7.0",
-    "react-ga": "^2.5.6",
-    "react-router-dom": "^4.3.1",
-    "react-scripts": "^2.1.5",
-    "react-transition-group": "^2.5.2",
-    "typescript": "^3.3.3333",
-    "vanilla-lazyload": "^8.17.0"
-  },
+  "version": "1.0.0",
+  "description": "Client and server of alchemist-app",
+  "main": "index.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "GENERATE_SOURCEMAP=false react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "start": "node server.js",
+    "heroku-postbuild": "cd client/ && npm install && npm install --only=dev --no-shrinkwrap && npm run build"
   },
-  "engines": {
-    "npm": "6.8.0",
-    "node": "10.15.1"
+  "repository": {
+    "type": "git",
+    "url": "git@git.soma.salesforce.com:j-wright/alchemist-app.git"
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ],
-  "devDependencies": {}
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
 }
