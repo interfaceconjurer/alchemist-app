@@ -16,7 +16,7 @@
 }
 
 .main{
-  transition: opacity 1.5s ease;
+  transition: opacity .3s ease;
   transform: translate3d(0,0,0);
   padding: 2rem 2rem;
   position: relative;

@@ -34,7 +34,6 @@ class View extends Component{
     this.disableFocus.disengage();
     let id = this.props.modalData.workItem.id;
     document.querySelector(`.buttonId-${id}`).focus();
-    window.onresize = null
     
   }
 
