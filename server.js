@@ -21,7 +21,7 @@ if (!isDev && cluster.isMaster) {
 
 } else {
   const app = express();
-
+  
   if(process.env.NODE_ENV === 'production') {
   app.use((req, res, next) => {
     if (req.header('x-forwarded-proto') !== 'https')

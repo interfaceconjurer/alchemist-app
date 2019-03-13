@@ -34,14 +34,6 @@ class Modal extends Component{
     resolveAPIPromise();
   }
 
-  componentWillUnmount(){
-    let modalConfig = {
-      actionType: 'HIDE_MODAL',
-      actionConfig: {}
-    };
-    PubSub.fire('toggleModal', modalConfig);
-  }
-
   componentDidMount(){
     let modalConfig = {
       actionType: 'SHOW_MODAL',
@@ -96,7 +88,7 @@ class Modal extends Component{
     const hideModal = () => {
       let config = {
         actionType: 'HIDE_MODAL',
-        actionConfig: {}
+        actionConfig: { "id": this.state.modalData.workItem.id}
       };
       PubSub.fire('toggleModal', config);
       this.props.history.goBack();

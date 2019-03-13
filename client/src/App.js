@@ -29,19 +29,41 @@ class App extends Component {
     PubSub.removeListener('toggleModal', this.handleMainClassState);
   }
 
-
   handleMainClassState = (config) => {
-    const actionClass ={
-      'SHOW_MODAL': {
-        class: 'main modalVisible'
-      },
-      'HIDE_MODAL': {
-        class: 'main'
-      }
-    };    
-    this.setState((state) => {
-      return {mainClass: actionClass[config.actionType].class}
-    });
+    
+    const changeClass = () => {
+      
+      const actionClass ={
+        'SHOW_MODAL': {
+          class: 'main modalVisible'
+        },
+        'HIDE_MODAL': {
+          class: 'main'
+        }
+      };    
+      this.setState((state) => {
+        return {mainClass: actionClass[config.actionType].class}
+      });
+    }
+    // let intersectionObserver = new IntersectionObserver(function(entry) {
+    //   if (entry[0].intersectionRatio > 0) {
+    //     console.log('in the view');
+    //     intersectionObserver.unobserve(entry[0].target);
+    //   } else {
+    //     console.log('out of view');
+    //   }
+    //   changeClass();
+    // });
+    // start observing
+    // if(config.actionConfig.id){
+    //   intersectionObserver.observe(document.querySelector(`.buttonId-${config.actionConfig.id}`));
+    //   // changeClass();
+    // } else {
+    //   console.log('else hit')
+    //   changeClass();
+    // }
+
+    changeClass();
   }
 
   render() {
