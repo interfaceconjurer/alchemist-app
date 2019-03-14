@@ -30,9 +30,7 @@ class App extends Component {
   }
 
   handleMainClassState = (config) => {
-    
     const changeClass = () => {
-      
       const actionClass ={
         'SHOW_MODAL': {
           class: 'main modalVisible'
@@ -45,25 +43,19 @@ class App extends Component {
         return {mainClass: actionClass[config.actionType].class}
       });
     }
-    // let intersectionObserver = new IntersectionObserver(function(entry) {
-    //   if (entry[0].intersectionRatio > 0) {
-    //     console.log('in the view');
-    //     intersectionObserver.unobserve(entry[0].target);
-    //   } else {
-    //     console.log('out of view');
-    //   }
-    //   changeClass();
-    // });
+    let intersectionObserver = new IntersectionObserver(function(entry) {
+      if (entry[0].intersectionRatio > 0) {
+        changeClass();
+        intersectionObserver.unobserve(entry[0].target);
+      } 
+    });
     // start observing
-    // if(config.actionConfig.id){
-    //   intersectionObserver.observe(document.querySelector(`.buttonId-${config.actionConfig.id}`));
-    //   // changeClass();
-    // } else {
-    //   console.log('else hit')
-    //   changeClass();
-    // }
-
-    changeClass();
+    if(config.actionConfig.id){
+      this.refs.main.style.height = 'auto';
+      intersectionObserver.observe(document.querySelector(`.buttonId-${config.actionConfig.id}`));
+    } else {
+      changeClass();
+    }
   }
 
   render() {
