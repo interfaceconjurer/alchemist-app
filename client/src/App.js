@@ -43,19 +43,7 @@ class App extends Component {
         return {mainClass: actionClass[config.actionType].class}
       });
     }
-    let intersectionObserver = new IntersectionObserver(function(entry) {
-      if (entry[0].intersectionRatio > 0) {
-        changeClass();
-        intersectionObserver.unobserve(entry[0].target);
-      } 
-    });
-    // start observing
-    if(config.actionConfig.id){
-      this.refs.main.style.height = 'auto';
-      intersectionObserver.observe(document.querySelector(`.buttonId-${config.actionConfig.id}`));
-    } else {
-      changeClass();
-    }
+    changeClass();
   }
 
   render() {
