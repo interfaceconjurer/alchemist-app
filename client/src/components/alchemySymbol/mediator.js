@@ -17,7 +17,6 @@ class AlchemySymbol extends Component {
   componentDidMount() {
     const runExecution = () => {
       this.animateSvg();
-      this.symbolElement.addEventListener('load', this.animateSvg.bind(this));
       window.onscroll = this.logScroll.bind(this, this.symbolElement.offsetHeight);
     }
     window.addEventListener("load", runExecution);
@@ -36,11 +35,11 @@ class AlchemySymbol extends Component {
         clearTimeout(this.symbolTimeOutFunc);
         this.exitAnimation(this.symbolElement);
       }
-    // symbol is IN of view
-    } else if(window.scrollY < symbolHeight && !this.symbolInView){
-      this.symbolInView = true;
-      this.updateSymbolIndex();
-    }
+      // symbol is IN of view
+      } else if(window.scrollY < symbolHeight && !this.symbolInView){
+        this.symbolInView = true;
+        this.updateSymbolIndex();
+      }
   }
 
   updateSymbolIndex() {
@@ -50,6 +49,7 @@ class AlchemySymbol extends Component {
       this.setState({
         symbolsIndex: newIndex
       });
+      this.animateSvg();
     }
   }
 

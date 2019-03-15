@@ -3,15 +3,15 @@ import TweenMax, { Back, TimelineMax, Power0, Power1, RoughEase } from 'gsap';
 export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) => {
 
     // get all applicable classes
-    const reactionClass1 = symbolElement.contentDocument.querySelectorAll('.reaction-class-1');
-    const reactionClass2 = symbolElement.contentDocument.querySelectorAll('.reaction-class-2');
-    const reactionClass3 = symbolElement.contentDocument.querySelectorAll('.reaction-class-3');
-    const reactionClass4 = symbolElement.contentDocument.querySelectorAll('.reaction-class-4');
-    const reactionClass5 = symbolElement.contentDocument.querySelectorAll('.reaction-class-5');
-    const reactionClass6 = symbolElement.contentDocument.querySelectorAll('.reaction-class-6');
-    const reactionClass7 = symbolElement.contentDocument.querySelectorAll('.reaction-class-7');
-    const reactionClass8 = symbolElement.contentDocument.querySelectorAll('.reaction-class-8');
-    const reactionClass9 = symbolElement.contentDocument.querySelectorAll('.reaction-class-9');
+    const reactionClass1 = symbolElement.querySelectorAll('.reaction-class-1');
+    const reactionClass2 = symbolElement.querySelectorAll('.reaction-class-2');
+    const reactionClass3 = symbolElement.querySelectorAll('.reaction-class-3');
+    const reactionClass4 = symbolElement.querySelectorAll('.reaction-class-4');
+    const reactionClass5 = symbolElement.querySelectorAll('.reaction-class-5');
+    const reactionClass6 = symbolElement.querySelectorAll('.reaction-class-6');
+    const reactionClass7 = symbolElement.querySelectorAll('.reaction-class-7');
+    const reactionClass8 = symbolElement.querySelectorAll('.reaction-class-8');
+    const reactionClass9 = symbolElement.querySelectorAll('.reaction-class-9');
   
     const animationMethods = {
 
@@ -219,7 +219,6 @@ export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) =
 
         },
         exitAnimation: (symbolElement) => {
-          // allow animation to run for 8 secs then transition symbol
           TweenMax.to(symbolElement, .6, 
             {scale:0, rotation:-30, opacity:0,ease:Back.easeIn.config(1.7), onComplete: animationEndedCall});
         }
