@@ -1,14 +1,9 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './processStep.css';
 
 
-class ProcessStep extends Component {
-  render(){
-    return(
+const ProcessStep = (props) =>
       <li className="process-step">
-        {this.props.children}
+        {props.children}
       </li>
-    )
-  }
-}
 export default ProcessStep;
