@@ -9,6 +9,7 @@ import AlchemySymbol from './components/alchemySymbol/mediator';
 import WorkLayout from './components/workLayout/mediator';
 import Modal from './components/modal/mediator';
 import PubSub from './pubSub';
+import Process from './components/process/process';
 
 ReactGA.initialize('UA-128600521-1');
 ReactGA.pageview(window.location.pathname + window.location.search);
@@ -71,7 +72,9 @@ class App extends Component {
             </a>
           </nav>
           <div className='divider'></div>
-          <p className='work-statement'>Captured here are brief moments in the lifecycle of various works. Further details are available over a coffee or whiskey<span role="img" aria-label="Whiskey and coffee emojis"> ☕🥃</span> </p>
+            <Process />
+          <div className='divider'></div>
+          <p className='work-statement'>Captured here are brief moments in the aforementioned process of various works. Further details are available over a coffee or whiskey<span role="img" aria-label="Whiskey and coffee emojis"> ☕🥃</span> </p>
           <WorkLayout /> 
         </main>
       </div>
