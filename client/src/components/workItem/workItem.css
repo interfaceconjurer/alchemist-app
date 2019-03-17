@@ -3,7 +3,6 @@ li{
   position: relative;
   min-height: 180px;
   transition: all .3s ease;
-  cursor: pointer;
 }
 
 li button{

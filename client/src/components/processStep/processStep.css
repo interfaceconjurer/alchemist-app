@@ -1,0 +1,37 @@
+.process-step{
+  font-size: 15px;
+  padding-bottom: 2.5rem;
+}
+
+.process-step figure{
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 2rem;
+}
+
+.process-step figure svg{
+  width: 49px;
+  height: 49px;
+}
+
+/* ======SMALL VIEW======= */
+@media only screen and (max-width: 650px) and (min-width: 0px) {
+  .process-step{
+      width: calc((100% /1));
+  }
+}
+
+/* ======MEDIUM VIEW======= */
+@media only screen and (max-width: 1000px) and (min-width: 650px) {
+  .process-step{
+      width: calc((100% /2) - 60px);
+  }
+}
+
+/* ======LARGE VIEW======= */
+@media only screen and (min-width: 1000px) {
+  .process-step{
+    width: calc((100% / 3) - 60px);
+  }
+}
+

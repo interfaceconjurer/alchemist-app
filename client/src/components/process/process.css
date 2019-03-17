@@ -1,0 +1,15 @@
+.process-wrap h2{
+  text-align: center;
+  font-weight: 100;
+}
+
+
+.process-wrap-ul{
+  max-width: 1270px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin: 0 auto;
+  padding: 1.5rem 0 0;
+  list-style: none;
+}
