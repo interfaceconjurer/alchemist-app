@@ -1,0 +1,15 @@
+.process-examples{
+  width: 100%;
+  min-height: 300px;
+  display: flex;
+  margin: 0;
+  padding: 2rem 0 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.process-examples-wrap h2{
+  text-align: center;
+  font-weight: 100;
+}
+
