@@ -34,6 +34,12 @@
   padding: 0;
 }
 
+.visual-design-statement{
+  text-align: center;
+  font-weight: 100;
+  margin-bottom: .5rem;
+}
+
 
 .work-statement{
   margin: 0 auto 2rem;
@@ -43,6 +49,12 @@
 
 .work-statement span{
   font-style: normal;
+}
+
+.work-statement-preamble{
+  margin: 0 auto 2rem;
+  font-style: italic;
+  text-align: center;
 }
 
 button:focus, img:focus, button:active, img:active{

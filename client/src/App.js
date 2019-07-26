@@ -10,6 +10,7 @@ import WorkLayout from './components/workLayout/mediator';
 import Modal from './components/modal/mediator';
 import PubSub from './pubSub';
 import Process from './components/process/process';
+import ProcessExamples from './components/processExamples/processExamples';
 
 ReactGA.initialize('UA-128600521-1');
 ReactGA.pageview(window.location.pathname + window.location.search);
@@ -74,7 +75,11 @@ class App extends Component {
           <div className='divider'></div>
             <Process />
           <div className='divider'></div>
-          <p className='work-statement'>Captured here are brief moments in the aforementioned process of various works. Further details are available over a coffee or whiskey<span role="img" aria-label="Whiskey and coffee emojis"> ☕🥃</span> </p>
+            <ProcessExamples />
+          <div className='divider'></div>
+          <h2 className="visual-design-statement">The Icing on the Cake. Who doesn’t like a little candy</h2>
+          <p className='work-statement-preamble'>Random moments of visual design snippets, motion, and microinteractions</p>
+          <p className='work-statement'>Further details are available over a coffee or whiskey<span role="img" aria-label="Whiskey and coffee emojis"> ☕🥃</span> </p>
           <WorkLayout /> 
         </main>
       </div>

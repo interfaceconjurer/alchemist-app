@@ -1,7 +1,6 @@
 export const workItemAPI = {
   workItemData: [],
   _fetchData: async function(){
-    console.log()
     let data;
     if(this.workItemData.length === 0){
       const key = process.env.REACT_APP_DRIBBBLE_TOKEN
