@@ -25,9 +25,6 @@
   filter: none;
 }
 
-.process-work-image-holder:focus-visible img{
-  filter: none;
-}
 
 /* ======SMALL VIEW======= */
 @media only screen and (max-width: 550px) and (min-width: 0px) {
