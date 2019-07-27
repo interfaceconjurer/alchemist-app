@@ -4,6 +4,7 @@ import './processExamples.css';
 import VisionSprint from '../../graphix/Mortgage-Lending.png';
 import Mango from '../../graphix/Mango.png';
 import DynamicForms from '../../graphix/Dynamic-Forms.png';
+import TweenMax, { Bounce } from 'gsap';
 
 
 class ProcessExamples extends Component {
@@ -15,6 +16,13 @@ class ProcessExamples extends Component {
     }else if(needsBlur === true){
       event.target.nextElementSibling.classList.remove('pwc-show');
     }
+  }
+
+  handleClick = (event) => {
+    console.log('hit')
+    const targetElement = event.target.parentNode;
+    TweenMax.fromTo(targetElement, 0.4, {x:-30},
+      {x:0, ease:Bounce.easeOut})
   }
   
   render(){
@@ -29,6 +37,7 @@ class ProcessExamples extends Component {
                 onBlur={this.handleInput} 
                 onMouseOver={this.handleInput} 
                 onMouseOut={this.handleInput} 
+                onClick={this.handleClick}
                 tabIndex="0" src={VisionSprint} 
                 alt="Mortgage Lending Vision Sprint"/>
               <figcaption className='process-work-caption'>Available Upon Request</figcaption>
@@ -43,6 +52,7 @@ class ProcessExamples extends Component {
                 onBlur={this.handleInput} 
                 onMouseOver={this.handleInput} 
                 onMouseOut={this.handleInput} 
+                onClick={this.handleClick}
                 tabIndex="0" src={Mango} 
                 alt="Project Mango"/>
               <figcaption className='process-work-caption'>Available Upon Request</figcaption>
@@ -57,6 +67,7 @@ class ProcessExamples extends Component {
                 onBlur={this.handleInput} 
                 onMouseOver={this.handleInput} 
                 onMouseOut={this.handleInput}
+                onClick={this.handleClick}
                 tabIndex="0" 
                 src={DynamicForms} 
                 alt="Mortgage Lending Vision Sprint"/>
