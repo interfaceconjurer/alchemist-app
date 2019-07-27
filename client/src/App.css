@@ -82,6 +82,9 @@ a:focus, a:active{
   text-decoration: none;
   display: flex;
   align-items: center;
+  flex: 1 1 100px;
+  margin-bottom: 1rem;
+  justify-content: center;
 }
 
 .out-bound-link .icon-container{
@@ -96,6 +99,9 @@ a:focus, a:active{
   display: flex;
   justify-content: center;
   padding: 3.5rem 0 3.5rem;
+  flex-wrap: wrap;
+  max-width: 700px;
+  margin: 0 auto;
 }
 
 /* ====== /nav ====== */

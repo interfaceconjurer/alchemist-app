@@ -71,6 +71,14 @@ class App extends Component {
               <span>Resume</span>
               <Icon title="Out-Bound Link" icon={icons.outboundlink} assistiveText="Out-Bound Link"/>
             </a>
+            <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://github.com/interfaceconjurer">
+              <span>GitHub</span>
+              <Icon title="Out-Bound Link" icon={icons.outboundlink} assistiveText="Out-Bound Link"/>
+            </a>
+            <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://medium.com/@adigitalchemist">
+              <span>Medium</span>
+              <Icon title="Out-Bound Link" icon={icons.outboundlink} assistiveText="Out-Bound Link"/>
+            </a>
           </nav>
           <div className='divider'></div>
             <Process />
