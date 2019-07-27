@@ -9,6 +9,30 @@ li button{
   border: none;
   padding: 0;
   cursor: pointer;
+  position: relative;
+}
+
+.workitem-caption{ 
+  opacity: 0;
+  pointer-events: none;
+  transition: all .4s ease;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  margin: 0 auto;
+  text-align: center;
+  width: 100%;
+  background-color: rgba(219, 28, 198, 0.7);
+  padding: .75rem 0;
+  color: #fff;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.wic-show{
+  opacity: 1;
+  
 }
 
 li img{
