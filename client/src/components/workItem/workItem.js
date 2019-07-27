@@ -34,15 +34,28 @@ class WorkItem extends Component {
     let needsAnimationToggle = !!(this.props.animatedGif && this.props.stillImage);
     let needsFocus = event.type === 'focus' || event.type === 'mouseover';
     let needsBlur = event.type === 'blur' || event.type === 'mouseout';
-    if(needsFocus && needsAnimationToggle){
-      this.refs.domButton.classList.add('isFocused');
-      this.imageElement.src = this.props.animatedGif
-    } else if(needsBlur && needsAnimationToggle){
-      this.refs.domButton.classList.remove('isFocused');
-      this.imageElement.src = this.props.stillImage
-    }
+    this.handleCaption({needsFocus, needsBlur})
+    this.handleAnimationToggle({needsFocus, needsBlur, needsAnimationToggle})
     if(event.keyCode === 13 || event.keyCode === 32){
       event.target.click();
+    }
+  }
+
+  handleCaption = (eventType) => {
+    if(eventType.needsFocus === true){
+      this.refs.domButton.lastChild.classList.add('wic-show');
+    }else if(eventType.needsBlur === true){
+      this.refs.domButton.lastChild.classList.remove('wic-show');
+    }
+  }
+
+  handleAnimationToggle = (obj) => {
+    if(obj.needsFocus && obj.needsAnimationToggle){
+      this.refs.domButton.classList.add('isFocused');
+      this.imageElement.src = this.props.animatedGif
+    } else if(obj.needsBlur && obj.needsAnimationToggle){
+      this.refs.domButton.classList.remove('isFocused');
+      this.imageElement.src = this.props.stillImage
     }
   }
 
@@ -57,14 +70,16 @@ class WorkItem extends Component {
           onMouseOut={this.handleInput} 
           onFocus={this.handleInput} 
           onBlur={this.handleInput} 
-          onKeyUp={this.handleInput} onClick={this.handleClick}>
-          <LazyImage 
-            imageElement={node => this.imageElement = node} 
-            animatedGif={this.props.animatedGif} 
-            stillImage={this.props.stillImage} 
-            onLoad={this.handleLoad} 
-            alt={this.props.workItem.description} 
-            src={this.props.imageSrc} />
+          onKeyUp={this.handleInput} 
+          onClick={this.handleClick}>
+            <LazyImage 
+              imageElement={node => this.imageElement = node} 
+              animatedGif={this.props.animatedGif} 
+              stillImage={this.props.stillImage} 
+              onLoad={this.handleLoad} 
+              alt={this.props.workItem.description} 
+              src={this.props.imageSrc} />
+              <span className='workitem-caption'>View More</span>
         </button>
       </li>
     );
