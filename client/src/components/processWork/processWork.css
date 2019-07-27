@@ -7,11 +7,36 @@
 
 .process-work-image-holder{
   margin: 0;
+  position: relative;
+}
+
+.process-work-caption{ 
+  opacity: 0;
+  pointer-events: none;
+  transition: all .4s ease;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  margin: 0 auto;
+  text-align: center;
+  width: 100%;
+  background-color: rgba(219, 28, 198, 0.7);
+  padding: 1rem 0;
+  color: #fff;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.pwc-show{
+  opacity: 1;
+  
 }
 
 .process-work-image-holder img{
   width: 100%;
   filter: grayscale(100%);
+  cursor: pointer;
 }
 
 .process-work-disclaimer {
@@ -21,7 +46,11 @@
   font-size: .75rem;
 }
 
-.process-work-image-holder:hover img{
+.process-work-image-holder img:hover{
+  filter: none;
+}
+
+.process-work-image-holder img:focus{
   filter: none;
 }
 
