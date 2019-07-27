@@ -7,6 +7,12 @@ import DynamicForms from '../../graphix/Dynamic-Forms.png';
 
 
 class ProcessExamples extends Component {
+  handleFocus = (event) => {
+    event.target.nextElementSibling.classList.add('pwc-show');
+  }
+  handleBlur = (event) => {
+    event.target.nextElementSibling.classList.remove('pwc-show');
+  }
   render(){
     return(
       <section className="process-examples-wrap">
@@ -14,21 +20,24 @@ class ProcessExamples extends Component {
         <div className="process-examples">
           <ProcessWork>
             <figure className='process-work-image-holder'>
-              <img tabindex="0" src={VisionSprint} alt="Mortgage Lending Vision Sprint"/>
+              <img onFocus={this.handleFocus} onBlur={this.handleBlur} tabIndex="0" src={VisionSprint} alt="Mortgage Lending Vision Sprint"/>
+              <figcaption className='process-work-caption'>Available Upon Request</figcaption>
             </figure>
             <p>This Vision Sprint was dedicated to mapping out a 5 year vision for Salesforce to build out a comprehensive solution for the Mortgage Industry. </p>
             <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>
           </ ProcessWork>
           <ProcessWork>
             <figure className='process-work-image-holder'>
-              <img tabindex="0" src={Mango} alt="Project Mango"/>
+              <img onFocus={this.handleFocus} onBlur={this.handleBlur} tabIndex="0" src={Mango} alt="Project Mango"/>
+              <figcaption className='process-work-caption'>Available Upon Request</figcaption>
             </figure>
             <p>Project Mango is an idea around document collection, verification, approval and providing transparency in the mortgage process. </p>
             <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>
           </ ProcessWork>
           <ProcessWork>
             <figure className='process-work-image-holder'>
-              <img tabindex="0" src={DynamicForms} alt="Mortgage Lending Vision Sprint"/>
+              <img onFocus={this.handleFocus} onBlur={this.handleBlur} tabIndex="0" src={DynamicForms} alt="Mortgage Lending Vision Sprint"/>
+              <figcaption className='process-work-caption'>Available Upon Request</figcaption>
             </figure>
             <p>Dynamic Forms is work I did around digitizing the Residential Loan Application in Mortgage on the Salesforce Platform.</p>
             <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>
