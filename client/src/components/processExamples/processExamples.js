@@ -19,7 +19,6 @@ class ProcessExamples extends Component {
   }
 
   handleClick = (event) => {
-    console.log('hit')
     const targetElement = event.target.parentNode;
     TweenMax.fromTo(targetElement, 0.4, {x:-30},
       {x:0, ease:Bounce.easeOut})
