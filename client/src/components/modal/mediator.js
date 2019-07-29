@@ -34,6 +34,14 @@ class Modal extends Component{
     resolveAPIPromise();
   }
 
+  componentWillUnmount(){
+    let modalConfig = {
+      actionType: 'HIDE_MODAL',
+      actionConfig: {}
+    };
+    PubSub.fire('toggleModal', modalConfig);
+  }
+
   componentDidMount(){
     let modalConfig = {
       actionType: 'SHOW_MODAL',
