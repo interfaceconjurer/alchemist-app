@@ -10,6 +10,13 @@
   position: relative;
 }
 
+.process-work-image-holder button{
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  line-height: 0;
+}
+
 .process-work-caption{ 
   opacity: 0;
   pointer-events: none;
