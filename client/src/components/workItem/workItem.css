@@ -10,6 +10,7 @@ li button{
   padding: 0;
   cursor: pointer;
   position: relative;
+  line-height: 0;
 }
 
 .workitem-caption{ 
