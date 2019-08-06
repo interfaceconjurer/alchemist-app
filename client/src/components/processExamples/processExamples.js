@@ -5,9 +5,24 @@ import VisionSprint from '../../graphix/Mortgage-Lending.png';
 import Mango from '../../graphix/Mango.png';
 import DynamicForms from '../../graphix/Dynamic-Forms.png';
 import TweenMax, { Elastic } from 'gsap';
+import LazyImage from "../lazyImage/vew";
+import '../workItem/workItem.css';
+
 
 
 class ProcessExamples extends Component {
+  constructor(){
+    super();
+    this.state = {
+      workItemImageLoaded: false
+    }
+  }
+
+  handleLoad = () => {
+    this.setState({ workItemImageLoaded: true });
+  }
+
+
   handleInput = (event) => {
     let needsFocus = event.type === 'focus' || event.type === 'mouseover';
     let needsBlur = event.type === 'blur' || event.type === 'mouseout';
@@ -23,6 +38,17 @@ class ProcessExamples extends Component {
     TweenMax.fromTo(targetElement, 0.6, {x:-40},
       {x:0, ease:Elastic.easeOut})
   }
+
+  getLoadingState = () => {
+    if(!this.state.workItemImageLoaded){
+      return <article className="loading-work-state">
+                <span className="big-circle">
+                  <span className="small-circle"></span>
+                  <span className="electron-circle"></span>
+                </span>
+              </article>;
+    } 
+  }
   
   render(){
     return(
@@ -31,15 +57,17 @@ class ProcessExamples extends Component {
         <div className="process-examples">
           <ProcessWork>
             <figure className='process-work-image-holder'>
+            {this.getLoadingState()}
               <button
                 onFocus={this.handleInput} 
                 onBlur={this.handleInput} 
                 onMouseOver={this.handleInput} 
                 onMouseOut={this.handleInput} 
                 onClick={this.handleClick}>
-                <img 
-                  src={VisionSprint} 
-                  alt="Mortgage Lending Vision Sprint"/>
+                <LazyImage 
+                  onLoad={this.handleLoad} 
+                  alt="Mortgage Lending Vision Sprint" 
+                  src={VisionSprint} />
                 </button>
               <figcaption className='process-work-caption'>Available Upon Request</figcaption>
             </figure>
@@ -48,15 +76,17 @@ class ProcessExamples extends Component {
           </ ProcessWork>
           <ProcessWork>
             <figure className='process-work-image-holder'>
+            {this.getLoadingState()}
               <button
                   onFocus={this.handleInput} 
                   onBlur={this.handleInput} 
                   onMouseOver={this.handleInput} 
                   onMouseOut={this.handleInput} 
                   onClick={this.handleClick}>
-                  <img 
-                    src={Mango} 
-                    alt="Project Mango"/>
+                  <LazyImage 
+                    onLoad={this.handleLoad} 
+                    alt="Project Mango" 
+                    src={Mango} />
                   </button>
               <figcaption className='process-work-caption'>Available Upon Request</figcaption>
             </figure>
@@ -65,15 +95,17 @@ class ProcessExamples extends Component {
           </ ProcessWork>
           <ProcessWork>
             <figure className='process-work-image-holder'>
+            {this.getLoadingState()}
               <button
                     onFocus={this.handleInput} 
                     onBlur={this.handleInput} 
                     onMouseOver={this.handleInput} 
                     onMouseOut={this.handleInput} 
                     onClick={this.handleClick}>
-                    <img 
-                      src={DynamicForms} 
-                      alt="Mortgage Lending Vision Sprint"/>
+                    <LazyImage 
+                      onLoad={this.handleLoad} 
+                      alt="Mortgage Lending Vision Sprint" 
+                      src={DynamicForms} />
                     </button>
               <figcaption className='process-work-caption'>Available Upon Request</figcaption>
             </figure>
