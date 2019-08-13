@@ -8,7 +8,7 @@
 .process-work-image-holder{
   margin: 0;
   position: relative;
-  min-height: 180px;
+  min-height: 100px;
 }
 
 .process-work-image-holder button{
