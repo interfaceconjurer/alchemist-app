@@ -51,7 +51,7 @@ class WorkLayout extends Component {
 }
   render() {
     return ( 
-      <View workItems={this.getWorkItems()} />
+      <View workItems={this.getWorkItems()} dataLoaded={this.state.data} />
     );
   }
 }

@@ -27,9 +27,9 @@ class ProcessExamples extends Component {
     let needsFocus = event.type === 'focus' || event.type === 'mouseover';
     let needsBlur = event.type === 'blur' || event.type === 'mouseout';
     if(needsFocus === true){
-      event.currentTarget.nextElementSibling.classList.add('pwc-show');
+      event.currentTarget.lastChild.classList.add('pwc-show');
     }else if(needsBlur === true){
-      event.currentTarget.nextElementSibling.classList.remove('pwc-show');
+      event.currentTarget.lastChild.classList.remove('pwc-show');
     }    
   }
 
@@ -46,28 +46,8 @@ class ProcessExamples extends Component {
         <div className="process-examples">
           <ProcessWork>
             <figure className='process-work-image-holder'>
-            <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
-              <button
-                onFocus={this.handleInput} 
-                onBlur={this.handleInput} 
-                onMouseOver={this.handleInput} 
-                onMouseOut={this.handleInput} 
-                onClick={this.handleClick}>
-                <LazyImage 
-                  onLoad={this.handleLoad} 
-                  alt="Mortgage Lending Vision Sprint" 
-                  src={VisionSprint} />
-                </button>
-              <figcaption className='process-work-caption'>Available Upon Request</figcaption>
-            </WithBasicLoader>
-            </figure>
-            <p>This Vision Sprint was dedicated to mapping out a 5 year vision for Salesforce to build out a comprehensive solution for the Mortgage Industry. </p>
-            <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>
-          </ ProcessWork>
-          <ProcessWork>
-            <figure className='process-work-image-holder'>
-            <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
-              <button
+              <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
+                <button
                   onFocus={this.handleInput} 
                   onBlur={this.handleInput} 
                   onMouseOver={this.handleInput} 
@@ -75,19 +55,19 @@ class ProcessExamples extends Component {
                   onClick={this.handleClick}>
                   <LazyImage 
                     onLoad={this.handleLoad} 
-                    alt="Project Mango" 
-                    src={Mango} />
+                    alt="Mortgage Lending Vision Sprint" 
+                    src={VisionSprint} />
+                    <figcaption className='process-work-caption'>Available Upon Request</figcaption>
                   </button>
-              <figcaption className='process-work-caption'>Available Upon Request</figcaption>
-            </WithBasicLoader>
+              </WithBasicLoader>
             </figure>
-            <p>Project Mango is an idea around document collection, verification, approval and providing transparency in the mortgage process. </p>
+            <p>This Vision Sprint was dedicated to mapping out a 5 year vision for Salesforce to build out a comprehensive solution for the Mortgage Industry. </p>
             <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>
           </ ProcessWork>
           <ProcessWork>
             <figure className='process-work-image-holder'>
-            <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
-              <button
+              <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
+                <button
                     onFocus={this.handleInput} 
                     onBlur={this.handleInput} 
                     onMouseOver={this.handleInput} 
@@ -95,11 +75,31 @@ class ProcessExamples extends Component {
                     onClick={this.handleClick}>
                     <LazyImage 
                       onLoad={this.handleLoad} 
-                      alt="Mortgage Lending Vision Sprint" 
-                      src={DynamicForms} />
+                      alt="Project Mango" 
+                      src={Mango} />
+                    <figcaption className='process-work-caption'>Available Upon Request</figcaption>
+                  </button>
+              </WithBasicLoader>
+            </figure>
+            <p>Project Mango is an idea around document collection, verification, approval and providing transparency in the mortgage process. </p>
+            <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>
+          </ ProcessWork>
+          <ProcessWork>
+            <figure className='process-work-image-holder'>
+              <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
+                <button
+                      onFocus={this.handleInput} 
+                      onBlur={this.handleInput} 
+                      onMouseOver={this.handleInput} 
+                      onMouseOut={this.handleInput} 
+                      onClick={this.handleClick}>
+                      <LazyImage 
+                        onLoad={this.handleLoad} 
+                        alt="Mortgage Lending Vision Sprint" 
+                        src={DynamicForms} />
+                      <figcaption className='process-work-caption'>Available Upon Request</figcaption>
                     </button>
-              <figcaption className='process-work-caption'>Available Upon Request</figcaption>
-            </WithBasicLoader>
+              </WithBasicLoader>
             </figure>
             <p>Dynamic Forms is work I did around digitizing the Residential Loan Application in Mortgage on the Salesforce Platform.</p>
             <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>
