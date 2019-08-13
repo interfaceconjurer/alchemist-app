@@ -5,9 +5,24 @@ import VisionSprint from '../../graphix/Mortgage-Lending.png';
 import Mango from '../../graphix/Mango.png';
 import DynamicForms from '../../graphix/Dynamic-Forms.png';
 import TweenMax, { Elastic } from 'gsap';
+import LazyImage from "../lazyImage/vew";
+import WithBasicLoader from "../withBasicLoader/withBasicLoader"
+
 
 
 class ProcessExamples extends Component {
+  constructor(){
+    super();
+    this.state = {
+      workItemImageLoaded: false
+    }
+  }
+
+  handleLoad = () => {
+    this.setState({ workItemImageLoaded: true });
+  }
+
+
   handleInput = (event) => {
     let needsFocus = event.type === 'focus' || event.type === 'mouseover';
     let needsBlur = event.type === 'blur' || event.type === 'mouseout';
@@ -31,51 +46,60 @@ class ProcessExamples extends Component {
         <div className="process-examples">
           <ProcessWork>
             <figure className='process-work-image-holder'>
+            <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
               <button
                 onFocus={this.handleInput} 
                 onBlur={this.handleInput} 
                 onMouseOver={this.handleInput} 
                 onMouseOut={this.handleInput} 
                 onClick={this.handleClick}>
-                <img 
-                  src={VisionSprint} 
-                  alt="Mortgage Lending Vision Sprint"/>
+                <LazyImage 
+                  onLoad={this.handleLoad} 
+                  alt="Mortgage Lending Vision Sprint" 
+                  src={VisionSprint} />
                 </button>
               <figcaption className='process-work-caption'>Available Upon Request</figcaption>
+            </WithBasicLoader>
             </figure>
             <p>This Vision Sprint was dedicated to mapping out a 5 year vision for Salesforce to build out a comprehensive solution for the Mortgage Industry. </p>
             <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>
           </ ProcessWork>
           <ProcessWork>
             <figure className='process-work-image-holder'>
+            <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
               <button
                   onFocus={this.handleInput} 
                   onBlur={this.handleInput} 
                   onMouseOver={this.handleInput} 
                   onMouseOut={this.handleInput} 
                   onClick={this.handleClick}>
-                  <img 
-                    src={Mango} 
-                    alt="Project Mango"/>
+                  <LazyImage 
+                    onLoad={this.handleLoad} 
+                    alt="Project Mango" 
+                    src={Mango} />
                   </button>
               <figcaption className='process-work-caption'>Available Upon Request</figcaption>
+            </WithBasicLoader>
             </figure>
             <p>Project Mango is an idea around document collection, verification, approval and providing transparency in the mortgage process. </p>
             <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>
           </ ProcessWork>
           <ProcessWork>
             <figure className='process-work-image-holder'>
+            <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
               <button
                     onFocus={this.handleInput} 
                     onBlur={this.handleInput} 
                     onMouseOver={this.handleInput} 
                     onMouseOut={this.handleInput} 
                     onClick={this.handleClick}>
-                    <img 
-                      src={DynamicForms} 
-                      alt="Mortgage Lending Vision Sprint"/>
+                    <LazyImage 
+                      onLoad={this.handleLoad} 
+                      alt="Mortgage Lending Vision Sprint" 
+                      src={DynamicForms} />
                     </button>
               <figcaption className='process-work-caption'>Available Upon Request</figcaption>
+            </WithBasicLoader>
             </figure>
             <p>Dynamic Forms is work I did around digitizing the Residential Loan Application in Mortgage on the Salesforce Platform.</p>
             <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>

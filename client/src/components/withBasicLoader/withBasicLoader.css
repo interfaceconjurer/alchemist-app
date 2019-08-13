@@ -1,0 +1,68 @@
+.loading-work-state{
+  background-color: #F0F0F0;
+  padding: 2.5rem .75rem;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  bottom: 0;
+  z-index: 2;
+  height: 100%;
+  
+}
+
+.loading-work-state .big-circle{
+  display: block;
+  border: 3px solid #D9D9D9;
+  width: 25%;
+  border-radius: 50%;
+  margin: 0 auto;
+  padding: 0 0 25% 0;
+  top: 50%;
+  position: absolute;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+
+.loading-work-state .small-circle{
+  display: block;
+  position: absolute;
+  width: 35%;
+  padding-bottom: 35%;
+  border-radius: 50%;
+  background: #D9D9D9;
+  margin: 0 auto;
+  top: 50%;
+  left: 0;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.loading-work-state .electron-circle{
+  display: block;
+  position: absolute;
+  width: 20%;
+  padding-bottom: 20%;
+  border-radius: 50%;
+  background: #D9D9D9;
+  margin: 0 auto;
+  animation: electronMotion 5s infinite linear;
+  transform-origin: 230% 230%;
+  transform: translate3d(0,0,0);
+  left: 5%;
+  top: 5%;
+  
+
+}
+
+@keyframes electronMotion {
+  from {
+    transform: translate3d(0,0,0) rotate(0deg);
+  }
+  to {
+    transform: translate3d(0,0,0) rotate(360deg);
+  }
+}

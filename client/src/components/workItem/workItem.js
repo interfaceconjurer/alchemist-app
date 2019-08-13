@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './workItem.css';
 import LazyImage from "../lazyImage/vew";
+import WithBasicLoader from "../withBasicLoader/withBasicLoader"
 
 
 class WorkItem extends Component {
@@ -17,17 +18,6 @@ class WorkItem extends Component {
 
   handleLoad = () => {
     this.setState({ workItemImageLoaded: true });
-  }
-
-  getLoadingState = () => {
-    if(!this.state.workItemImageLoaded){
-      return <article className="loading-work-state">
-                <span className="big-circle">
-                  <span className="small-circle"></span>
-                  <span className="electron-circle"></span>
-                </span>
-              </article>;
-    } 
   }
 
   handleInput = (event) => {
@@ -62,7 +52,7 @@ class WorkItem extends Component {
   render() {
     return(
       <li key={this.props.workItem.toString()}>
-        {this.getLoadingState()}
+        <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
         <button 
           ref="domButton"
           className={`buttonId-${this.props.workItem.id}` + (this.props.animatedGif ? ' hasAnimation' : '')} 
@@ -79,8 +69,9 @@ class WorkItem extends Component {
               onLoad={this.handleLoad} 
               alt={this.props.workItem.description} 
               src={this.props.imageSrc} />
-              <span className='workitem-caption'>View More</span>
+            <span className='workitem-caption'>View More</span>
         </button>
+        </WithBasicLoader>
       </li>
     );
   } 
