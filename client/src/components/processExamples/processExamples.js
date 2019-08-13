@@ -6,7 +6,7 @@ import Mango from '../../graphix/Mango.png';
 import DynamicForms from '../../graphix/Dynamic-Forms.png';
 import TweenMax, { Elastic } from 'gsap';
 import LazyImage from "../lazyImage/vew";
-import '../workItem/workItem.css';
+import WithBasicLoader from "../withBasicLoader/withBasicLoader"
 
 
 
@@ -38,17 +38,6 @@ class ProcessExamples extends Component {
     TweenMax.fromTo(targetElement, 0.6, {x:-40},
       {x:0, ease:Elastic.easeOut})
   }
-
-  getLoadingState = () => {
-    if(!this.state.workItemImageLoaded){
-      return <article className="loading-work-state">
-                <span className="big-circle">
-                  <span className="small-circle"></span>
-                  <span className="electron-circle"></span>
-                </span>
-              </article>;
-    } 
-  }
   
   render(){
     return(
@@ -57,7 +46,7 @@ class ProcessExamples extends Component {
         <div className="process-examples">
           <ProcessWork>
             <figure className='process-work-image-holder'>
-            {this.getLoadingState()}
+            <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
               <button
                 onFocus={this.handleInput} 
                 onBlur={this.handleInput} 
@@ -70,13 +59,14 @@ class ProcessExamples extends Component {
                   src={VisionSprint} />
                 </button>
               <figcaption className='process-work-caption'>Available Upon Request</figcaption>
+            </WithBasicLoader>
             </figure>
             <p>This Vision Sprint was dedicated to mapping out a 5 year vision for Salesforce to build out a comprehensive solution for the Mortgage Industry. </p>
             <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>
           </ ProcessWork>
           <ProcessWork>
             <figure className='process-work-image-holder'>
-            {this.getLoadingState()}
+            <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
               <button
                   onFocus={this.handleInput} 
                   onBlur={this.handleInput} 
@@ -89,13 +79,14 @@ class ProcessExamples extends Component {
                     src={Mango} />
                   </button>
               <figcaption className='process-work-caption'>Available Upon Request</figcaption>
+            </WithBasicLoader>
             </figure>
             <p>Project Mango is an idea around document collection, verification, approval and providing transparency in the mortgage process. </p>
             <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>
           </ ProcessWork>
           <ProcessWork>
             <figure className='process-work-image-holder'>
-            {this.getLoadingState()}
+            <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
               <button
                     onFocus={this.handleInput} 
                     onBlur={this.handleInput} 
@@ -108,6 +99,7 @@ class ProcessExamples extends Component {
                       src={DynamicForms} />
                     </button>
               <figcaption className='process-work-caption'>Available Upon Request</figcaption>
+            </WithBasicLoader>
             </figure>
             <p>Dynamic Forms is work I did around digitizing the Residential Loan Application in Mortgage on the Salesforce Platform.</p>
             <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>

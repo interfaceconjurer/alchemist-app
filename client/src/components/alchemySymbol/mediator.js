@@ -7,10 +7,10 @@ class AlchemySymbol extends Component {
   constructor() {
     super();
     this.state = {
-      symbolsIndex: 1
+      symbolsIndex: Math.floor(Math.random() * 8) + 1
     }
     this.symbolInView = true;
-    this.symbolTimeOutFunc = null;
+    // this.symbolTimeOutFunc = null;
     this.exitAnimation = null;
   }
 
@@ -32,7 +32,7 @@ class AlchemySymbol extends Component {
     if(window.scrollY > symbolHeight && this.symbolInView){
       this.symbolInView = false;
       if(this.exitAnimation){
-        clearTimeout(this.symbolTimeOutFunc);
+        // clearTimeout(this.symbolTimeOutFunc);
         this.exitAnimation(this.symbolElement);
       }
       // symbol is IN of view
@@ -55,7 +55,7 @@ class AlchemySymbol extends Component {
 
   animateSvg() {
     this.exitAnimation = Helper.animateSymbol(this.symbolElement, this.state.symbolsIndex, this.updateSymbolIndex.bind(this));
-    this.symbolTimeOutFunc = setTimeout(this.exitAnimation.bind(this, this.symbolElement) ,8000);  
+    // this.symbolTimeOutFunc = setTimeout(this.exitAnimation.bind(this, this.symbolElement) ,8000);  
   }
 
   render() {
