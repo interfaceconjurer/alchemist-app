@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import './withBasicLoader.css';
+import './withBasicImgLoader.css';
 
 
-class WithBasicLoader extends Component{
+class WithBasicImgLoader extends Component{
  
   getLoadingState = () => {
     if(!this.props.itemLoaded){
@@ -26,4 +26,4 @@ class WithBasicLoader extends Component{
     )
   }
 }
-export default WithBasicLoader;
+export default WithBasicImgLoader;

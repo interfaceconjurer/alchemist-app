@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './processWork.css';
 import TweenMax, { Elastic } from 'gsap';
 import LazyImage from "../lazyImage/vew";
-import WithBasicLoader from "../withBasicLoader/withBasicLoader"
+import WithBasicImgLoader from "../withBasicImgLoader/withBasicImgLoader"
 
 class ProcessWork extends Component{
   constructor(){
@@ -36,7 +36,7 @@ class ProcessWork extends Component{
     return(
       <div className='process-work-wrap'>
             <figure className='process-work-image-holder'>
-              <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
+              <WithBasicImgLoader itemLoaded={this.state.workItemImageLoaded}>
                 <button
                   onFocus={this.handleInput} 
                   onBlur={this.handleInput} 
@@ -49,7 +49,7 @@ class ProcessWork extends Component{
                     src={this.props.processItem.imageSrc} />
                     <figcaption className='process-work-caption'>Available Upon Request</figcaption>
                   </button>
-              </WithBasicLoader>
+              </WithBasicImgLoader>
             </figure>
             <p>{this.props.processItem.description}</p>
             <span className='process-work-disclaimer'>{this.props.processItem.disclaimer}</span>
