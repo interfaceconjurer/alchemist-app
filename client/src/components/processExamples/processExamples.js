@@ -4,39 +4,32 @@ import './processExamples.css';
 import VisionSprint from '../../graphix/Mortgage-Lending.png';
 import Mango from '../../graphix/Mango.png';
 import DynamicForms from '../../graphix/Dynamic-Forms.png';
-import TweenMax, { Elastic } from 'gsap';
-import LazyImage from "../lazyImage/vew";
-import WithBasicLoader from "../withBasicLoader/withBasicLoader"
-
-
 
 class ProcessExamples extends Component {
   constructor(){
     super();
     this.state = {
-      workItemImageLoaded: false
+      data : {
+        processWorkItems : [{
+          imageSrc : VisionSprint,
+          title : "Mortgage Lending Vision Sprint",
+          description : "This Vision Sprint was dedicated to mapping out a 5 year vision for Salesforce to build out a comprehensive solution for the Mortgage Industry.",
+          disclaimer : "Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request "
+        },
+        {
+          imageSrc : Mango,
+          title : "Project Mango",
+          description : "Project Mango is an idea around document collection, verification, approval and providing transparency in the mortgage process.",
+          disclaimer : "Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request "
+        },
+        {
+          imageSrc : DynamicForms,
+          title : "Dynamic form builderd",
+          description : "This Vision Sprint was dedicated to mapping out a 5 year vision for Salesforce to build out a comprehensive solution for the Mortgage Industry.",
+          disclaimer : "Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request "
+        }]
+      }
     }
-  }
-
-  handleLoad = () => {
-    this.setState({ workItemImageLoaded: true });
-  }
-
-
-  handleInput = (event) => {
-    let needsFocus = event.type === 'focus' || event.type === 'mouseover';
-    let needsBlur = event.type === 'blur' || event.type === 'mouseout';
-    if(needsFocus === true){
-      event.currentTarget.lastChild.classList.add('pwc-show');
-    }else if(needsBlur === true){
-      event.currentTarget.lastChild.classList.remove('pwc-show');
-    }    
-  }
-
-  handleClick = (event) => {
-    const targetElement = event.currentTarget.parentNode;
-    TweenMax.fromTo(targetElement, 0.6, {x:-40},
-      {x:0, ease:Elastic.easeOut})
   }
   
   render(){
@@ -44,66 +37,9 @@ class ProcessExamples extends Component {
       <section className="process-examples-wrap">
         <h2>3 examples of work that showcase this product centric process</h2>
         <div className="process-examples">
-          <ProcessWork>
-            <figure className='process-work-image-holder'>
-              <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
-                <button
-                  onFocus={this.handleInput} 
-                  onBlur={this.handleInput} 
-                  onMouseOver={this.handleInput} 
-                  onMouseOut={this.handleInput} 
-                  onClick={this.handleClick}>
-                  <LazyImage 
-                    onLoad={this.handleLoad} 
-                    alt="Mortgage Lending Vision Sprint" 
-                    src={VisionSprint} />
-                    <figcaption className='process-work-caption'>Available Upon Request</figcaption>
-                  </button>
-              </WithBasicLoader>
-            </figure>
-            <p>This Vision Sprint was dedicated to mapping out a 5 year vision for Salesforce to build out a comprehensive solution for the Mortgage Industry. </p>
-            <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>
-          </ ProcessWork>
-          <ProcessWork>
-            <figure className='process-work-image-holder'>
-              <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
-                <button
-                    onFocus={this.handleInput} 
-                    onBlur={this.handleInput} 
-                    onMouseOver={this.handleInput} 
-                    onMouseOut={this.handleInput} 
-                    onClick={this.handleClick}>
-                    <LazyImage 
-                      onLoad={this.handleLoad} 
-                      alt="Project Mango" 
-                      src={Mango} />
-                    <figcaption className='process-work-caption'>Available Upon Request</figcaption>
-                  </button>
-              </WithBasicLoader>
-            </figure>
-            <p>Project Mango is an idea around document collection, verification, approval and providing transparency in the mortgage process. </p>
-            <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>
-          </ ProcessWork>
-          <ProcessWork>
-            <figure className='process-work-image-holder'>
-              <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
-                <button
-                      onFocus={this.handleInput} 
-                      onBlur={this.handleInput} 
-                      onMouseOver={this.handleInput} 
-                      onMouseOut={this.handleInput} 
-                      onClick={this.handleClick}>
-                      <LazyImage 
-                        onLoad={this.handleLoad} 
-                        alt="Mortgage Lending Vision Sprint" 
-                        src={DynamicForms} />
-                      <figcaption className='process-work-caption'>Available Upon Request</figcaption>
-                    </button>
-              </WithBasicLoader>
-            </figure>
-            <p>Dynamic Forms is work I did around digitizing the Residential Loan Application in Mortgage on the Salesforce Platform.</p>
-            <span className='process-work-disclaimer'>Due to the sensitive nature of IP, this information can not be shared online. More information is available upon request </span>
-          </ ProcessWork>
+          <ProcessWork processItem={this.state.data.processWorkItems[0]} />
+          <ProcessWork processItem={this.state.data.processWorkItems[1]} />
+          <ProcessWork processItem={this.state.data.processWorkItems[2]} />
         </div>
       </section>
     )

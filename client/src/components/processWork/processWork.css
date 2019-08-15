@@ -47,7 +47,6 @@
 
 .process-work-image-holder img{
   width: 100%;
-  opacity: 0;
   filter: grayscale(100%);
   cursor: pointer;
 }
