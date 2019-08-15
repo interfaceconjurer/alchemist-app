@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './workItem.css';
 import LazyImage from "../lazyImage/vew";
-import WithBasicLoader from "../withBasicLoader/withBasicLoader"
+import WithBasicImgLoader from "../withBasicImgLoader/withBasicImgLoader"
 
 
 class WorkItem extends Component {
@@ -53,7 +53,7 @@ class WorkItem extends Component {
     return(
       <li key={this.props.workItem.toString()}>
         <figure className='work-item-image-holder'>
-          <WithBasicLoader itemLoaded={this.state.workItemImageLoaded}>
+          <WithBasicImgLoader itemLoaded={this.state.workItemImageLoaded}>
           <button 
             ref="domButton"
             className={`buttonId-${this.props.workItem.id}` + (this.props.animatedGif ? ' hasAnimation' : '')} 
@@ -72,7 +72,7 @@ class WorkItem extends Component {
                 src={this.props.imageSrc} />
               <span className='workitem-caption'>View More</span>
           </button>
-          </WithBasicLoader>
+          </WithBasicImgLoader>
         </figure>
       </li>
     );

@@ -132,24 +132,24 @@ export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) =
           const startLoopingAnimation = () => {
             // animate the two offset circles in a loop
             const tl_reactionClass1 = new TimelineMax({repeat:4, delay:0, repeatDelay:0, ease:Power0.easeNone});
-            tl_reactionClass1.to(reactionClass1, 2, {transformOrigin: '44.5% 46.9%', rotation:59})
-            .to(reactionClass1, 2, {transformOrigin: '44.5% 46.9%', rotation:-0});
+            tl_reactionClass1.to(reactionClass1, 2, {transformOrigin: '50% 50%', rotation:59})
+            .to(reactionClass1, 2, {transformOrigin: '50% 50%', rotation:-0});
             const tl_reactionClass3 = new TimelineMax({repeat:4, delay:0, repeatDelay:0, ease:Power0.easeNone});
-            tl_reactionClass3.to(reactionClass3, 2, {transformOrigin: '50% 50%', y:-24.5, x:51})
-            .to(reactionClass3, 2, {transformOrigin: '50% 50%', y:-6.5, x:17});
+            tl_reactionClass3.to(reactionClass3, 2, {transformOrigin: '50% 50%', y:20, x:-35})
+            .to(reactionClass3, 2, {transformOrigin: '50% 50%', y:0, x:0});
             const tl_reactionClass4 = new TimelineMax({repeat:4, delay:0, repeatDelay:0, ease:Power0.easeNone});
-            tl_reactionClass4.to(reactionClass4, 2, {transformOrigin: '50% 50%', y:-27, x:-11})
-            .to(reactionClass4, 2, {transformOrigin: '50% 50%', y:-6.5, x:17});
+            tl_reactionClass4.to(reactionClass4, 2, {transformOrigin: '50% 50%', y:20, x:35})
+            .to(reactionClass4, 2, {transformOrigin: '50% 50%', y:0, x:0});
             const tl_reactionClass5 = new TimelineMax({repeat:4, delay:0, repeatDelay:0, ease:Power0.easeNone});
-            tl_reactionClass5.to(reactionClass5, 2, {transformOrigin: '50% 50%', y:27, x:11})
-            .to(reactionClass5, 2, {transformOrigin: '50% 50%', y:-6.5, x:17});
+            tl_reactionClass5.to(reactionClass5, 2, {transformOrigin: '50% 50%', y:-35, x:0})
+            .to(reactionClass5, 2, {transformOrigin: '50% 50%', y:0, x:0});
             
             
           }
 
           TweenMax.from(reactionClass1, .6, {transformOrigin: '50% 50%', delay:.4, scale:.7, opacity:0, ease:Back.easeOut.config(3)});
           TweenMax.from(reactionClass2, .6, {transformOrigin: '50% 50%', delay:.9, scale:.2, opacity:0, ease:Back.easeOut.config(6), onComplete: startLoopingAnimation});
-          TweenMax.from(reactionClass6, .6, {transformOrigin: '50% 50%', delay:.4, opacity:0, ease:Back.easeOut.config(3)});
+          // TweenMax.from(reactionClass6, .6, {transformOrigin: '50% 50%', delay:.4, opacity:0, ease:Back.easeOut.config(3)});
 
         },
         animateSymbol_06: (symbolElement) => {
