@@ -1,4 +1,5 @@
-import TweenMax, { Back, TimelineMax, Power0, Power1, RoughEase } from 'gsap';
+import TweenMax, { Back, TimelineMax, Power0, Power1 } from 'gsap';
+import { RoughEase } from "gsap/EasePack";
 
 export const _animateSymbol = (symbolElement, symbolIndex, animationEndedCall) => {
 
