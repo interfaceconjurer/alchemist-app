@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { withRouter } from "react-router";
+import withRouter from "../../withRouter";
 import View from './view';
 import WorkItem from '../workItem/workItem';
 import workItemAPI from '../../workItemAPI';

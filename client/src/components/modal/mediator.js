@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { withRouter } from "react-router";
+import withRouter from "../../withRouter";
 import workItemAPI from '../../workItemAPI';
 import View from './view';
 import PubSub from '../../pubSub';
@@ -20,7 +20,7 @@ class Modal extends Component{
     this.modalDOMNode = '';
   }
   
-  componentWillMount(){
+  UNSAFE_componentWillMount(){
     const resolveAPIPromise = async () => {
       let data = await workItemAPI.getSingleItem(this.props.match.params.id);
       let modalConfig = {
