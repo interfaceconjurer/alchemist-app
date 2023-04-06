@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Route, Switch} from "react-router-dom";
+import { Route, Routes} from "react-router-dom";
 import ReactGA from 'react-ga';
 import './App.css';
 import Resume from './resume/Jordan_L_Wright.pdf';
@@ -23,7 +23,7 @@ class App extends Component {
     }
   }
 
-  componentWillMount(){
+  UNSAFE_componentWillMount(){
     PubSub.addListener('toggleModal', this.handleMainClassState);
   }
 
@@ -51,9 +51,9 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Switch location={this.props.location}>
+        <Routes location={this.props.location}>
           <Route path="/workItem/:id" component={Modal} />
-        </Switch> 
+        </Routes> 
         <main ref="main" className={this.state.mainClass}>
           <header className="App-header">
             <AlchemySymbol />
@@ -82,13 +82,13 @@ class App extends Component {
           </nav>
           <div className='divider'></div>
             <Process />
-          <div className='divider'></div>
+          {/* <div className='divider'></div>
             <ProcessExamples />
           <div className='divider'></div>
           <h2 className="visual-design-statement">The Icing on the Cake. Who doesn’t like a little candy</h2>
           <p className='work-statement-preamble'>Random moments of visual design snippets, motion, and microinteractions</p>
           <p className='work-statement'>Further details are available over a coffee or whiskey<span role="img" aria-label="Whiskey and coffee emojis"> ☕🥃</span> </p>
-          <WorkLayout /> 
+          <WorkLayout />  */}
         </main>
       </div>
     );
