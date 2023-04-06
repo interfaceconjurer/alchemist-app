@@ -12,6 +12,10 @@
     "url": "git@git.soma.salesforce.com:j-wright/alchemist-app.git"
   },
   "keywords": [],
+  "engines": {
+    "npm": "9.6.3",
+    "node": "16.17.1"
+},
   "author": "",
   "license": "ISC",
   "dependencies": {
