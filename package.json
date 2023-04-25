@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@git.soma.salesforce.com:j-wright/alchemist-app.git"
+    "url": "git@github.com:interfaceconjurer/alchemist-app.git"
   },
   "keywords": [],
   "engines": {
