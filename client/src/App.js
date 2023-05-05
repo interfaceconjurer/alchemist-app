@@ -6,11 +6,11 @@ import Resume from './resume/Jordan_L_Wright.pdf';
 import Icon from './components/icon/view';
 import { icons } from './components/iconList/iconList';
 import AlchemySymbol from './components/alchemySymbol/mediator';
-import WorkLayout from './components/workLayout/mediator';
+// import WorkLayout from './components/workLayout/mediator';
 import Modal from './components/modal/mediator';
 import PubSub from './pubSub';
 import Process from './components/process/process';
-import ProcessExamples from './components/processExamples/processExamples';
+// import ProcessExamples from './components/processExamples/processExamples';
 
 ReactGA.initialize('UA-128600521-1');
 ReactGA.pageview(window.location.pathname + window.location.search);
