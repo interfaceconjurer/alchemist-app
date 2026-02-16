@@ -1,19 +1,14 @@
 import React, { Component } from 'react';
 import { Route, Routes} from "react-router-dom";
-import ReactGA from 'react-ga';
 import './App.css';
 import Resume from './resume/Jordan_L_Wright.pdf';
 import Icon from './components/icon/view';
 import { icons } from './components/iconList/iconList';
 import AlchemySymbol from './components/alchemySymbol/mediator';
-// import WorkLayout from './components/workLayout/mediator';
 import Modal from './components/modal/mediator';
 import PubSub from './pubSub';
-import Process from './components/process/process';
-// import ProcessExamples from './components/processExamples/processExamples';
-
-ReactGA.initialize('UA-128600521-1');
-ReactGA.pageview(window.location.pathname + window.location.search);
+import { ThemeProvider } from './contexts/ThemeContext';
+import ThemeToggle from './components/ThemeToggle/ThemeToggle';
 
 class App extends Component {
   constructor(){
@@ -21,9 +16,10 @@ class App extends Component {
     this.state = {
       mainClass: 'main'
     }
+    this.mainRef = React.createRef();
   }
 
-  UNSAFE_componentWillMount(){
+  componentDidMount(){
     PubSub.addListener('toggleModal', this.handleMainClassState);
   }
 
@@ -50,47 +46,38 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
-        <Routes location={this.props.location}>
-          <Route path="/workItem/:id" component={Modal} />
-        </Routes> 
-        <main ref="main" className={this.state.mainClass}>
-          <header className="App-header">
+      <ThemeProvider>
+        <div className="App">
+          <ThemeToggle />
+          <Routes location={this.props.location}>
+            <Route path="/workItem/:id" element={<Modal />} />
+          </Routes>
+          <main ref={this.mainRef} className={this.state.mainClass}>
             <AlchemySymbol />
-            <h1 className="App-title">Jordan L. Wright</h1>
-            <p className="App-intro">
-              Product Designer &amp; Interface Conjurer
-            </p>
-          </header>
-          <nav className='nav'>
-            <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="http://www.linkedin.com/in/jordan-l-wright-91b17321">
-              <span>LinkedIn</span>
-              <Icon title="Out-Bound Link" icon={icons.outboundlink} assistiveText="Out-Bound Link"/>
-            </a>
-            <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href={Resume}>
-              <span>Resume</span>
-              <Icon title="Out-Bound Link" icon={icons.outboundlink} assistiveText="Out-Bound Link"/>
-            </a>
-            <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://github.com/interfaceconjurer">
-              <span>GitHub</span>
-              <Icon title="Out-Bound Link" icon={icons.outboundlink} assistiveText="Out-Bound Link"/>
-            </a>
-            <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://medium.com/@adigitalchemist">
-              <span>Medium</span>
-              <Icon title="Out-Bound Link" icon={icons.outboundlink} assistiveText="Out-Bound Link"/>
-            </a>
-          </nav>
-          <div className='divider'></div>
-            <Process />
-          {/* <div className='divider'></div>
-            <ProcessExamples />
-          <div className='divider'></div>
-          <h2 className="visual-design-statement">The Icing on the Cake. Who doesn’t like a little candy</h2>
-          <p className='work-statement-preamble'>Random moments of visual design snippets, motion, and microinteractions</p>
-          <p className='work-statement'>Further details are available over a coffee or whiskey<span role="img" aria-label="Whiskey and coffee emojis"> ☕🥃</span> </p>
-          <WorkLayout />  */}
-        </main>
-      </div>
+            <header className="App-header">
+              <h1 className="App-title">Jordan L. Wright</h1>
+              <p className="App-intro">
+                Interface Conjurer<br />
+                <span className="App-intro-subtitle">Designer &amp; Engineer</span>
+              </p>
+              <nav className='nav'>
+                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="http://www.linkedin.com/in/jordan-l-wright-91b17321">
+                  <span>LinkedIn</span>
+                  <Icon title="Out-Bound Link" icon={icons.outboundlink} assistiveText="Out-Bound Link"/>
+                </a>
+                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href={Resume}>
+                  <span>Resume</span>
+                  <Icon title="Out-Bound Link" icon={icons.outboundlink} assistiveText="Out-Bound Link"/>
+                </a>
+                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://github.com/interfaceconjurer">
+                  <span>GitHub</span>
+                  <Icon title="Out-Bound Link" icon={icons.outboundlink} assistiveText="Out-Bound Link"/>
+                </a>
+              </nav>
+            </header>
+          </main>
+        </div>
+      </ThemeProvider>
     );
   }
 }

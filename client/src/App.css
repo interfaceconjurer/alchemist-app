@@ -1,28 +1,110 @@
+/* Theme Variables */
+:root {
+  /* Light theme (default) */
+  --bg-color: #ffffff;
+  --text-color: #747474;
+  --text-color-dark: #494545;
+  --border-color: #979797;
+  --border-color-light: #C4C4C4;
+  --focus-shadow: rgba(139, 0, 255, .5);
+  --button-bg: #fff;
+
+  /* Toggle button colors */
+  --toggle-bg: rgba(255, 255, 255, 0.9);
+  --toggle-border: rgba(0, 0, 0, 0.1);
+  --toggle-icon: #000000;
+  --toggle-shadow: rgba(0, 0, 0, 0.1);
+
+  /* 3D component colors - purple in light mode */
+  --wireframe-color: #8b00ff;
+  --wireframe-emissive: #8b00ff;
+  --fill-opacity-base: 0.08;
+  --fill-opacity-seed: 0.12;
+  --glow-intensity: 0.5;
+}
+
+[data-theme="dark"] {
+  /* Dark theme */
+  --bg-color: #0a0a0a;
+  --text-color: #b8b8b8;
+  --text-color-dark: #d0d0d0;
+  --border-color: #4a4a4a;
+  --border-color-light: #3a3a3a;
+  --focus-shadow: rgba(139, 0, 255, .5);
+  --button-bg: #1a1a1a;
+
+  /* Toggle button colors */
+  --toggle-bg: rgba(42, 42, 42, 0.9);
+  --toggle-border: rgba(100, 100, 100, 0.2);
+  --toggle-icon: #ffffff;
+  --toggle-shadow: rgba(0, 0, 0, 0.2);
+
+  /* 3D component colors - white with purple glow */
+  --wireframe-color: #ffffff;
+  --wireframe-emissive: #8b00ff;
+  --fill-opacity-base: 0.12;
+  --fill-opacity-seed: 0.3;
+  --glow-intensity: 1.5;
+}
+
+body {
+  background-color: var(--bg-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
 .App {
-  color:#747474;
+  color: var(--text-color);
   height: 100%;
+}
+
+.App-header {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  max-width: 300px;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .App-header {
+  background-color: rgba(30, 30, 30, 0.4);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .App-title {
   font-size: 1.5em;
-  text-align: center;
+  text-align: left;
   margin: 0;
   padding-bottom: 0.25rem;
+  font-family: monospace;
 }
 
 .App-intro {
-  text-align: center;
-  margin: 0;
+  text-align: left;
+  margin: 0 0 1rem 0;
+  font-size: 0.9em;
+  opacity: 0.8;
+  font-family: monospace;
+  line-height: 1.4;
+}
+
+.App-intro-subtitle {
+  font-size: 0.85em;
 }
 
 .main{
   transition: opacity .3s ease;
   transform: translate3d(0,0,0);
-  padding: 2rem 2rem;
+  padding: 0;
   position: relative;
   z-index: 1;
   opacity: 1;
-  min-height: 100%;
+  min-height: 100vh;
+  width: 100%;
 }
 
 .main.modalVisible{
@@ -58,33 +140,47 @@
 }
 
 button:focus, img:focus, button:active, img:active{
-  box-shadow: 0 0 5px 2px rgba(219, 28, 198, .5);
-  outline: none; 
-  color: #494545
+  box-shadow: 0 0 5px 2px var(--focus-shadow);
+  outline: none;
+  color: var(--text-color-dark);
 }
 
 a:focus, a:active{
-  background-color: #fff;
-  box-shadow: 0 0 5px 2px rgba(219, 28, 198, .5);
-  outline: none; 
-  color: #494545
+  background-color: var(--button-bg);
+  box-shadow: 0 0 5px 2px var(--focus-shadow);
+  outline: none;
+  color: var(--text-color-dark);
 }
 
 .out-bound-link{
-  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.4);
   border-radius: .5rem;
-  border: 1px solid #C4C4C4;
-  padding: .75rem 1.5rem;
-  margin: 0 .5rem;
-  color:#747474;
+  border: 1px solid rgba(200, 200, 200, 0.3);
+  padding: .75rem 1rem;
+  margin: 0;
+  color: var(--text-color);
   font-size: .875rem;
   cursor: pointer;
   text-decoration: none;
   display: flex;
   align-items: center;
-  flex: 1 1 100px;
-  margin-bottom: 1rem;
-  justify-content: center;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+
+[data-theme="dark"] .out-bound-link {
+  background-color: rgba(30, 30, 30, 0.4);
+  border: 1px solid rgba(100, 100, 100, 0.3);
+}
+
+.out-bound-link:hover {
+  background-color: rgba(255, 255, 255, 0.6);
+  transform: translateX(2px);
+}
+
+[data-theme="dark"] .out-bound-link:hover {
+  background-color: rgba(30, 30, 30, 0.6);
 }
 
 .out-bound-link .icon-container{
@@ -97,11 +193,10 @@ a:focus, a:active{
 
 .nav{
   display: flex;
-  justify-content: center;
-  padding: 3.5rem 0 3.5rem;
-  flex-wrap: wrap;
-  max-width: 700px;
-  margin: 0 auto;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0;
 }
 
 /* ====== /nav ====== */
@@ -110,14 +205,14 @@ a:focus, a:active{
 /* ====== divider ====== */
 
 .divider{
-  border-bottom: 1px solid #979797;
+  border-bottom: 1px solid var(--border-color);
   width: 100%;
   height: .5em;
   margin-bottom: 2rem;
 }
 
 .divider::before{
-  border-top: 1px dashed #979797;
+  border-top: 1px dashed var(--border-color);
   content: '';
   display: block;
   position: relative;
@@ -125,7 +220,7 @@ a:focus, a:active{
 }
 
 .divider::after{
-  border-bottom: 1px dashed #979797;
+  border-bottom: 1px dashed var(--border-color);
   content: '';
   display: block;
   position: relative;
@@ -139,8 +234,11 @@ a:focus, a:active{
 
 /* ======SMALL VIEW======= */
 @media only screen and (max-width: 550px) and (min-width: 0px) {
-  .symbol {
-    height: 21rem;
+  .App-header {
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    max-width: none;
   }
 }
 
