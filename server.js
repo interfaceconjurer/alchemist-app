@@ -21,18 +21,18 @@ if (!isDev && cluster.isMaster) {
 
 } else {
   const app = express();
-  
-  if(process.env.NODE_ENV === 'production') {
-  app.use((req, res, next) => {
-    if (req.header('x-forwarded-proto') !== 'https')
-      res.redirect(`https://${req.header('host')}${req.url}`)
-    else
-      next()
-  })
-}
 
-  // Priority serve any static files.
-  app.use(express.static(path.resolve(__dirname, './client/build')));
+  if (process.env.NODE_ENV === 'production') {
+    app.use((req, res, next) => {
+      if (req.header('x-forwarded-proto') !== 'https')
+        res.redirect(`https://${req.header('host')}${req.url}`)
+      else
+        next()
+    })
+  }
+
+  // Priority serve any static files (Vite outputs to dist/ by default).
+  app.use(express.static(path.resolve(__dirname, './client/dist')));
 
   // Answer API requests.
   app.get('/api', function (req, res) {
@@ -42,12 +42,12 @@ if (!isDev && cluster.isMaster) {
 
   // All remaining requests return the React app, so it can handle routing.
   // Express 5 / path-to-regexp requires a named wildcard; '*' is no longer valid.
-  app.get('/{*splat}', function(request, response) {
-    response.sendFile(path.resolve(__dirname, './client/build', 'index.html'));
+  app.get('/{*splat}', function (request, response) {
+    response.sendFile(path.resolve(__dirname, './client/dist', 'index.html'));
   });
 
   app.listen(PORT, function () {
-    console.error(`Node ${isDev ? 'dev server' : 'cluster worker '+process.pid}: listening on port ${PORT}`);
+    console.error(`Node ${isDev ? 'dev server' : 'cluster worker ' + process.pid}: listening on port ${PORT}`);
   });
 }
 
