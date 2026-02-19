@@ -3,9 +3,9 @@ export const workItemAPI = {
   _fetchData: async function(){
     let data;
     if(this.workItemData.length === 0){
-      const key = process.env.REACT_APP_DRIBBBLE_TOKEN
+      const key = import.meta.env.VITE_DRIBBBLE_TOKEN;
       const url = 'https://api.dribbble.com/v2/user/shots?page=1&per_page=100';
-      const response = await fetch(url + '&access_token=' + "key");
+      const response = await fetch(url + '&access_token=' + key);
       data = await response.json();
       this.workItemData = data;
     } else{
