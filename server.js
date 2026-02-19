@@ -31,8 +31,8 @@ if (!isDev && cluster.isMaster) {
   })
 }
 
-  // Priority serve any static files.
-  app.use(express.static(path.resolve(__dirname, './client/build')));
+  // Priority serve any static files (Vite outputs to dist/ by default).
+  app.use(express.static(path.resolve(__dirname, './client/dist')));
 
   // Answer API requests.
   app.get('/api', function (req, res) {
@@ -43,7 +43,7 @@ if (!isDev && cluster.isMaster) {
   // All remaining requests return the React app, so it can handle routing.
   // Express 5 / path-to-regexp requires a named wildcard; '*' is no longer valid.
   app.get('/{*splat}', function(request, response) {
-    response.sendFile(path.resolve(__dirname, './client/build', 'index.html'));
+    response.sendFile(path.resolve(__dirname, './client/dist', 'index.html'));
   });
 
   app.listen(PORT, function () {
