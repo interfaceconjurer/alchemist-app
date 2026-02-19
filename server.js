@@ -41,7 +41,8 @@ if (!isDev && cluster.isMaster) {
   });
 
   // All remaining requests return the React app, so it can handle routing.
-  app.get('*', function(request, response) {
+  // Express 5 / path-to-regexp requires a named wildcard; '*' is no longer valid.
+  app.get('/{*splat}', function(request, response) {
     response.sendFile(path.resolve(__dirname, './client/build', 'index.html'));
   });
 
