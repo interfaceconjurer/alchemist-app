@@ -1,9 +1,52 @@
 .symbolContainer{
-  max-width: 24rem;
-  height: 24rem;
-  padding-bottom: 2rem;
-  margin: 0 auto;
-  position: relative;
+  width: 100%;
+  height: 100vh;
+  padding: 0;
+  margin: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  transition: filter 0.3s ease;
+  /* Light mode purple glow */
+  filter:
+    drop-shadow(0 0 8px rgba(139, 0, 255, 0.15))
+    drop-shadow(0 0 15px rgba(147, 0, 211, 0.1));
+  animation: purpleGlowLight 3s ease-in-out infinite;
+}
+
+/* Add subtle glow effect in dark mode - purple glow */
+[data-theme="dark"] .symbolContainer {
+  filter:
+    drop-shadow(0 0 10px rgba(139, 0, 255, 0.2))
+    drop-shadow(0 0 20px rgba(147, 0, 211, 0.15));
+  animation: purpleGlow 3s ease-in-out infinite;
+}
+
+@keyframes purpleGlow {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 10px rgba(139, 0, 255, 0.2))
+      drop-shadow(0 0 20px rgba(147, 0, 211, 0.15));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 15px rgba(139, 0, 255, 0.25))
+      drop-shadow(0 0 30px rgba(147, 0, 211, 0.2));
+  }
+}
+
+@keyframes purpleGlowLight {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 8px rgba(139, 0, 255, 0.15))
+      drop-shadow(0 0 15px rgba(147, 0, 211, 0.1));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 12px rgba(139, 0, 255, 0.2))
+      drop-shadow(0 0 20px rgba(147, 0, 211, 0.15));
+  }
 }
 
 .symbol {
