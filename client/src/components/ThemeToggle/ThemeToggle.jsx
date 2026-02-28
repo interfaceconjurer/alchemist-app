@@ -14,8 +14,8 @@ const ThemeToggle = () => {
       {theme === 'light' ? (
         // Moon icon for dark mode
         <svg
-          width="20"
-          height="20"
+          width="17"
+          height="17"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -28,8 +28,8 @@ const ThemeToggle = () => {
       ) : (
         // Sun icon for light mode
         <svg
-          width="20"
-          height="20"
+          width="17"
+          height="17"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

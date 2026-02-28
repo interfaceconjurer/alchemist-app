@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "heroku-postbuild": "cd client/ && npm install --include=dev && npm run build"
+    "heroku-postbuild": "cd client/ && npm install --include=dev && npm run build",
+    "clear-state": "node scripts/clear-state.js"
   },
   "repository": {
     "type": "git",
@@ -15,11 +16,14 @@
   "engines": {
     "npm": ">=9.0.0",
     "node": ">=18.0.0"
-},
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^5.2.1",
     "path": "0.12.7"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.1"
   }
 }
