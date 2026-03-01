@@ -1,0 +1,142 @@
+.terminal-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 24px 0 0 24px;
+  z-index: 2;
+  opacity: 1;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+}
+
+.terminal-loader--fading {
+  opacity: 0;
+}
+
+/* Match left panel: light mode */
+.terminal-window {
+  max-width: 400px;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: height 250ms ease;
+}
+
+[data-theme="dark"] .terminal-window {
+  background-color: rgba(30, 30, 30, 0.4);
+  border-color: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.terminal-window--compact {
+  height: 44px;
+}
+
+.terminal-window--expanded {
+  height: 200px;
+}
+
+/* Command header */
+.terminal-command {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre;
+}
+
+.terminal-icon {
+  width: 14px;
+  height: 14px;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .terminal-icon {
+  color: #9ca3af;
+}
+
+/* Divider between command and output */
+.terminal-divider {
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .terminal-divider {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Output body */
+.terminal-body {
+  padding: 10px 14px;
+  font-family: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-y: auto;
+  box-sizing: border-box;
+  flex: 1;
+}
+
+.terminal-line {
+  white-space: pre;
+  min-height: 1.6em;
+}
+
+/* Light mode text (readable on light bg) */
+.term-white {
+  color: #374151;
+}
+
+.term-green {
+  color: #059669;
+}
+
+.term-cyan {
+  color: #0891b2;
+}
+
+.term-dim {
+  color: #9ca3af;
+}
+
+.term-bold {
+  color: #111827;
+  font-weight: 600;
+}
+
+.term-yellow {
+  color: #b45309;
+}
+
+[data-theme="dark"] .terminal-body .term-white,
+[data-theme="dark"] .terminal-command .term-white {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .terminal-body .term-green {
+  color: #4ade80;
+}
+
+[data-theme="dark"] .terminal-body .term-cyan {
+  color: #67e8f9;
+}
+
+[data-theme="dark"] .terminal-body .term-dim {
+  color: #6b7280;
+}
+
+[data-theme="dark"] .terminal-body .term-bold {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .terminal-body .term-yellow {
+  color: #facc15;
+}

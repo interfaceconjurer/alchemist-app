@@ -12,6 +12,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import ThemeToggle from "./components/ThemeToggle/ThemeToggle";
 import { loadState, createDebouncedSave } from "./workspacePersistence";
 import { resolveWorkItemsByIds } from "./resolveWorkItems";
+import TerminalLoader from "./components/terminalLoader/TerminalLoader";
 
 const LEFT_PANEL_MIN_WIDTH = 280;
 const LEFT_PANEL_DEFAULT_WIDTH = 380;
@@ -27,6 +28,8 @@ class App extends Component {
       openTabs: [],
       activeTabId: null,
       stateLoaded: false,
+      animatedTabs: new Set(),
+      fadingTabs: new Set(),
     };
     this.mainRef = React.createRef();
     this.isResizing = false;
@@ -57,7 +60,29 @@ class App extends Component {
       const activeTabId = wasActive
         ? (openTabs.length > 0 ? openTabs[openTabs.length - 1].id : null)
         : state.activeTabId;
-      return { openTabs, activeTabId };
+      const animatedTabs = new Set(state.animatedTabs);
+      animatedTabs.delete(tabId);
+      const fadingTabs = new Set(state.fadingTabs);
+      fadingTabs.delete(tabId);
+      return { openTabs, activeTabId, animatedTabs, fadingTabs };
+    });
+  };
+
+  startTabFade = (tabId) => {
+    this.setState((state) => {
+      const fadingTabs = new Set(state.fadingTabs);
+      fadingTabs.add(tabId);
+      return { fadingTabs };
+    });
+  };
+
+  markAnimationComplete = (tabId) => {
+    this.setState((state) => {
+      const animatedTabs = new Set(state.animatedTabs);
+      animatedTabs.add(tabId);
+      const fadingTabs = new Set(state.fadingTabs);
+      fadingTabs.delete(tabId);
+      return { animatedTabs, fadingTabs };
     });
   };
 
@@ -85,7 +110,8 @@ class App extends Component {
           ? Math.min(Math.max(persisted.leftPanelWidth, LEFT_PANEL_MIN_WIDTH), getLeftPanelMaxWidth())
           : LEFT_PANEL_DEFAULT_WIDTH;
 
-      this.setState({ openTabs, activeTabId, leftPanelWidth, stateLoaded: true });
+      const animatedTabs = new Set(openTabs.map((t) => t.id));
+      this.setState({ openTabs, activeTabId, leftPanelWidth, stateLoaded: true, animatedTabs });
     });
   }
 
@@ -222,6 +248,7 @@ class App extends Component {
                         >
                           <span className="work-item-title">{item.title}</span>
                           <span className="work-item-description">{item.description}</span>
+                          <span className="work-item-date">{item.date}</span>
                         </button>
                       ))}
                     </div>
@@ -259,23 +286,54 @@ class App extends Component {
                     </div>
                   </div>
                   {this.state.openTabs.length > 0 ? (
-                    <>
-                      <div className="stage-content">
-                      {this.state.activeTabId && (() => {
-                        const active = this.state.openTabs.find((t) => t.id === this.state.activeTabId);
-                        return active ? (
-                          <div className="stage-content-inner">
-                            <h2 className="stage-content-title">{active.title}</h2>
-                            <p className="stage-content-description">{active.description}</p>
-                            <p className="stage-content-placeholder">Content for this work item will go here.</p>
+                    this.state.openTabs.map((tab) => {
+                      const isActive = tab.id === this.state.activeTabId;
+                      const isAnimated = this.state.animatedTabs.has(tab.id);
+                      const isFading = this.state.fadingTabs.has(tab.id);
+                      const contentVisible = isAnimated || isFading;
+
+                      return (
+                        <div
+                          key={tab.id}
+                          className="stage-content-wrapper"
+                          style={{ display: isActive ? "flex" : "none" }}
+                          role="tabpanel"
+                          aria-hidden={!isActive}
+                        >
+                          <div
+                            className={`stage-content ${contentVisible ? "stage-content--entering" : "stage-content--hidden"}`}
+                          >
+                            <div className="stage-content-inner">
+                              <h2 className="stage-content-title">{tab.title}</h2>
+                              <p className="stage-content-description">{tab.description}</p>
+                              <p className="stage-content-placeholder">Content for this work item will go here.</p>
+                            </div>
                           </div>
-                        ) : null;
-                      })()}
-                      </div>
-                    </>
+                          {!isAnimated && (
+                            <TerminalLoader
+                              item={tab}
+                              onFadeStart={() => this.startTabFade(tab.id)}
+                              onComplete={() => this.markAnimationComplete(tab.id)}
+                            />
+                          )}
+                        </div>
+                      );
+                    })
                   ) : (
                     <div className="stage-empty">
-                      <p className="stage-empty-message">Open a work item from My Work to view it here.</p>
+                      <div className="stage-empty-content">
+                        <svg
+                          className="stage-empty-icon"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 17 17"
+                          width="48"
+                          height="48"
+                          aria-hidden="true"
+                        >
+                          <path fill="currentColor" d={icons.workItem} />
+                        </svg>
+                        <p className="stage-empty-message">Open a work item from My Work to view it here.</p>
+                      </div>
                     </div>
                   )}
                 </div>

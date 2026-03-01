@@ -27,7 +27,7 @@ function loadFromLocalStorage() {
   } catch {
     // corrupted data
   }
-  return { openTabIds: [], activeTabId: null, leftPanelWidth: 280 };
+  return { openTabIds: [], activeTabId: null, leftPanelWidth: 380 };
 }
 
 /**
@@ -71,9 +71,11 @@ export function createDebouncedSave(delayMs = 500) {
       clearTimeout(timeoutId);
       timeoutId = null;
     }
+    // Only write to localStorage on beforeunload — not to the server.
+    // The debounced save already syncs to the server every 500ms,
+    // so the server is at most half a second behind.
+    // Avoiding sendBeacon here prevents race conditions with the clear-state script.
     localStorage.setItem(STORAGE_KEY, JSON.stringify(latestState));
-    const blob = new Blob([JSON.stringify(latestState)], { type: 'application/json' });
-    navigator.sendBeacon(API_URL, blob);
     latestState = null;
   }
 

@@ -5,7 +5,7 @@
   --text-color: #747474;
   --text-color-dark: #494545;
   --border-color: #979797;
-  --border-color-light: #c4c4c4;
+  --border-color-light: #e0e0e0;
   --focus-shadow: rgba(139, 0, 255, 0.5);
   --button-bg: #fff;
 
@@ -29,7 +29,7 @@
   --text-color: #b8b8b8;
   --text-color-dark: #d0d0d0;
   --border-color: #4a4a4a;
-  --border-color-light: #3a3a3a;
+  --border-color-light: #242424;
   --focus-shadow: rgba(139, 0, 255, 0.5);
   --button-bg: #1a1a1a;
 
@@ -70,8 +70,9 @@ body {
 .main {
   display: flex;
   flex-direction: row;
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
+  overflow: hidden;
 }
 
 .left-panel {
@@ -84,6 +85,7 @@ body {
   width: 380px;
   min-width: 280px;
   flex-shrink: 0;
+  overflow-y: auto;
   /* Light mode: slight grey and shadow for same separation as dark mode */
   background-color: rgba(0, 0, 0, 0.04);
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
@@ -227,10 +229,35 @@ body {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+.stage-content-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
 .stage-content {
   flex: 1;
   overflow: auto;
   padding: 1rem;
+}
+
+.stage-content--hidden {
+  opacity: 0;
+}
+
+.stage-content--entering {
+  animation: fadeInContent 300ms ease forwards;
+}
+
+@keyframes fadeInContent {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .stage-content-inner {
@@ -262,9 +289,32 @@ body {
 .stage-empty {
   flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 2rem;
+}
+
+.stage-empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 2.5rem;
+  border: 1px dashed rgba(0, 0, 0, 0.22);
+  border-radius: 8px;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .stage-empty-content {
+  border-color: rgba(255, 255, 255, 0.22);
+  background-color: rgba(30, 30, 30, 0.4);
+}
+
+.stage-empty-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--text-color);
 }
 
 .stage-empty-message {
@@ -399,6 +449,10 @@ a:active {
   margin: 0;
   justify-content: center;
   flex-flow: wrap;
+}
+
+.nav .icon-container {
+  color: var(--text-color);
 }
 
 /* ====== /nav ====== */
@@ -561,6 +615,11 @@ a:active {
 
 .work-item-title {
   font-weight: 500;
+}
+
+.work-item-date {
+  font-size: 0.75em;
+  opacity: 0.5;
 }
 
 .work-item-description {

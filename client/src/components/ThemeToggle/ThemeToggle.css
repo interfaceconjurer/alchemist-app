@@ -30,7 +30,7 @@
 }
 
 .theme-toggle svg {
-  color: var(--toggle-icon);
+  color: var(--text-color);
   flex-shrink: 0;
 }
 

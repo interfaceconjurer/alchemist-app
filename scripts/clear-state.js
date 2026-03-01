@@ -3,27 +3,24 @@ const fs = require('fs');
 const path = require('path');
 const http = require('http');
 
-const STATE_FILE = path.resolve(__dirname, '..', 'data', 'workspace-state.json');
+const STATE_DIR = path.resolve(__dirname, '..', 'data');
+const STATE_FILE = path.join(STATE_DIR, 'workspace-state.json');
 const PORT = process.env.PORT || 5001;
 
-// 1. Clear server-side file
-let fileCleared = false;
+const emptyState = JSON.stringify({ openTabIds: [], activeTabId: null, leftPanelWidth: 380 }, null, 2);
+
+// Write empty state directly to the file (creates data/ if needed)
 try {
-  if (fs.existsSync(STATE_FILE)) {
-    fs.unlinkSync(STATE_FILE);
-    console.log('Server state cleared:', STATE_FILE);
-    fileCleared = true;
-  } else {
-    console.log('No server state file found.');
+  if (!fs.existsSync(STATE_DIR)) {
+    fs.mkdirSync(STATE_DIR, { recursive: true });
   }
+  fs.writeFileSync(STATE_FILE, emptyState, 'utf-8');
+  console.log('State file reset to empty.');
 } catch (err) {
-  console.error('Failed to clear server state file:', err.message);
+  console.error('Failed to write state file:', err.message);
 }
 
-// 2. Reset via API so the server returns empty state on next load,
-//    which causes the client to overwrite localStorage with the empty state.
-const emptyState = JSON.stringify({ openTabIds: [], activeTabId: null, leftPanelWidth: 280 });
-
+// Also PUT to the running server so in-memory state is consistent
 const req = http.request(
   { hostname: 'localhost', port: PORT, path: '/api/workspace-state', method: 'PUT',
     headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(emptyState) },
@@ -31,23 +28,16 @@ const req = http.request(
   (res) => {
     if (res.statusCode === 200) {
       console.log('Server API reset to empty state.');
-    } else {
-      console.log(`Server API returned ${res.statusCode}. localStorage will be cleared on next page load.`);
     }
-    printDone();
+    console.log('\nDone. Close the browser tab and reopen (or hard-refresh) to see the reset.');
+    console.log('(A normal refresh triggers beforeunload which writes the old state back.)');
   },
 );
 
 req.on('error', () => {
-  console.log('Server not running. Browser localStorage still has state.');
-  console.log('  -> Reload the app with the server running, or clear manually:');
-  console.log("     localStorage.removeItem('workspace-state')");
-  printDone();
+  console.log('Server not running — file was still reset.');
+  console.log('\nDone. Start the server and open the app to see the reset.');
 });
 
 req.write(emptyState);
 req.end();
-
-function printDone() {
-  console.log('\nDone. Refresh the browser to see the reset.');
-}

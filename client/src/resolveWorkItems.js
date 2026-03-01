@@ -16,7 +16,7 @@ export function resolveWorkItemsByIds(ids) {
   for (const id of ids) {
     const item = workItemMap.get(id);
     if (item) {
-      resolved.push({ id: item.id, title: item.title, description: item.description });
+      resolved.push({ id: item.id, title: item.title, description: item.description, date: item.date });
     }
   }
   return resolved;

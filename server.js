@@ -52,7 +52,7 @@ if (!isDev && cluster.isMaster) {
         const raw = fs.readFileSync(STATE_FILE, 'utf-8');
         res.json(JSON.parse(raw));
       } else {
-        res.json({ openTabIds: [], activeTabId: null, leftPanelWidth: 280 });
+        res.json({ openTabIds: [], activeTabId: null, leftPanelWidth: 380 });
       }
     } catch (err) {
       console.error('Failed to read workspace state:', err);
