@@ -76,7 +76,7 @@ function TerminalLoader({ item, onFadeStart, onComplete }) {
 
   return (
     <div className={containerClass}>
-      <div className={`terminal-window ${hasOutput ? "terminal-window--expanded" : "terminal-window--compact"}`}>
+      <div className="terminal-window">
         <div className="terminal-command">
           <svg className="terminal-icon" aria-hidden="true" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect x="0.5" y="0.5" width="15" height="15" rx="2" stroke="currentColor" strokeWidth="1.5" />

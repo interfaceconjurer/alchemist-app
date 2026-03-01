@@ -1,0 +1,122 @@
+.work-content {
+  margin-top: 1rem;
+}
+
+.work-content-section {
+  margin-bottom: 2rem;
+}
+
+.work-content-section:last-child {
+  margin-bottom: 0;
+}
+
+.work-content-heading {
+  font-family: monospace;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color-dark);
+  margin: 0 0 0.75rem 0;
+}
+
+.work-content-text {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-color);
+  margin: 0 0 0.75rem 0;
+}
+
+.work-content-goals {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--text-color);
+}
+
+.work-content-goals li {
+  margin-bottom: 0.35rem;
+}
+
+.work-content-goals li:last-child {
+  margin-bottom: 0;
+}
+
+/* Artifacts — card grid */
+.work-content-artifacts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.work-content-artifact {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.work-content-artifact-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-top: 0.6rem;
+}
+
+.work-content-artifact-label {
+  font-family: monospace;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-color-dark);
+  margin: 0;
+}
+
+.work-content-artifact-description {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-color);
+  opacity: 0.85;
+  margin: 0;
+}
+
+/* Outcome — horizontal scrollable row */
+.work-content-outcome-row {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.work-content-outcome-item {
+  margin: 0;
+  min-width: 200px;
+  max-width: 300px;
+  flex-shrink: 0;
+}
+
+/* Shared image styles */
+.work-content-image-placeholder {
+  background-color: rgba(0, 0, 0, 0.04);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="dark"] .work-content-image-placeholder {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.work-content-image-placeholder img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.work-content-caption {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-color);
+  opacity: 0.8;
+  margin-top: 0.5rem;
+}

@@ -1,0 +1,120 @@
+.command-palette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  padding-top: 20vh;
+}
+
+.command-palette {
+  width: 100%;
+  max-width: 32rem;
+  max-height: 24rem;
+  background: var(--bg-color);
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color-light);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  align-self: flex-start;
+}
+
+.command-palette-input {
+  padding: 0.75rem 1rem;
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: var(--text-color-dark);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border-color-light);
+  outline: none;
+}
+
+.command-palette-input::placeholder {
+  color: var(--text-color);
+  opacity: 0.5;
+}
+
+.command-palette-list {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0.25rem 0;
+}
+
+.command-palette-empty {
+  padding: 1rem;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--text-color);
+  opacity: 0.5;
+  text-align: center;
+}
+
+.command-palette-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  gap: 0.5rem;
+}
+
+.command-palette-item--highlighted {
+  background: rgba(139, 0, 255, 0.08);
+}
+
+[data-theme="dark"] .command-palette-item--highlighted {
+  background: rgba(139, 0, 255, 0.15);
+}
+
+.command-palette-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.command-palette-action-prefix {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: rgba(139, 0, 255, 0.7);
+  flex-shrink: 0;
+}
+
+.command-palette-item-label {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--text-color-dark);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.command-palette-item-section {
+  font-family: monospace;
+  font-size: 0.7rem;
+  color: var(--text-color);
+  opacity: 0.5;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.command-palette-item-hint {
+  font-family: monospace;
+  font-size: 0.7rem;
+  padding: 0.1em 0.35em;
+  border: 1px solid var(--border-color-light);
+  border-radius: 3px;
+  background-color: rgba(0, 0, 0, 0.04);
+  color: var(--text-color);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .command-palette-item-hint {
+  background-color: rgba(255, 255, 255, 0.06);
+}

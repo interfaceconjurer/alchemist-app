@@ -4,7 +4,7 @@ import "./App.css";
 import Resume from "./resume/Jordan_L_Wright.pdf";
 import Icon from "./components/icon/view";
 import { icons } from "./components/iconList/iconList";
-import { workSections } from "./components/workList/workList";
+import { workSections, getSectionForItem } from "./components/workList/workList";
 import AlchemySymbol from "./components/alchemySymbol/mediator";
 import Modal from "./components/modal/mediator";
 import PubSub from "./pubSub";
@@ -13,6 +13,9 @@ import ThemeToggle from "./components/ThemeToggle/ThemeToggle";
 import { loadState, createDebouncedSave } from "./workspacePersistence";
 import { resolveWorkItemsByIds } from "./resolveWorkItems";
 import TerminalLoader from "./components/terminalLoader/TerminalLoader";
+import WorkContent from "./components/workContent/WorkContent";
+import StatusBar from "./components/statusBar/StatusBar";
+import CommandPalette from "./components/commandPalette/CommandPalette";
 
 const LEFT_PANEL_MIN_WIDTH = 280;
 const LEFT_PANEL_DEFAULT_WIDTH = 380;
@@ -30,6 +33,9 @@ class App extends Component {
       stateLoaded: false,
       animatedTabs: new Set(),
       fadingTabs: new Set(),
+      commandPaletteOpen: false,
+      draggedTabId: null,
+      dropTargetIndex: null,
     };
     this.mainRef = React.createRef();
     this.isResizing = false;
@@ -42,13 +48,12 @@ class App extends Component {
   }
 
   openWorkItem = (item) => {
-    const { id, title, description } = item;
     this.setState((state) => {
-      const exists = state.openTabs.some((tab) => tab.id === id);
+      const exists = state.openTabs.some((tab) => tab.id === item.id);
       const openTabs = exists
         ? state.openTabs
-        : [...state.openTabs, { id, title, description }];
-      return { openTabs, activeTabId: id };
+        : [...state.openTabs, { ...item }];
+      return { openTabs, activeTabId: item.id };
     });
   };
 
@@ -90,12 +95,100 @@ class App extends Component {
     this.setState({ activeTabId: tabId });
   };
 
+  toggleCommandPalette = () => {
+    this.setState((state) => ({ commandPaletteOpen: !state.commandPaletteOpen }));
+  };
+
+  closeActiveTab = () => {
+    this.setState((state) => {
+      if (!state.activeTabId) return null;
+      const openTabs = state.openTabs.filter((tab) => tab.id !== state.activeTabId);
+      const activeTabId = openTabs.length > 0 ? openTabs[openTabs.length - 1].id : null;
+      const animatedTabs = new Set(state.animatedTabs);
+      animatedTabs.delete(state.activeTabId);
+      const fadingTabs = new Set(state.fadingTabs);
+      fadingTabs.delete(state.activeTabId);
+      return { openTabs, activeTabId, animatedTabs, fadingTabs };
+    });
+  };
+
+  closeAllTabs = () => {
+    this.setState({
+      openTabs: [],
+      activeTabId: null,
+      animatedTabs: new Set(),
+      fadingTabs: new Set(),
+    });
+  };
+
+  handlePaletteAction = (actionId) => {
+    switch (actionId) {
+      case "action:close-tab":
+        this.closeActiveTab();
+        break;
+      case "action:close-all":
+        this.closeAllTabs();
+        break;
+      default:
+        break;
+    }
+  };
+
+  handleGlobalKeyDown = (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      e.preventDefault();
+      this.toggleCommandPalette();
+      return;
+    }
+    if (this.state.commandPaletteOpen) return;
+    if (e.ctrlKey && e.key === "q") {
+      e.preventDefault();
+      this.closeActiveTab();
+      return;
+    }
+  };
+
+  handleTabDragStart = (e, tabId) => {
+    e.dataTransfer.effectAllowed = "move";
+    this.setState({ draggedTabId: tabId });
+  };
+
+  handleTabDragOver = (e, index) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    this.setState({ dropTargetIndex: index });
+  };
+
+  handleTabDragLeave = () => {
+    this.setState({ dropTargetIndex: null });
+  };
+
+  handleTabDrop = () => {
+    this.setState((state) => {
+      const { draggedTabId, dropTargetIndex, openTabs } = state;
+      if (draggedTabId == null || dropTargetIndex == null) return { draggedTabId: null, dropTargetIndex: null };
+
+      const fromIndex = openTabs.findIndex((t) => t.id === draggedTabId);
+      if (fromIndex === -1 || fromIndex === dropTargetIndex) return { draggedTabId: null, dropTargetIndex: null };
+
+      const tabs = [...openTabs];
+      const [moved] = tabs.splice(fromIndex, 1);
+      tabs.splice(dropTargetIndex, 0, moved);
+      return { openTabs: tabs, draggedTabId: null, dropTargetIndex: null };
+    });
+  };
+
+  handleTabDragEnd = () => {
+    this.setState({ draggedTabId: null, dropTargetIndex: null });
+  };
+
   componentDidMount() {
     PubSub.addListener("toggleModal", this.handleMainClassState);
     document.addEventListener("mousemove", this.handleResizeMove);
     document.addEventListener("mouseup", this.handleResizeEnd);
     window.addEventListener("resize", this.handleWindowResize);
     window.addEventListener("beforeunload", this._handleBeforeUnload);
+    document.addEventListener("keydown", this.handleGlobalKeyDown);
 
     loadState().then((persisted) => {
       const openTabs = resolveWorkItemsByIds(persisted.openTabIds);
@@ -137,6 +230,7 @@ class App extends Component {
     document.removeEventListener("mouseup", this.handleResizeEnd);
     window.removeEventListener("resize", this.handleWindowResize);
     window.removeEventListener("beforeunload", this._handleBeforeUnload);
+    document.removeEventListener("keydown", this.handleGlobalKeyDown);
   }
 
   _handleBeforeUnload = () => {
@@ -189,6 +283,13 @@ class App extends Component {
     return (
       <ThemeProvider>
         <div className="App">
+          <CommandPalette
+            isOpen={this.state.commandPaletteOpen}
+            onClose={() => this.setState({ commandPaletteOpen: false })}
+            onSelectItem={this.openWorkItem}
+            onAction={this.handlePaletteAction}
+            openTabIds={this.state.openTabs.map((t) => t.id)}
+          />
           <Routes location={this.props.location}>
             <Route path="/workItem/:id" element={<Modal />} />
           </Routes>
@@ -261,13 +362,19 @@ class App extends Component {
                 <div className="stage-main">
                   <div className="stage-tabs" role="tablist">
                     <div className="stage-tabs-list">
-                      {this.state.openTabs.map((tab) => (
+                      {this.state.openTabs.map((tab, index) => (
                         <div
                           key={tab.id}
                           role="tab"
                           aria-selected={this.state.activeTabId === tab.id}
-                          className={`stage-tab ${this.state.activeTabId === tab.id ? "stage-tab--active" : ""}`}
+                          className={`stage-tab ${this.state.activeTabId === tab.id ? "stage-tab--active" : ""}${this.state.dropTargetIndex === index && this.state.draggedTabId !== tab.id ? " stage-tab--drop-before" : ""}`}
                           onClick={() => this.selectTab(tab.id)}
+                          draggable
+                          onDragStart={(e) => this.handleTabDragStart(e, tab.id)}
+                          onDragOver={(e) => this.handleTabDragOver(e, index)}
+                          onDragLeave={this.handleTabDragLeave}
+                          onDrop={this.handleTabDrop}
+                          onDragEnd={this.handleTabDragEnd}
                         >
                           <span className="stage-tab-title">{tab.title}</span>
                           <button
@@ -306,7 +413,7 @@ class App extends Component {
                             <div className="stage-content-inner">
                               <h2 className="stage-content-title">{tab.title}</h2>
                               <p className="stage-content-description">{tab.description}</p>
-                              <p className="stage-content-placeholder">Content for this work item will go here.</p>
+                              <WorkContent content={tab.content} />
                             </div>
                           </div>
                           {!isAnimated && (
@@ -332,11 +439,23 @@ class App extends Component {
                         >
                           <path fill="currentColor" d={icons.workItem} />
                         </svg>
-                        <p className="stage-empty-message">Open a work item from My Work to view it here.</p>
+                        <p className="stage-empty-title">No open files</p>
+                        <div className="stage-empty-hints">
+                          <p className="stage-empty-hint">
+                            <kbd className="stage-empty-kbd">{"\u2318"}K</kbd> to search
+                          </p>
+                          <p className="stage-empty-hint">or select from My Work in the sidebar</p>
+                        </div>
                       </div>
                     </div>
                   )}
                 </div>
+                {this.state.activeTabId && (
+                  <StatusBar
+                    activeTab={this.state.openTabs.find((t) => t.id === this.state.activeTabId)}
+                    sectionLabel={getSectionForItem(this.state.activeTabId)}
+                  />
+                )}
               </div>
             </section>
           </main>

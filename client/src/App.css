@@ -197,6 +197,10 @@ body {
   margin-bottom: -1px;
 }
 
+.stage-tab--drop-before {
+  box-shadow: -2px 0 0 0 rgba(139, 0, 255, 0.6);
+}
+
 .stage-tab-title {
   max-width: 12rem;
   overflow: hidden;
@@ -324,6 +328,43 @@ body {
   opacity: 0.7;
   margin: 0;
   text-align: center;
+}
+
+.stage-empty-title {
+  font-size: 1rem;
+  font-family: monospace;
+  font-weight: 500;
+  color: var(--text-color-dark);
+  margin: 0;
+}
+
+.stage-empty-hints {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.stage-empty-hint {
+  font-size: 0.8rem;
+  font-family: monospace;
+  color: var(--text-color);
+  opacity: 0.6;
+  margin: 0;
+}
+
+.stage-empty-kbd {
+  display: inline-block;
+  padding: 0.15em 0.4em;
+  font-family: monospace;
+  font-size: 0.8em;
+  border: 1px solid var(--border-color-light);
+  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="dark"] .stage-empty-kbd {
+  background-color: rgba(255, 255, 255, 0.06);
 }
 
 .App-title {
