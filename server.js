@@ -52,7 +52,7 @@ if (!isDev && cluster.isMaster) {
         const raw = fs.readFileSync(STATE_FILE, 'utf-8');
         res.json(JSON.parse(raw));
       } else {
-        res.json({ openTabIds: [], activeTabId: null, leftPanelWidth: 380 });
+        res.json({ openTabIds: [], activeTabId: null });
       }
     } catch (err) {
       console.error('Failed to read workspace state:', err);
@@ -61,17 +61,11 @@ if (!isDev && cluster.isMaster) {
   });
 
   function writeWorkspaceState(req, res) {
-    const { openTabIds, activeTabId, leftPanelWidth } = req.body;
+    const state = req.body;
 
-    if (!Array.isArray(openTabIds)) {
-      return res.status(400).json({ error: 'openTabIds must be an array' });
+    if (!state || typeof state !== 'object' || !Array.isArray(state.openTabIds)) {
+      return res.status(400).json({ error: 'Invalid state: openTabIds must be an array' });
     }
-
-    const state = {
-      openTabIds,
-      activeTabId: activeTabId ?? null,
-      leftPanelWidth: typeof leftPanelWidth === 'number' ? leftPanelWidth : 280,
-    };
 
     try {
       if (!fs.existsSync(STATE_DIR)) {

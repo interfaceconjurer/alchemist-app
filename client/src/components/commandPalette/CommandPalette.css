@@ -2,29 +2,33 @@
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(0, 0, 0, 0.3);
-  display: flex;
-  justify-content: center;
-  padding-top: 20vh;
+  background: transparent;
 }
 
 .command-palette {
+  position: absolute;
+  left: 0.5rem;
   width: 100%;
   max-width: 32rem;
   max-height: 24rem;
-  background: var(--bg-color);
-  border-radius: 0.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  background: #f5f5f5;
+  border-radius: 0 0 0.5rem 0.5rem;
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.35);
   border: 1px solid var(--border-color-light);
+  border-top: none;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  align-self: flex-start;
+}
+
+[data-theme="dark"] .command-palette {
+  background: #121212;
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.75);
 }
 
 .command-palette-input {
   padding: 0.75rem 1rem;
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.9rem;
   color: var(--text-color-dark);
   background: transparent;
@@ -46,7 +50,7 @@
 
 .command-palette-empty {
   padding: 1rem;
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
   color: var(--text-color);
   opacity: 0.5;
@@ -79,14 +83,14 @@
 }
 
 .command-palette-action-prefix {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
   color: rgba(139, 0, 255, 0.7);
   flex-shrink: 0;
 }
 
 .command-palette-item-label {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.85rem;
   color: var(--text-color-dark);
   white-space: nowrap;
@@ -95,7 +99,7 @@
 }
 
 .command-palette-item-section {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
   color: var(--text-color);
   opacity: 0.5;
@@ -104,7 +108,7 @@
 }
 
 .command-palette-item-hint {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
   padding: 0.1em 0.35em;
   border: 1px solid var(--border-color-light);
@@ -117,4 +121,13 @@
 
 [data-theme="dark"] .command-palette-item-hint {
   background-color: rgba(255, 255, 255, 0.06);
+}
+
+.command-palette-item-date {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-color);
+  opacity: 0.5;
+  white-space: nowrap;
+  flex-shrink: 0;
 }

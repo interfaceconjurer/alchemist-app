@@ -63,9 +63,7 @@ class App extends Component {
       }
       // Replace existing preview tab in-place
       if (state.previewTabId !== null) {
-        const openTabs = state.openTabs.map((tab) =>
-          tab.id === state.previewTabId ? { ...item } : tab
-        );
+        const openTabs = state.openTabs.map((tab) => (tab.id === state.previewTabId ? { ...item } : tab));
         const animatedTabs = new Set(state.animatedTabs);
         animatedTabs.delete(state.previewTabId);
         const fadingTabs = new Set(state.fadingTabs);
@@ -289,8 +287,9 @@ class App extends Component {
           ? Math.min(Math.max(persisted.leftPanelWidth, LEFT_PANEL_MIN_WIDTH), getLeftPanelMaxWidth())
           : LEFT_PANEL_DEFAULT_WIDTH;
 
+      const previewTabId = validIds.has(persisted.previewTabId) ? persisted.previewTabId : null;
       const animatedTabs = new Set(openTabs.map((t) => t.id));
-      this.setState({ openTabs, activeTabId, leftPanelWidth, stateLoaded: true, animatedTabs });
+      this.setState({ openTabs, activeTabId, previewTabId, leftPanelWidth, stateLoaded: true, animatedTabs });
     });
   }
 
@@ -303,18 +302,10 @@ class App extends Component {
     const previewChanged = prevState.previewTabId !== this.state.previewTabId;
 
     if (tabsChanged || activeChanged || widthChanged || previewChanged) {
-      const persistentTabIds = this.state.openTabs
-        .filter((t) => t.id !== this.state.previewTabId)
-        .map((t) => t.id);
-      const persistedActiveTabId =
-        this.state.activeTabId === this.state.previewTabId
-          ? persistentTabIds.length > 0
-            ? persistentTabIds[persistentTabIds.length - 1]
-            : null
-          : this.state.activeTabId;
       this._debouncedSave({
-        openTabIds: persistentTabIds,
-        activeTabId: persistedActiveTabId,
+        openTabIds: this.state.openTabs.map((t) => t.id),
+        activeTabId: this.state.activeTabId,
+        previewTabId: this.state.previewTabId,
         leftPanelWidth: this.state.leftPanelWidth,
       });
     }
@@ -327,9 +318,7 @@ class App extends Component {
   scrollActiveTabIntoView = () => {
     requestAnimationFrame(() => {
       if (!this.tabListRef.current) return;
-      const tabEl = this.tabListRef.current.querySelector(
-        `[data-tab-id="${this.state.activeTabId}"]`
-      );
+      const tabEl = this.tabListRef.current.querySelector(`[data-tab-id="${this.state.activeTabId}"]`);
       if (tabEl) {
         tabEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
       }
@@ -406,6 +395,25 @@ class App extends Component {
           <Routes location={this.props.location}>
             <Route path="/workItem/:id" element={<Modal />} />
           </Routes>
+          <div className="top-bar">
+            <button type="button" className="top-bar-search" onClick={this.toggleCommandPalette} aria-label="Search">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              Search Work Items
+            </button>
+            <ThemeToggle />
+          </div>
           <main ref={this.mainRef} className={this.state.mainClass}>
             <section className="left-panel" style={{ width: this.state.leftPanelWidth }}>
               <div
@@ -486,8 +494,12 @@ class App extends Component {
                             "stage-tab",
                             this.state.activeTabId === tab.id ? "stage-tab--active" : "",
                             this.state.previewTabId === tab.id ? "stage-tab--preview" : "",
-                            this.state.dropTargetIndex === index && this.state.draggedTabId !== tab.id ? "stage-tab--drop-before" : "",
-                          ].filter(Boolean).join(" ")}
+                            this.state.dropTargetIndex === index && this.state.draggedTabId !== tab.id
+                              ? "stage-tab--drop-before"
+                              : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
                           onClick={() => this.selectTab(tab.id)}
                           onDoubleClick={() => this.handleTabDoubleClick(tab.id)}
                           draggable
@@ -497,13 +509,7 @@ class App extends Component {
                           onDrop={this.handleTabDrop}
                           onDragEnd={this.handleTabDragEnd}
                         >
-                          <img
-                            src="/favicon.ico"
-                            alt=""
-                            className="stage-tab-icon"
-                            width={16}
-                            height={16}
-                          />
+                          <img src="/favicon.ico" alt="" className="stage-tab-icon" width={16} height={16} />
                           <span className="stage-tab-title">{tab.title}</span>
                           <button
                             type="button"
@@ -515,9 +521,6 @@ class App extends Component {
                           </button>
                         </div>
                       ))}
-                    </div>
-                    <div className="stage-tabs-end">
-                      <ThemeToggle />
                     </div>
                   </div>
                   {this.state.openTabs.length > 0 ? (
@@ -556,17 +559,49 @@ class App extends Component {
                     })
                   ) : (
                     <div className="stage-empty">
-                      <div className="stage-empty-content">
+                      <div className="stage-empty-icon-wrap">
                         <svg
                           className="stage-empty-icon"
                           xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 17 17"
-                          width="48"
-                          height="48"
+                          viewBox="0 0 52 122"
+                          width={144}
+                          height={144}
+                          preserveAspectRatio="xMidYMid meet"
                           aria-hidden="true"
                         >
-                          <path fill="currentColor" d={icons.workItem} />
+                          <defs>
+                            <clipPath id="stage-empty-beaker-clip">
+                              <path fill="black" d={icons.beaker} />
+                            </clipPath>
+                            <linearGradient
+                              id="stage-empty-shimmer-grad"
+                              gradientUnits="objectBoundingBox"
+                              x1="1"
+                              y1="1"
+                              x2="0"
+                              y2="0"
+                            >
+                              <stop offset="0" stopColor="transparent" />
+                              <stop offset="0.35" stopColor="transparent" />
+                              <stop offset="0.5" stopColor="rgba(120, 120, 120, 0.35)" />
+                              <stop offset="0.65" stopColor="transparent" />
+                              <stop offset="1" stopColor="transparent" />
+                            </linearGradient>
+                          </defs>
+                          <path fill="currentColor" d={icons.beaker} />
+                          <g clipPath="url(#stage-empty-beaker-clip)">
+                            <rect
+                              className="stage-empty-icon-shimmer-rect"
+                              x={-282}
+                              y={0}
+                              width={500}
+                              height={122}
+                              fill="url(#stage-empty-shimmer-grad)"
+                            />
+                          </g>
                         </svg>
+                      </div>
+                      <div className="stage-empty-content">
                         <p className="stage-empty-title">No open files</p>
                         <div className="stage-empty-hints">
                           <p className="stage-empty-hint">

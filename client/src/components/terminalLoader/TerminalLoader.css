@@ -28,14 +28,18 @@
   align-items: center;
   gap: 8px;
   padding: 0.5rem 1rem;
-  font-family: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.6;
   white-space: pre;
-  background-color: rgba(30, 30, 30, 0.4);
+  background-color: rgba(0, 0, 0, 0.04);
   width: 50%;
   margin: 1rem 1rem 0;
   border-radius: 0.5rem;
+}
+
+[data-theme="dark"] .terminal-command {
+  background-color: rgba(30, 30, 30, 0.4);
 }
 
 .terminal-icon {
@@ -62,7 +66,7 @@
 /* Output body */
 .terminal-body {
   padding: 1rem 1.5rem;
-  font-family: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.6;
   overflow-y: auto;

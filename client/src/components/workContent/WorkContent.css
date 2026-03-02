@@ -11,7 +11,7 @@
 }
 
 .work-content-heading {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-color-dark);
@@ -62,7 +62,7 @@
 }
 
 .work-content-artifact-label {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-color-dark);

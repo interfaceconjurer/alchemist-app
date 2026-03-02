@@ -27,7 +27,7 @@ function loadFromLocalStorage() {
   } catch {
     // corrupted data
   }
-  return { openTabIds: [], activeTabId: null, leftPanelWidth: 380 };
+  return { openTabIds: [], activeTabId: null };
 }
 
 /**

@@ -17,6 +17,7 @@ function buildItemList() {
         id: item.id,
         label: item.title,
         description: item.description,
+        date: item.date,
         tags: item.tags || [],
         sectionLabel: section.label,
         type: "item",
@@ -24,6 +25,7 @@ function buildItemList() {
       });
     }
   }
+  items.sort((a, b) => new Date(b.date) - new Date(a.date));
   return items;
 }
 
@@ -152,6 +154,9 @@ function CommandPalette({ isOpen, onClose, onSelectItem, onAction, openTabIds })
                 </div>
                 {isAction && entry.hint && (
                   <kbd className="command-palette-item-hint">{entry.hint}</kbd>
+                )}
+                {!isAction && entry.date && (
+                  <span className="command-palette-item-date">{entry.date}</span>
                 )}
               </div>
             );
