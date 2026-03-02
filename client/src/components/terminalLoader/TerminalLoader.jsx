@@ -35,7 +35,7 @@ function TerminalLoader({ item, onFadeStart, onComplete }) {
           if (lineIndex === totalLines) {
             setPhase("ready");
           }
-        }, elapsed),
+        }, elapsed)
       );
     }
 
@@ -69,8 +69,7 @@ function TerminalLoader({ item, onFadeStart, onComplete }) {
     return () => clearTimeout(timer);
   }, [phase, stableOnComplete]);
 
-  const containerClass =
-    "terminal-loader" + (phase === "fading" || phase === "done" ? " terminal-loader--fading" : "");
+  const containerClass = "terminal-loader" + (phase === "fading" || phase === "done" ? " terminal-loader--fading" : "");
 
   const hasOutput = visibleLines > 0;
 
@@ -78,9 +77,21 @@ function TerminalLoader({ item, onFadeStart, onComplete }) {
     <div className={containerClass}>
       <div className="terminal-window">
         <div className="terminal-command">
-          <svg className="terminal-icon" aria-hidden="true" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            className="terminal-icon"
+            aria-hidden="true"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <rect x="0.5" y="0.5" width="15" height="15" rx="2" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M4 5L7 8L4 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M4 5L7 8L4 11"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
             <line x1="9" y1="11" x2="12" y2="11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
           <span className="term-white">{command.text}</span>

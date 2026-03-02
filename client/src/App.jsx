@@ -36,24 +36,105 @@ class App extends Component {
       commandPaletteOpen: false,
       draggedTabId: null,
       dropTargetIndex: null,
+      previewTabId: null,
     };
     this.mainRef = React.createRef();
+    this.tabListRef = React.createRef();
     this.isResizing = false;
     this.startX = 0;
     this.startWidth = 0;
+    this._clickTimer = null;
+    this._clickedItemId = null;
 
     const { debouncedSave, flush } = createDebouncedSave(500);
     this._debouncedSave = debouncedSave;
     this._flushSave = flush;
   }
 
-  openWorkItem = (item) => {
+  openWorkItemAsPreview = (item) => {
     this.setState((state) => {
-      const exists = state.openTabs.some((tab) => tab.id === item.id);
-      const openTabs = exists
-        ? state.openTabs
-        : [...state.openTabs, { ...item }];
-      return { openTabs, activeTabId: item.id };
+      // Already open as persistent tab — just activate
+      if (state.openTabs.some((tab) => tab.id === item.id && tab.id !== state.previewTabId)) {
+        return { activeTabId: item.id };
+      }
+      // Already the preview tab — just activate
+      if (state.previewTabId === item.id) {
+        return { activeTabId: item.id };
+      }
+      // Replace existing preview tab in-place
+      if (state.previewTabId !== null) {
+        const openTabs = state.openTabs.map((tab) =>
+          tab.id === state.previewTabId ? { ...item } : tab
+        );
+        const animatedTabs = new Set(state.animatedTabs);
+        animatedTabs.delete(state.previewTabId);
+        const fadingTabs = new Set(state.fadingTabs);
+        fadingTabs.delete(state.previewTabId);
+        return { openTabs, activeTabId: item.id, previewTabId: item.id, animatedTabs, fadingTabs };
+      }
+      // No preview tab — append new one
+      return {
+        openTabs: [...state.openTabs, { ...item }],
+        activeTabId: item.id,
+        previewTabId: item.id,
+      };
+    });
+  };
+
+  openWorkItemAsPersistent = (item) => {
+    this.setState((state) => {
+      // Promote current preview tab
+      if (state.previewTabId === item.id) {
+        return { activeTabId: item.id, previewTabId: null };
+      }
+      // Already open as persistent — just activate
+      if (state.openTabs.some((tab) => tab.id === item.id)) {
+        return { activeTabId: item.id };
+      }
+      // Not open — append as persistent
+      return {
+        openTabs: [...state.openTabs, { ...item }],
+        activeTabId: item.id,
+      };
+    });
+  };
+
+  // CommandPalette and programmatic use — always persistent
+  openWorkItem = (item) => {
+    this.openWorkItemAsPersistent(item);
+  };
+
+  handleWorkItemClick = (item) => {
+    if (this._clickTimer && this._clickedItemId !== item.id) {
+      clearTimeout(this._clickTimer);
+      this._clickTimer = null;
+    }
+    if (this._clickTimer && this._clickedItemId === item.id) {
+      return;
+    }
+    this._clickedItemId = item.id;
+    this._clickTimer = setTimeout(() => {
+      this._clickTimer = null;
+      this._clickedItemId = null;
+      this.openWorkItemAsPreview(item);
+    }, 250);
+  };
+
+  handleWorkItemDoubleClick = (item) => {
+    if (this._clickTimer) {
+      clearTimeout(this._clickTimer);
+      this._clickTimer = null;
+      this._clickedItemId = null;
+    }
+    this.openWorkItemAsPersistent(item);
+  };
+
+  handleTabDoubleClick = (tabId) => {
+    this.setState((state) => {
+      if (state.previewTabId === tabId) {
+        return { previewTabId: null };
+      }
+      return null;
     });
   };
 
@@ -63,13 +144,16 @@ class App extends Component {
       const openTabs = state.openTabs.filter((tab) => tab.id !== tabId);
       const wasActive = state.activeTabId === tabId;
       const activeTabId = wasActive
-        ? (openTabs.length > 0 ? openTabs[openTabs.length - 1].id : null)
+        ? openTabs.length > 0
+          ? openTabs[openTabs.length - 1].id
+          : null
         : state.activeTabId;
       const animatedTabs = new Set(state.animatedTabs);
       animatedTabs.delete(tabId);
       const fadingTabs = new Set(state.fadingTabs);
       fadingTabs.delete(tabId);
-      return { openTabs, activeTabId, animatedTabs, fadingTabs };
+      const previewTabId = state.previewTabId === tabId ? null : state.previewTabId;
+      return { openTabs, activeTabId, animatedTabs, fadingTabs, previewTabId };
     });
   };
 
@@ -108,7 +192,8 @@ class App extends Component {
       animatedTabs.delete(state.activeTabId);
       const fadingTabs = new Set(state.fadingTabs);
       fadingTabs.delete(state.activeTabId);
-      return { openTabs, activeTabId, animatedTabs, fadingTabs };
+      const previewTabId = state.previewTabId === state.activeTabId ? null : state.previewTabId;
+      return { openTabs, activeTabId, animatedTabs, fadingTabs, previewTabId };
     });
   };
 
@@ -118,6 +203,7 @@ class App extends Component {
       activeTabId: null,
       animatedTabs: new Set(),
       fadingTabs: new Set(),
+      previewTabId: null,
     });
   };
 
@@ -214,15 +300,41 @@ class App extends Component {
     const tabsChanged = prevState.openTabs !== this.state.openTabs;
     const activeChanged = prevState.activeTabId !== this.state.activeTabId;
     const widthChanged = prevState.leftPanelWidth !== this.state.leftPanelWidth;
+    const previewChanged = prevState.previewTabId !== this.state.previewTabId;
 
-    if (tabsChanged || activeChanged || widthChanged) {
+    if (tabsChanged || activeChanged || widthChanged || previewChanged) {
+      const persistentTabIds = this.state.openTabs
+        .filter((t) => t.id !== this.state.previewTabId)
+        .map((t) => t.id);
+      const persistedActiveTabId =
+        this.state.activeTabId === this.state.previewTabId
+          ? persistentTabIds.length > 0
+            ? persistentTabIds[persistentTabIds.length - 1]
+            : null
+          : this.state.activeTabId;
       this._debouncedSave({
-        openTabIds: this.state.openTabs.map((t) => t.id),
-        activeTabId: this.state.activeTabId,
+        openTabIds: persistentTabIds,
+        activeTabId: persistedActiveTabId,
         leftPanelWidth: this.state.leftPanelWidth,
       });
     }
+
+    if ((tabsChanged || activeChanged) && this.state.activeTabId !== null) {
+      this.scrollActiveTabIntoView();
+    }
   }
+
+  scrollActiveTabIntoView = () => {
+    requestAnimationFrame(() => {
+      if (!this.tabListRef.current) return;
+      const tabEl = this.tabListRef.current.querySelector(
+        `[data-tab-id="${this.state.activeTabId}"]`
+      );
+      if (tabEl) {
+        tabEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      }
+    });
+  };
 
   componentWillUnmount() {
     PubSub.removeListener("toggleModal", this.handleMainClassState);
@@ -231,6 +343,7 @@ class App extends Component {
     window.removeEventListener("resize", this.handleWindowResize);
     window.removeEventListener("beforeunload", this._handleBeforeUnload);
     document.removeEventListener("keydown", this.handleGlobalKeyDown);
+    if (this._clickTimer) clearTimeout(this._clickTimer);
   }
 
   _handleBeforeUnload = () => {
@@ -345,7 +458,8 @@ class App extends Component {
                           key={item.id}
                           type="button"
                           className={`work-item ${this.state.activeTabId === item.id ? "work-item--selected" : ""}`}
-                          onClick={() => this.openWorkItem(item)}
+                          onClick={() => this.handleWorkItemClick(item)}
+                          onDoubleClick={() => this.handleWorkItemDoubleClick(item)}
                         >
                           <span className="work-item-title">{item.title}</span>
                           <span className="work-item-description">{item.description}</span>
@@ -361,14 +475,21 @@ class App extends Component {
               <div className="stage-editor">
                 <div className="stage-main">
                   <div className="stage-tabs" role="tablist">
-                    <div className="stage-tabs-list">
+                    <div className="stage-tabs-list" ref={this.tabListRef}>
                       {this.state.openTabs.map((tab, index) => (
                         <div
                           key={tab.id}
                           role="tab"
                           aria-selected={this.state.activeTabId === tab.id}
-                          className={`stage-tab ${this.state.activeTabId === tab.id ? "stage-tab--active" : ""}${this.state.dropTargetIndex === index && this.state.draggedTabId !== tab.id ? " stage-tab--drop-before" : ""}`}
+                          data-tab-id={tab.id}
+                          className={[
+                            "stage-tab",
+                            this.state.activeTabId === tab.id ? "stage-tab--active" : "",
+                            this.state.previewTabId === tab.id ? "stage-tab--preview" : "",
+                            this.state.dropTargetIndex === index && this.state.draggedTabId !== tab.id ? "stage-tab--drop-before" : "",
+                          ].filter(Boolean).join(" ")}
                           onClick={() => this.selectTab(tab.id)}
+                          onDoubleClick={() => this.handleTabDoubleClick(tab.id)}
                           draggable
                           onDragStart={(e) => this.handleTabDragStart(e, tab.id)}
                           onDragOver={(e) => this.handleTabDragOver(e, index)}
@@ -376,6 +497,13 @@ class App extends Component {
                           onDrop={this.handleTabDrop}
                           onDragEnd={this.handleTabDragEnd}
                         >
+                          <img
+                            src="/favicon.ico"
+                            alt=""
+                            className="stage-tab-icon"
+                            width={16}
+                            height={16}
+                          />
                           <span className="stage-tab-title">{tab.title}</span>
                           <button
                             type="button"

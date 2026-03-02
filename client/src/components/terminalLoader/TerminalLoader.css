@@ -27,11 +27,15 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 14px;
+  padding: 0.5rem 1rem;
   font-family: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", monospace;
   font-size: 12px;
   line-height: 1.6;
   white-space: pre;
+  background-color: rgba(30, 30, 30, 0.4);
+  width: 50%;
+  margin: 1rem 1rem 0;
+  border-radius: 0.5rem;
 }
 
 .terminal-icon {
@@ -47,8 +51,8 @@
 
 /* Divider between command and output */
 .terminal-divider {
-  height: 1px;
-  background-color: rgba(0, 0, 0, 0.08);
+  /* height: 1px; */
+  /* background-color: rgba(0, 0, 0, 0.08); */
 }
 
 [data-theme="dark"] .terminal-divider {
@@ -57,7 +61,7 @@
 
 /* Output body */
 .terminal-body {
-  padding: 10px 14px;
+  padding: 1rem 1.5rem;
   font-family: ui-monospace, "SF Mono", "Cascadia Code", "Consolas", monospace;
   font-size: 12px;
   line-height: 1.6;
@@ -65,12 +69,13 @@
   box-sizing: border-box;
   flex: 1;
   min-height: 0;
+  margin: 0;
 }
 
-.terminal-line {
+/* .terminal-line {
   white-space: pre;
   min-height: 1.6em;
-}
+} */
 
 /* Light mode text (readable on light bg) */
 .term-white {
