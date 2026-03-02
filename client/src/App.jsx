@@ -595,7 +595,7 @@ class App extends Component {
                               x={-282}
                               y={0}
                               width={500}
-                              height={122}
+                              height={200}
                               fill="url(#stage-empty-shimmer-grad)"
                             />
                           </g>

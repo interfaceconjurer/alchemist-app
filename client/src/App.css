@@ -405,11 +405,14 @@ body {
   0% {
     transform: translateX(-225px);
   }
-  90% {
-    transform: translateX(500px);
+  70% {
+    transform: translateX(-225px);
+  }
+  85% {
+    transform: translateX(150px);
   }
   100% {
-    transform: translateX(500px);
+    transform: translateX(-225px);
   }
 }
 
@@ -420,7 +423,7 @@ body {
 }
 
 .stage-empty-icon .stage-empty-icon-shimmer-rect {
-  animation: stage-empty-icon-shimmer 4s ease-in-out infinite;
+  animation: stage-empty-icon-shimmer 10s ease-in-out infinite;
 }
 
 .stage-empty-icon {
