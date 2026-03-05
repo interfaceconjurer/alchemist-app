@@ -12,35 +12,41 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import ThemeToggle from "./components/ThemeToggle/ThemeToggle";
 import { loadState, createDebouncedSave } from "./workspacePersistence";
 import { resolveWorkItemsByIds } from "./resolveWorkItems";
-import TerminalLoader from "./components/terminalLoader/TerminalLoader";
-import WorkContent from "./components/workContent/WorkContent";
 import StatusBar from "./components/statusBar/StatusBar";
 import CommandPalette from "./components/commandPalette/CommandPalette";
 
-const LEFT_PANEL_MIN_WIDTH = 280;
-const LEFT_PANEL_DEFAULT_WIDTH = 380;
+// Import app-specific components
+import TabBar from "./components/app/TabBar";
+import TabContent from "./components/app/TabContent";
+import DropZones from "./components/app/DropZones";
 
-const getLeftPanelMaxWidth = () => Math.floor(window.innerWidth / 2);
+// Import utility functions
+import {
+  LEFT_PANEL_MIN_WIDTH,
+  LEFT_PANEL_DEFAULT_WIDTH,
+  getLeftPanelMaxWidth,
+  getInitialState
+} from "./utils/stateHelpers";
+
+// Import hooks
+import { createTabManager } from "./hooks/useTabManager";
+import { createDragDropManager } from "./hooks/useDragDrop";
+import { createSplitViewManager } from "./hooks/useSplitView";
+import { createResizeManager } from "./hooks/useResize";
+import { createKeyboardShortcutsManager } from "./hooks/useKeyboardShortcuts";
 
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      mainClass: "main",
-      leftPanelWidth: LEFT_PANEL_DEFAULT_WIDTH,
-      openTabs: [],
-      activeTabId: null,
-      stateLoaded: false,
-      animatedTabs: new Set(),
-      fadingTabs: new Set(),
-      commandPaletteOpen: false,
-      draggedTabId: null,
-      dropTargetIndex: null,
-      previewTabId: null,
-    };
+    this.state = getInitialState();
     this.mainRef = React.createRef();
     this.tabListRef = React.createRef();
+    this.stageRef = React.createRef();
     this.isResizing = false;
+    // Drag-related instance variables
+    this.dragState = null;
+    this.ghostElement = null;
+    this.isSplitterResizing = false;
     this.startX = 0;
     this.startWidth = 0;
     this._clickTimer = null;
@@ -49,222 +55,62 @@ class App extends Component {
     const { debouncedSave, flush } = createDebouncedSave(500);
     this._debouncedSave = debouncedSave;
     this._flushSave = flush;
+
+    // Create tab manager and bind its methods
+    const tabManager = createTabManager(this);
+    this.openWorkItemAsPreview = tabManager.openWorkItemAsPreview;
+    this.openWorkItemAsPersistent = tabManager.openWorkItemAsPersistent;
+    this.openWorkItem = tabManager.openWorkItem;
+    this.closeTab = tabManager.closeTab;
+    this.closeActiveTab = tabManager.closeActiveTab;
+    this.closeAllTabs = tabManager.closeAllTabs;
+    this.selectTab = tabManager.selectTab;
+    this.startTabFade = tabManager.startTabFade;
+    this.markAnimationComplete = tabManager.markAnimationComplete;
+    this.scrollTabIntoView = tabManager.scrollTabIntoView;
+
+    // Create drag & drop manager and bind its methods
+    const dragDropManager = createDragDropManager(this);
+    this.handleTabMouseDown = dragDropManager.handleTabMouseDown;
+    this.handleDragDetection = dragDropManager.handleDragDetection;
+    this.initiateDrag = dragDropManager.initiateDrag;
+    this.handleDragMove = dragDropManager.handleDragMove;
+    this.detectDropZone = dragDropManager.detectDropZone;
+    this.handleDragEnd = dragDropManager.handleDragEnd;
+    this.handleDragCancel = dragDropManager.handleDragCancel;
+    this.handleTabDragStart = dragDropManager.handleTabDragStart;
+    this.handleTabDragOver = dragDropManager.handleTabDragOver;
+    this.handleTabDragLeave = dragDropManager.handleTabDragLeave;
+    this.handleTabDrop = dragDropManager.handleTabDrop;
+    this.handleTabDragEnd = dragDropManager.handleTabDragEnd;
+
+    // Create split view manager and bind its methods
+    const splitViewManager = createSplitViewManager(this);
+    this.initiateSplit = splitViewManager.initiateSplit;
+    this.moveTabToPane = splitViewManager.moveTabToPane;
+    this.closeSplit = splitViewManager.closeSplit;
+    this.closeSplitState = splitViewManager.closeSplitState;
+    this.handleSplitterStart = splitViewManager.handleSplitterStart;
+    this.handleSplitterMove = splitViewManager.handleSplitterMove;
+    this.handleSplitterEnd = splitViewManager.handleSplitterEnd;
+
+    // Create resize manager and bind its methods
+    const resizeManager = createResizeManager(this);
+    this.handleResizeStart = resizeManager.handleResizeStart;
+    this.handleResizeMove = resizeManager.handleResizeMove;
+    this.handleResizeEnd = resizeManager.handleResizeEnd;
+    this.handleWindowResize = resizeManager.handleWindowResize;
+    this.handleMainClassState = resizeManager.handleMainClassState;
+
+    // Create keyboard shortcuts manager and bind its methods
+    const keyboardShortcutsManager = createKeyboardShortcutsManager(this);
+    this.handleWorkItemClick = keyboardShortcutsManager.handleWorkItemClick;
+    this.handleWorkItemDoubleClick = keyboardShortcutsManager.handleWorkItemDoubleClick;
+    this.handleTabDoubleClick = keyboardShortcutsManager.handleTabDoubleClick;
+    this.toggleCommandPalette = keyboardShortcutsManager.toggleCommandPalette;
+    this.handlePaletteAction = keyboardShortcutsManager.handlePaletteAction;
+    this.handleGlobalKeyDown = keyboardShortcutsManager.handleGlobalKeyDown;
   }
-
-  openWorkItemAsPreview = (item) => {
-    this.setState((state) => {
-      // Already open as persistent tab — just activate
-      if (state.openTabs.some((tab) => tab.id === item.id && tab.id !== state.previewTabId)) {
-        return { activeTabId: item.id };
-      }
-      // Already the preview tab — just activate
-      if (state.previewTabId === item.id) {
-        return { activeTabId: item.id };
-      }
-      // Replace existing preview tab in-place
-      if (state.previewTabId !== null) {
-        const openTabs = state.openTabs.map((tab) => (tab.id === state.previewTabId ? { ...item } : tab));
-        const animatedTabs = new Set(state.animatedTabs);
-        animatedTabs.delete(state.previewTabId);
-        const fadingTabs = new Set(state.fadingTabs);
-        fadingTabs.delete(state.previewTabId);
-        return { openTabs, activeTabId: item.id, previewTabId: item.id, animatedTabs, fadingTabs };
-      }
-      // No preview tab — append new one
-      return {
-        openTabs: [...state.openTabs, { ...item }],
-        activeTabId: item.id,
-        previewTabId: item.id,
-      };
-    });
-  };
-
-  openWorkItemAsPersistent = (item) => {
-    this.setState((state) => {
-      // Promote current preview tab
-      if (state.previewTabId === item.id) {
-        return { activeTabId: item.id, previewTabId: null };
-      }
-      // Already open as persistent — just activate
-      if (state.openTabs.some((tab) => tab.id === item.id)) {
-        return { activeTabId: item.id };
-      }
-      // Not open — append as persistent
-      return {
-        openTabs: [...state.openTabs, { ...item }],
-        activeTabId: item.id,
-      };
-    });
-  };
-
-  // CommandPalette and programmatic use — always persistent
-  openWorkItem = (item) => {
-    this.openWorkItemAsPersistent(item);
-  };
-
-  handleWorkItemClick = (item) => {
-    if (this._clickTimer && this._clickedItemId !== item.id) {
-      clearTimeout(this._clickTimer);
-      this._clickTimer = null;
-    }
-    if (this._clickTimer && this._clickedItemId === item.id) {
-      return;
-    }
-    this._clickedItemId = item.id;
-    this._clickTimer = setTimeout(() => {
-      this._clickTimer = null;
-      this._clickedItemId = null;
-      this.openWorkItemAsPreview(item);
-    }, 250);
-  };
-
-  handleWorkItemDoubleClick = (item) => {
-    if (this._clickTimer) {
-      clearTimeout(this._clickTimer);
-      this._clickTimer = null;
-      this._clickedItemId = null;
-    }
-    this.openWorkItemAsPersistent(item);
-  };
-
-  handleTabDoubleClick = (tabId) => {
-    this.setState((state) => {
-      if (state.previewTabId === tabId) {
-        return { previewTabId: null };
-      }
-      return null;
-    });
-  };
-
-  closeTab = (e, tabId) => {
-    e.stopPropagation();
-    this.setState((state) => {
-      const openTabs = state.openTabs.filter((tab) => tab.id !== tabId);
-      const wasActive = state.activeTabId === tabId;
-      const activeTabId = wasActive
-        ? openTabs.length > 0
-          ? openTabs[openTabs.length - 1].id
-          : null
-        : state.activeTabId;
-      const animatedTabs = new Set(state.animatedTabs);
-      animatedTabs.delete(tabId);
-      const fadingTabs = new Set(state.fadingTabs);
-      fadingTabs.delete(tabId);
-      const previewTabId = state.previewTabId === tabId ? null : state.previewTabId;
-      return { openTabs, activeTabId, animatedTabs, fadingTabs, previewTabId };
-    });
-  };
-
-  startTabFade = (tabId) => {
-    this.setState((state) => {
-      const fadingTabs = new Set(state.fadingTabs);
-      fadingTabs.add(tabId);
-      return { fadingTabs };
-    });
-  };
-
-  markAnimationComplete = (tabId) => {
-    this.setState((state) => {
-      const animatedTabs = new Set(state.animatedTabs);
-      animatedTabs.add(tabId);
-      const fadingTabs = new Set(state.fadingTabs);
-      fadingTabs.delete(tabId);
-      return { animatedTabs, fadingTabs };
-    });
-  };
-
-  selectTab = (tabId) => {
-    this.setState({ activeTabId: tabId });
-  };
-
-  toggleCommandPalette = () => {
-    this.setState((state) => ({ commandPaletteOpen: !state.commandPaletteOpen }));
-  };
-
-  closeActiveTab = () => {
-    this.setState((state) => {
-      if (!state.activeTabId) return null;
-      const openTabs = state.openTabs.filter((tab) => tab.id !== state.activeTabId);
-      const activeTabId = openTabs.length > 0 ? openTabs[openTabs.length - 1].id : null;
-      const animatedTabs = new Set(state.animatedTabs);
-      animatedTabs.delete(state.activeTabId);
-      const fadingTabs = new Set(state.fadingTabs);
-      fadingTabs.delete(state.activeTabId);
-      const previewTabId = state.previewTabId === state.activeTabId ? null : state.previewTabId;
-      return { openTabs, activeTabId, animatedTabs, fadingTabs, previewTabId };
-    });
-  };
-
-  closeAllTabs = () => {
-    this.setState({
-      openTabs: [],
-      activeTabId: null,
-      animatedTabs: new Set(),
-      fadingTabs: new Set(),
-      previewTabId: null,
-    });
-  };
-
-  handlePaletteAction = (actionId) => {
-    switch (actionId) {
-      case "action:close-tab":
-        this.closeActiveTab();
-        break;
-      case "action:close-all":
-        this.closeAllTabs();
-        break;
-      default:
-        break;
-    }
-  };
-
-  handleGlobalKeyDown = (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-      e.preventDefault();
-      this.toggleCommandPalette();
-      return;
-    }
-    if (this.state.commandPaletteOpen) return;
-    if (e.ctrlKey && e.key === "q") {
-      e.preventDefault();
-      this.closeActiveTab();
-      return;
-    }
-  };
-
-  handleTabDragStart = (e, tabId) => {
-    e.dataTransfer.effectAllowed = "move";
-    this.setState({ draggedTabId: tabId });
-  };
-
-  handleTabDragOver = (e, index) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
-    this.setState({ dropTargetIndex: index });
-  };
-
-  handleTabDragLeave = () => {
-    this.setState({ dropTargetIndex: null });
-  };
-
-  handleTabDrop = () => {
-    this.setState((state) => {
-      const { draggedTabId, dropTargetIndex, openTabs } = state;
-      if (draggedTabId == null || dropTargetIndex == null) return { draggedTabId: null, dropTargetIndex: null };
-
-      const fromIndex = openTabs.findIndex((t) => t.id === draggedTabId);
-      if (fromIndex === -1 || fromIndex === dropTargetIndex) return { draggedTabId: null, dropTargetIndex: null };
-
-      const tabs = [...openTabs];
-      const [moved] = tabs.splice(fromIndex, 1);
-      tabs.splice(dropTargetIndex, 0, moved);
-      return { openTabs: tabs, draggedTabId: null, dropTargetIndex: null };
-    });
-  };
-
-  handleTabDragEnd = () => {
-    this.setState({ draggedTabId: null, dropTargetIndex: null });
-  };
 
   componentDidMount() {
     PubSub.addListener("toggleModal", this.handleMainClassState);
@@ -289,7 +135,55 @@ class App extends Component {
 
       const previewTabId = validIds.has(persisted.previewTabId) ? persisted.previewTabId : null;
       const animatedTabs = new Set(openTabs.map((t) => t.id));
-      this.setState({ openTabs, activeTabId, previewTabId, leftPanelWidth, stateLoaded: true, animatedTabs });
+
+      // Load split view state if present
+      let splitView = {
+        enabled: false,
+        leftPaneTabIds: [],
+        rightPaneTabIds: [],
+        leftActiveTabId: null,
+        rightActiveTabId: null,
+        leftPanePreviewTabId: null,
+        rightPanePreviewTabId: null,
+        activePaneId: 'left',
+        splitterPosition: 50
+      };
+
+      if (persisted.splitView && persisted.splitView.enabled) {
+        // Validate split view tab IDs
+        const leftPaneTabIds = (persisted.splitView.leftPaneTabIds || []).filter(id => validIds.has(id));
+        const rightPaneTabIds = (persisted.splitView.rightPaneTabIds || []).filter(id => validIds.has(id));
+
+        // Only enable split if both panes have tabs
+        if (leftPaneTabIds.length > 0 && rightPaneTabIds.length > 0) {
+          const leftActiveTabId = validIds.has(persisted.splitView.leftActiveTabId)
+            ? persisted.splitView.leftActiveTabId
+            : leftPaneTabIds[0];
+          const rightActiveTabId = validIds.has(persisted.splitView.rightActiveTabId)
+            ? persisted.splitView.rightActiveTabId
+            : rightPaneTabIds[0];
+          const leftPanePreviewTabId = validIds.has(persisted.splitView.leftPanePreviewTabId)
+            ? persisted.splitView.leftPanePreviewTabId
+            : null;
+          const rightPanePreviewTabId = validIds.has(persisted.splitView.rightPanePreviewTabId)
+            ? persisted.splitView.rightPanePreviewTabId
+            : null;
+
+          splitView = {
+            enabled: true,
+            leftPaneTabIds,
+            rightPaneTabIds,
+            leftActiveTabId,
+            rightActiveTabId,
+            leftPanePreviewTabId,
+            rightPanePreviewTabId,
+            activePaneId: persisted.splitView.activePaneId || 'left',
+            splitterPosition: persisted.splitView.splitterPosition || 50
+          };
+        }
+      }
+
+      this.setState({ openTabs, activeTabId, previewTabId, leftPanelWidth, stateLoaded: true, animatedTabs, splitView });
     });
   }
 
@@ -300,30 +194,18 @@ class App extends Component {
     const activeChanged = prevState.activeTabId !== this.state.activeTabId;
     const widthChanged = prevState.leftPanelWidth !== this.state.leftPanelWidth;
     const previewChanged = prevState.previewTabId !== this.state.previewTabId;
+    const splitViewChanged = JSON.stringify(prevState.splitView) !== JSON.stringify(this.state.splitView);
 
-    if (tabsChanged || activeChanged || widthChanged || previewChanged) {
+    if (tabsChanged || activeChanged || widthChanged || previewChanged || splitViewChanged) {
       this._debouncedSave({
         openTabIds: this.state.openTabs.map((t) => t.id),
         activeTabId: this.state.activeTabId,
         previewTabId: this.state.previewTabId,
         leftPanelWidth: this.state.leftPanelWidth,
+        splitView: this.state.splitView
       });
     }
-
-    if ((tabsChanged || activeChanged) && this.state.activeTabId !== null) {
-      this.scrollActiveTabIntoView();
-    }
   }
-
-  scrollActiveTabIntoView = () => {
-    requestAnimationFrame(() => {
-      if (!this.tabListRef.current) return;
-      const tabEl = this.tabListRef.current.querySelector(`[data-tab-id="${this.state.activeTabId}"]`);
-      if (tabEl) {
-        tabEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
-      }
-    });
-  };
 
   componentWillUnmount() {
     PubSub.removeListener("toggleModal", this.handleMainClassState);
@@ -339,46 +221,88 @@ class App extends Component {
     this._flushSave();
   };
 
-  handleWindowResize = () => {
-    this.setState((state) => ({
-      leftPanelWidth: Math.min(state.leftPanelWidth, getLeftPanelMaxWidth()),
-    }));
+  // Helper methods for split view rendering
+  renderTabs = (tabs, paneId = null) => {
+    const isInactivePane = this.state.splitView.enabled &&
+                          paneId &&
+                          paneId !== this.state.splitView.activePaneId;
+
+    // Determine which active tab to use
+    let activeTabId = this.state.activeTabId;
+    if (this.state.splitView.enabled && paneId) {
+      activeTabId = paneId === 'left' ? this.state.splitView.leftActiveTabId : this.state.splitView.rightActiveTabId;
+    }
+
+    // Determine which preview tab ID to use
+    let previewTabId = this.state.previewTabId;
+    if (this.state.splitView.enabled && paneId) {
+      previewTabId = paneId === 'left'
+        ? this.state.splitView.leftPanePreviewTabId
+        : this.state.splitView.rightPanePreviewTabId;
+    }
+
+    return (
+      <TabBar
+        tabs={tabs}
+        paneId={paneId}
+        activeTabId={activeTabId}
+        previewTabId={previewTabId}
+        isInactivePane={isInactivePane}
+        dropTargetIndex={this.state.dropTargetIndex}
+        draggedTabId={this.state.draggedTabId}
+        tabListRef={this.tabListRef}
+        onTabClick={(tabId, paneId) => {
+          // Always update pane focus when clicking any tab in split view
+          this.setState(state => {
+            const paneActiveKey = paneId === 'left' ? 'leftActiveTabId' : 'rightActiveTabId';
+
+            return {
+              splitView: {
+                ...state.splitView,
+                activePaneId: paneId,
+                [paneActiveKey]: tabId
+              },
+              activeTabId: tabId
+            };
+          });
+        }}
+        onTabDoubleClick={this.handleTabDoubleClick}
+        onTabMouseDown={this.handleTabMouseDown}
+        onTabClose={this.closeTab}
+        onSelectTab={this.selectTab}
+      />
+    );
   };
 
-  handleResizeStart = (e) => {
-    e.preventDefault();
-    this.isResizing = true;
-    this.startX = e.clientX;
-    this.startWidth = this.state.leftPanelWidth;
+  renderTabContent = (tabs, paneId = null) => {
+    // Determine which active tab to use
+    let activeTabId = this.state.activeTabId;
+    if (this.state.splitView.enabled && paneId) {
+      activeTabId = paneId === 'left' ? this.state.splitView.leftActiveTabId : this.state.splitView.rightActiveTabId;
+    }
+
+    return (
+      <TabContent
+        tabs={tabs}
+        activeTabId={activeTabId}
+        animatedTabs={this.state.animatedTabs}
+        fadingTabs={this.state.fadingTabs}
+        onStartTabFade={this.startTabFade}
+        onMarkAnimationComplete={this.markAnimationComplete}
+      />
+    );
   };
 
-  handleResizeMove = (e) => {
-    if (!this.isResizing) return;
-    const deltaX = e.clientX - this.startX;
-    const maxWidth = getLeftPanelMaxWidth();
-    const newWidth = Math.min(maxWidth, Math.max(LEFT_PANEL_MIN_WIDTH, this.startWidth + deltaX));
-    this.setState({ leftPanelWidth: newWidth });
-  };
-
-  handleResizeEnd = () => {
-    this.isResizing = false;
-  };
-
-  handleMainClassState = (config) => {
-    const changeClass = () => {
-      const actionClass = {
-        SHOW_MODAL: {
-          class: "main modalVisible",
-        },
-        HIDE_MODAL: {
-          class: "main",
-        },
-      };
-      this.setState((state) => {
-        return { mainClass: actionClass[config.actionType].class };
-      });
-    };
-    changeClass();
+  renderDropZones = () => {
+    return (
+      <DropZones
+        isDragging={this.state.dragThreshold.isDragging && this.stageRef.current}
+        dropZone={this.state.dragThreshold.dropZone}
+        splitViewEnabled={this.state.splitView.enabled}
+        openTabsCount={this.state.openTabs.length}
+        splitterPosition={this.state.splitView.splitterPosition}
+      />
+    );
   };
 
   render() {
@@ -481,137 +405,145 @@ class App extends Component {
             </section>
             <section className="stage">
               <div className="stage-editor">
-                <div className="stage-main">
-                  <div className="stage-tabs" role="tablist">
-                    <div className="stage-tabs-list" ref={this.tabListRef}>
-                      {this.state.openTabs.map((tab, index) => (
-                        <div
-                          key={tab.id}
-                          role="tab"
-                          aria-selected={this.state.activeTabId === tab.id}
-                          data-tab-id={tab.id}
-                          className={[
-                            "stage-tab",
-                            this.state.activeTabId === tab.id ? "stage-tab--active" : "",
-                            this.state.previewTabId === tab.id ? "stage-tab--preview" : "",
-                            this.state.dropTargetIndex === index && this.state.draggedTabId !== tab.id
-                              ? "stage-tab--drop-before"
-                              : "",
-                          ]
-                            .filter(Boolean)
-                            .join(" ")}
-                          onClick={() => this.selectTab(tab.id)}
-                          onDoubleClick={() => this.handleTabDoubleClick(tab.id)}
-                          draggable
-                          onDragStart={(e) => this.handleTabDragStart(e, tab.id)}
-                          onDragOver={(e) => this.handleTabDragOver(e, index)}
-                          onDragLeave={this.handleTabDragLeave}
-                          onDrop={this.handleTabDrop}
-                          onDragEnd={this.handleTabDragEnd}
-                        >
-                          <img src="/favicon.ico" alt="" className="stage-tab-icon" width={16} height={16} />
-                          <span className="stage-tab-title">{tab.title}</span>
-                          <button
-                            type="button"
-                            className="stage-tab-close"
-                            onClick={(e) => this.closeTab(e, tab.id)}
-                            aria-label={`Close ${tab.title}`}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  {this.state.openTabs.length > 0 ? (
-                    this.state.openTabs.map((tab) => {
-                      const isActive = tab.id === this.state.activeTabId;
-                      const isAnimated = this.state.animatedTabs.has(tab.id);
-                      const isFading = this.state.fadingTabs.has(tab.id);
-                      const contentVisible = isAnimated || isFading;
-
-                      return (
-                        <div
-                          key={tab.id}
-                          className="stage-content-wrapper"
-                          style={{ display: isActive ? "flex" : "none" }}
-                          role="tabpanel"
-                          aria-hidden={!isActive}
-                        >
-                          <div
-                            className={`stage-content ${contentVisible ? "stage-content--entering" : "stage-content--hidden"}`}
-                          >
-                            <div className="stage-content-inner">
-                              <h2 className="stage-content-title">{tab.title}</h2>
-                              <p className="stage-content-description">{tab.description}</p>
-                              <WorkContent content={tab.content} />
+                <div className="stage-main" ref={this.stageRef} style={{ position: 'relative' }}>
+                  {/* Conditional rendering for split view vs single view */}
+                  {!this.state.splitView.enabled ? (
+                    // Single pane view
+                    <>
+                      {this.renderTabs(this.state.openTabs)}
+                      {this.state.openTabs.length > 0 ? (
+                        this.renderTabContent(this.state.openTabs)
+                      ) : (
+                        <div className="stage-empty">
+                          <div className="stage-empty-icon-wrap">
+                            <svg
+                              className="stage-empty-icon"
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 52 122"
+                              width={144}
+                              height={144}
+                              preserveAspectRatio="xMidYMid meet"
+                              aria-hidden="true"
+                            >
+                              <defs>
+                                <clipPath id="stage-empty-beaker-clip">
+                                  <path fill="black" d={icons.beaker} />
+                                </clipPath>
+                                <linearGradient
+                                  id="stage-empty-shimmer-grad"
+                                  gradientUnits="objectBoundingBox"
+                                  x1="1"
+                                  y1="1"
+                                  x2="0"
+                                  y2="0"
+                                >
+                                  <stop offset="0" stopColor="transparent" />
+                                  <stop offset="0.35" stopColor="transparent" />
+                                  <stop offset="0.5" stopColor="rgba(120, 120, 120, 0.35)" />
+                                  <stop offset="0.65" stopColor="transparent" />
+                                  <stop offset="1" stopColor="transparent" />
+                                </linearGradient>
+                              </defs>
+                              <path fill="currentColor" d={icons.beaker} />
+                              <g clipPath="url(#stage-empty-beaker-clip)">
+                                <rect
+                                  className="stage-empty-icon-shimmer-rect"
+                                  x={-282}
+                                  y={0}
+                                  width={500}
+                                  height={200}
+                                  fill="url(#stage-empty-shimmer-grad)"
+                                />
+                              </g>
+                            </svg>
+                          </div>
+                          <div className="stage-empty-content">
+                            <p className="stage-empty-title">No open files</p>
+                            <div className="stage-empty-hints">
+                              <p className="stage-empty-hint">
+                                <kbd className="stage-empty-kbd">{"\u2318"}K</kbd> to search
+                              </p>
+                              <p className="stage-empty-hint">or select from My Work in the sidebar</p>
                             </div>
                           </div>
-                          {!isAnimated && (
-                            <TerminalLoader
-                              item={tab}
-                              onFadeStart={() => this.startTabFade(tab.id)}
-                              onComplete={() => this.markAnimationComplete(tab.id)}
-                            />
-                          )}
                         </div>
-                      );
-                    })
+                      )}
+                    </>
                   ) : (
-                    <div className="stage-empty">
-                      <div className="stage-empty-icon-wrap">
-                        <svg
-                          className="stage-empty-icon"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 52 122"
-                          width={144}
-                          height={144}
-                          preserveAspectRatio="xMidYMid meet"
-                          aria-hidden="true"
-                        >
-                          <defs>
-                            <clipPath id="stage-empty-beaker-clip">
-                              <path fill="black" d={icons.beaker} />
-                            </clipPath>
-                            <linearGradient
-                              id="stage-empty-shimmer-grad"
-                              gradientUnits="objectBoundingBox"
-                              x1="1"
-                              y1="1"
-                              x2="0"
-                              y2="0"
-                            >
-                              <stop offset="0" stopColor="transparent" />
-                              <stop offset="0.35" stopColor="transparent" />
-                              <stop offset="0.5" stopColor="rgba(120, 120, 120, 0.35)" />
-                              <stop offset="0.65" stopColor="transparent" />
-                              <stop offset="1" stopColor="transparent" />
-                            </linearGradient>
-                          </defs>
-                          <path fill="currentColor" d={icons.beaker} />
-                          <g clipPath="url(#stage-empty-beaker-clip)">
-                            <rect
-                              className="stage-empty-icon-shimmer-rect"
-                              x={-282}
-                              y={0}
-                              width={500}
-                              height={200}
-                              fill="url(#stage-empty-shimmer-grad)"
-                            />
-                          </g>
-                        </svg>
+                    // Split pane view
+                    <div className="stage-split-container">
+                      <div
+                        className={`stage-pane stage-pane--left ${
+                          this.state.splitView.activePaneId === 'left' ? 'stage-pane--active' : 'stage-pane--inactive'
+                        }`}
+                        style={{ width: `${this.state.splitView.splitterPosition}%` }}
+                        onClick={() => {
+                          // Focus this pane when clicking anywhere in it
+                          if (this.state.splitView.activePaneId !== 'left') {
+                            this.setState(state => ({
+                              splitView: {
+                                ...state.splitView,
+                                activePaneId: 'left'
+                              },
+                              // Update global active tab to this pane's active tab
+                              activeTabId: state.splitView.leftActiveTabId
+                            }));
+                          }
+                        }}
+                      >
+                        {(() => {
+                          const leftPaneTabs = this.state.openTabs.filter(t =>
+                            this.state.splitView.leftPaneTabIds.includes(t.id)
+                          );
+                          return (
+                            <>
+                              {this.renderTabs(leftPaneTabs, 'left')}
+                              {this.renderTabContent(leftPaneTabs, 'left')}
+                            </>
+                          );
+                        })()}
                       </div>
-                      <div className="stage-empty-content">
-                        <p className="stage-empty-title">No open files</p>
-                        <div className="stage-empty-hints">
-                          <p className="stage-empty-hint">
-                            <kbd className="stage-empty-kbd">{"\u2318"}K</kbd> to search
-                          </p>
-                          <p className="stage-empty-hint">or select from My Work in the sidebar</p>
-                        </div>
+
+                      <div className="stage-splitter" onMouseDown={this.handleSplitterStart}>
+                        <div className="stage-splitter-handle" />
+                      </div>
+
+                      <div
+                        className={`stage-pane stage-pane--right ${
+                          this.state.splitView.activePaneId === 'right' ? 'stage-pane--active' : 'stage-pane--inactive'
+                        }`}
+                        style={{ width: `${100 - this.state.splitView.splitterPosition}%` }}
+                        onClick={() => {
+                          // Focus this pane when clicking anywhere in it
+                          if (this.state.splitView.activePaneId !== 'right') {
+                            this.setState(state => ({
+                              splitView: {
+                                ...state.splitView,
+                                activePaneId: 'right'
+                              },
+                              // Update global active tab to this pane's active tab
+                              activeTabId: state.splitView.rightActiveTabId
+                            }));
+                          }
+                        }}
+                      >
+                        {(() => {
+                          const rightPaneTabs = this.state.openTabs.filter(t =>
+                            this.state.splitView.rightPaneTabIds.includes(t.id)
+                          );
+                          return (
+                            <>
+                              {this.renderTabs(rightPaneTabs, 'right')}
+                              {this.renderTabContent(rightPaneTabs, 'right')}
+                            </>
+                          );
+                        })()}
                       </div>
                     </div>
                   )}
+
+                  {/* Drop zone overlays during drag */}
+                  {this.renderDropZones()}
                 </div>
                 {this.state.activeTabId && (
                   <StatusBar

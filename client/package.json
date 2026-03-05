@@ -18,10 +18,15 @@
   },
   "scripts": {
     "start": "vite",
-    "dev": "vite",
     "build": "vite build",
+    "build:clean": "rm -rf dist node_modules/.vite",
+    "clean": "npm run build:clean",
+    "clean:all": "npm run build:clean && rm -rf node_modules",
     "preview": "vite preview",
     "test": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug",
     "update:packages": "node wipe-dependencies.js && rm -rf node_modules && npm update --save-dev && npm update --save"
   },
   "engines": {
@@ -35,11 +40,13 @@
     "not op_mini all"
   ],
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
-    "vite": "^6.0.3",
-    "vitest": "^4.0.18",
-    "@testing-library/react": "^16.0.1",
+    "@playwright/test": "^1.58.2",
     "@testing-library/jest-dom": "^6.6.3",
-    "jsdom": "^25.0.1"
+    "@testing-library/react": "^16.0.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "playwright": "^1.58.2",
+    "vite": "^6.0.3",
+    "vitest": "^4.0.18"
   }
 }
