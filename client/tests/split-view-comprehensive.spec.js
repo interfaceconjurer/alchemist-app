@@ -146,7 +146,6 @@ test.describe('Comprehensive Split View Tests', () => {
     await page.locator('.work-item').nth(2).click();
     await page.waitForTimeout(300);
 
-    // Get left preview title
     const leftPreviewTitle = await page.locator('.stage-pane--left .stage-tab--preview .stage-tab-title').textContent();
     console.log('Left preview before reload:', leftPreviewTitle);
 
@@ -154,10 +153,18 @@ test.describe('Comprehensive Split View Tests', () => {
     const rightPaneTab = await page.locator('.stage-pane--right .stage-tab').first();
     await rightPaneTab.click();
     await page.waitForTimeout(200);
+
+    // Listen for the debounced PUT that contains the complete split view state.
+    // Filter on the body to skip any intermediate PUTs from earlier debounce cycles.
+    const putResponse = page.waitForResponse((res) => {
+      if (!res.url().includes('workspace-state')) return false;
+      if (res.request().method() !== 'PUT') return false;
+      const body = res.request().postDataJSON();
+      return body?.splitView?.enabled === true;
+    }, { timeout: 8000 });
     await page.locator('.work-item').nth(3).click();
     await page.waitForTimeout(300);
 
-    // Get right preview title
     const rightPreviewTitle = await page.locator('.stage-pane--right .stage-tab--preview .stage-tab-title').textContent();
     console.log('Right preview before reload:', rightPreviewTitle);
 
@@ -167,48 +174,28 @@ test.describe('Comprehensive Split View Tests', () => {
     await expect(page.locator('.stage-pane--right .stage-tab')).toHaveCount(2);
     await expect(page.locator('.stage-pane--right .stage-tab--preview')).toHaveCount(1);
 
-    // Wait for state to save
-    await page.waitForTimeout(1500);
-
-    // Reload page
+    // Wait for the debounced save to complete on the server, then reload
+    await putResponse;
     await page.reload();
     await page.waitForSelector('.App', { timeout: 5000 });
-    await page.waitForTimeout(2000);
+    await page.waitForSelector('.stage-split-container', { state: 'visible', timeout: 10000 });
 
-    // Split view state may not be perfectly restored due to timing issues
-    // Check if we have tabs at least
-    const splitVisible = await page.locator('.stage-split-container').isVisible().catch(() => false);
-    const tabsVisible = await page.locator('.stage-tabs').isVisible().catch(() => false);
+    // Verify both panes have tabs
+    expect(await page.locator('.stage-pane--left .stage-tab').count()).toBeGreaterThan(0);
+    expect(await page.locator('.stage-pane--right .stage-tab').count()).toBeGreaterThan(0);
 
-    // Either split view or single pane should be visible
-    expect(splitVisible || tabsVisible).toBeTruthy();
-
-    // Verify tabs are restored (counts may vary due to state restoration)
-    const leftTabCount = await page.locator('.stage-pane--left .stage-tab').count();
-    const rightTabCount = await page.locator('.stage-pane--right .stage-tab').count();
-
-    expect(leftTabCount).toBeGreaterThan(0);
-    expect(rightTabCount).toBeGreaterThan(0);
-
-    // Verify at least one pane has a preview tab
+    // Verify preview tabs survived
     const leftPreviewCount = await page.locator('.stage-pane--left .stage-tab--preview').count();
     const rightPreviewCount = await page.locator('.stage-pane--right .stage-tab--preview').count();
-
     expect(leftPreviewCount + rightPreviewCount).toBeGreaterThan(0);
 
-    // Get actual titles after reload
-    const actualLeftPreview = await page.locator('.stage-pane--left .stage-tab--preview .stage-tab-title').textContent();
-    const actualRightPreview = await page.locator('.stage-pane--right .stage-tab--preview .stage-tab-title').textContent();
-
+    const actualLeftPreview = await page.locator('.stage-pane--left .stage-tab--preview .stage-tab-title').first().textContent().catch(() => null);
+    const actualRightPreview = await page.locator('.stage-pane--right .stage-tab--preview .stage-tab-title').first().textContent().catch(() => null);
     console.log('Left preview after reload:', actualLeftPreview);
     console.log('Right preview after reload:', actualRightPreview);
 
-    // Verify at least the preview tabs exist and have content
     expect(actualLeftPreview).toBeTruthy();
     expect(actualRightPreview).toBeTruthy();
-
-    // Note: The exact titles might not match due to state restoration order,
-    // but the important thing is that each pane has its preview tab preserved
   });
 
   test('edge case: moving last tab from pane closes split correctly', async ({ page }) => {
