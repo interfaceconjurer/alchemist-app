@@ -1,0 +1,149 @@
+.terminal-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 2;
+  opacity: 1;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+}
+
+.terminal-loader--fading {
+  opacity: 0;
+}
+
+/* Match left panel: light mode */
+.terminal-window {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-color);
+  overflow: hidden;
+}
+
+/* Command header */
+.terminal-command {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.5rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre;
+  background-color: rgba(0, 0, 0, 0.04);
+  width: 50%;
+  margin: 1rem 1rem 0;
+  border-radius: 0.5rem;
+}
+
+[data-theme="dark"] .terminal-command {
+  background-color: rgba(30, 30, 30, 0.4);
+}
+
+.terminal-icon {
+  width: 14px;
+  height: 14px;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .terminal-icon {
+  color: #9ca3af;
+}
+
+/* Divider between command and output */
+.terminal-divider {
+  /* height: 1px; */
+  /* background-color: rgba(0, 0, 0, 0.08); */
+}
+
+[data-theme="dark"] .terminal-divider {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Output body */
+.terminal-body {
+  padding: 1rem 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-y: auto;
+  box-sizing: border-box;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+}
+
+/* .terminal-line {
+  white-space: pre;
+  min-height: 1.6em;
+} */
+
+/* Light mode text (readable on light bg) */
+.term-white {
+  color: #374151;
+}
+
+.term-green {
+  color: #059669;
+}
+
+.term-cyan {
+  color: #0891b2;
+}
+
+.term-dim {
+  color: #9ca3af;
+}
+
+.term-bold {
+  color: #111827;
+  font-weight: 600;
+}
+
+.term-yellow {
+  color: #b45309;
+}
+
+.term-magenta {
+  color: #7c3aed;
+}
+
+.term-red {
+  color: #dc2626;
+}
+
+[data-theme="dark"] .terminal-body .term-white,
+[data-theme="dark"] .terminal-command .term-white {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .terminal-body .term-green {
+  color: #4ade80;
+}
+
+[data-theme="dark"] .terminal-body .term-cyan {
+  color: #67e8f9;
+}
+
+[data-theme="dark"] .terminal-body .term-dim {
+  color: #6b7280;
+}
+
+[data-theme="dark"] .terminal-body .term-bold {
+  color: #e0e0e0;
+}
+
+[data-theme="dark"] .terminal-body .term-yellow {
+  color: #facc15;
+}
+
+[data-theme="dark"] .terminal-body .term-magenta {
+  color: #a78bfa;
+}
+
+[data-theme="dark"] .terminal-body .term-red {
+  color: #f87171;
+}

@@ -1,3 +1,7 @@
+:root {
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
 html, body {
   min-height: 100%;
 }

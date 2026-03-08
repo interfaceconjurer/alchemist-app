@@ -1,0 +1,156 @@
+/* Theme Variables */
+:root {
+  /* Light theme (default) */
+  --bg-color: #ffffff;
+  --text-color: #747474;
+  --text-color-dark: #494545;
+  --heading-color: #494545;
+  --border-color: #979797;
+  --border-color-light: #e0e0e0;
+  --focus-shadow: rgba(139, 0, 255, 0.5);
+  --accent-color: rgba(139, 0, 255, 0.5);
+  --button-bg: #fff;
+
+  /* Scrollbar - transparent track, white thumb in light mode */
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: #ffffff;
+  --scrollbar-thumb-hover: #e0e0e0;
+
+  /* 3D component colors - purple in light mode */
+  --wireframe-color: #8b00ff;
+  --wireframe-emissive: #8b00ff;
+  --fill-opacity-base: 0.08;
+  --fill-opacity-seed: 0.12;
+
+  /* UI surface / component overrides (light) */
+  --top-bar-bg: rgba(0, 0, 0, 0.04);
+  --top-bar-search-hover-bg: rgba(0, 0, 0, 0.06);
+  --left-panel-bg: rgba(0, 0, 0, 0.04);
+  --left-panel-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+  --stage-tabs-bg: rgba(0, 0, 0, 0.04);
+  --stage-tab-hover-bg: rgba(0, 0, 0, 0.02);
+  --stage-tab-close-hover-bg: rgba(0, 0, 0, 0.08);
+  --stage-empty-icon-color: rgba(0, 0, 0, 0.1);
+  --stage-empty-content-border-color: rgba(0, 0, 0, 0.22);
+  --stage-empty-text-color: var(--text-color);
+  --stage-empty-kbd-bg: rgba(0, 0, 0, 0.08);
+  --stage-empty-kbd-color: var(--text-color);
+  --out-bound-link-bg: rgba(0, 0, 0, 0.06);
+  --out-bound-link-border: rgba(0, 0, 0, 0.08);
+  --out-bound-link-hover-bg: rgba(0, 0, 0, 0.16);
+  --work-list-section-border-left-color: rgba(0, 0, 0, 0.08);
+  --work-item-bg: rgba(0, 0, 0, 0.06);
+  --work-item-border: rgba(0, 0, 0, 0.08);
+  --work-item-hover-bg: rgba(0, 0, 0, 0.16);
+  --work-item-selected-bg: rgba(139, 0, 255, 0.1);
+  --work-item-selected-border: rgba(139, 0, 255, 0.25);
+  --work-item-selected-hover-bg: rgba(139, 0, 255, 0.2);
+  --work-item-selected-hover-border: rgba(139, 0, 255, 0.4);
+  --work-item-selected-focus-bg: rgba(139, 0, 255, 0.1);
+  --work-item-selected-focus-border: rgba(139, 0, 255, 0.25);
+  --work-item-selected-hover-focus-bg: rgba(139, 0, 255, 0.2);
+  --work-item-selected-hover-focus-border: rgba(139, 0, 255, 0.4);
+
+  /* Transparent / generic */
+  --transparent: transparent;
+
+  /* Resize handle & splitter accent */
+  --resize-handle-accent: rgba(139, 0, 255, 0.15);
+  --resize-handle-accent-active: rgba(139, 0, 255, 0.25);
+
+  /* Stage tab drop indicator */
+  --stage-tab-drop-indicator: rgba(139, 0, 255, 0.6);
+  --stage-tab-inactive-active-border: rgba(139, 0, 255, 0.3);
+
+  /* Stage empty content background */
+  --stage-empty-content-bg: rgba(0, 0, 0, 0.04);
+
+  /* Drop zone */
+  --drop-zone-bg: rgba(139, 0, 255, 0.1);
+  --drop-zone-border: rgba(139, 0, 255, 0.4);
+  --drop-zone-active-bg: rgba(139, 0, 255, 0.2);
+  --drop-zone-active-border: rgba(139, 0, 255, 0.6);
+  --drop-zone-active-shadow: inset 0 0 20px rgba(139, 0, 255, 0.3);
+  --drop-zone-label-color: rgb(139, 0, 255);
+
+  /* Drag ghost shadow */
+  --drag-ghost-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] {
+  /* Dark theme */
+  --bg-color: #0a0a0a;
+  --text-color: #b8b8b8;
+  --text-color-dark: #d0d0d0;
+  --heading-color: #d0d0d0;
+  --border-color: #4a4a4a;
+  --border-color-light: #242424;
+  --focus-shadow: rgba(139, 0, 255, 0.5);
+  --accent-color: rgba(139, 0, 255, 0.5);
+  --button-bg: #1a1a1a;
+
+  /* Scrollbar - transparent track, black thumb in dark mode */
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: #000000;
+  --scrollbar-thumb-hover: #2a2a2a;
+
+  /* 3D component colors - white with purple glow */
+  --wireframe-color: #ffffff;
+  --wireframe-emissive: #8b00ff;
+  --fill-opacity-base: 0.12;
+  --fill-opacity-seed: 0.3;
+
+  /* UI surface / component overrides (dark) */
+  --top-bar-bg: rgba(30, 30, 30, 0.4);
+  --top-bar-search-hover-bg: rgba(255, 255, 255, 0.08);
+  --left-panel-bg: rgba(30, 30, 30, 0.4);
+  --left-panel-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --stage-tabs-bg: rgba(255, 255, 255, 0.03);
+  --stage-tab-hover-bg: rgba(255, 255, 255, 0.03);
+  --stage-tab-close-hover-bg: rgba(255, 255, 255, 0.1);
+  --stage-empty-icon-color: #808080;
+  --stage-empty-content-border-color: #808080;
+  --stage-empty-text-color: #d4d4d4;
+  --stage-empty-kbd-bg: #383838;
+  --stage-empty-kbd-color: #e0e0e0;
+  --out-bound-link-bg: rgba(30, 30, 30, 0.4);
+  --out-bound-link-border: rgba(100, 100, 100, 0.3);
+  --out-bound-link-hover-bg: rgba(30, 30, 30, 0.8);
+  --work-list-section-border-left-color: rgba(255, 255, 255, 0.08);
+  --work-item-bg: rgba(30, 30, 30, 0.4);
+  --work-item-border: rgba(100, 100, 100, 0.3);
+  --work-item-hover-bg: rgba(30, 30, 30, 0.8);
+  --work-item-selected-bg: rgba(139, 0, 255, 0.12);
+  --work-item-selected-border: rgba(139, 0, 255, 0.3);
+  --work-item-selected-hover-bg: rgba(139, 0, 255, 0.24);
+  --work-item-selected-hover-border: rgba(139, 0, 255, 0.45);
+  --work-item-selected-focus-bg: rgba(139, 0, 255, 0.12);
+  --work-item-selected-focus-border: rgba(139, 0, 255, 0.3);
+  --work-item-selected-hover-focus-bg: rgba(139, 0, 255, 0.24);
+  --work-item-selected-hover-focus-border: rgba(139, 0, 255, 0.45);
+
+  /* Transparent / generic */
+  --transparent: transparent;
+
+  /* Resize handle & splitter accent */
+  --resize-handle-accent: rgba(139, 0, 255, 0.2);
+  --resize-handle-accent-active: rgba(139, 0, 255, 0.3);
+
+  /* Stage tab drop indicator */
+  --stage-tab-drop-indicator: rgba(139, 0, 255, 0.6);
+  --stage-tab-inactive-active-border: rgba(139, 0, 255, 0.3);
+
+  /* Stage empty content background */
+  --stage-empty-content-bg: rgba(255, 255, 255, 0.03);
+
+  /* Drop zone */
+  --drop-zone-bg: rgba(139, 0, 255, 0.12);
+  --drop-zone-border: rgba(139, 0, 255, 0.45);
+  --drop-zone-active-bg: rgba(139, 0, 255, 0.24);
+  --drop-zone-active-border: rgba(139, 0, 255, 0.6);
+  --drop-zone-active-shadow: inset 0 0 20px rgba(139, 0, 255, 0.35);
+  --drop-zone-label-color: rgb(180, 100, 255);
+
+  /* Drag ghost shadow */
+  --drag-ghost-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}

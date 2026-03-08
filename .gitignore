@@ -7,9 +7,12 @@
 
 # testing
 /coverage
+**/playwright-report/
+**/test-results/
 # production
 
 **/build
+**/dist
 # misc
 
 static.json
@@ -24,3 +27,7 @@ static.json
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# workspace state
+data/
+.context/
