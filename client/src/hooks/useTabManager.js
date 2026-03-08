@@ -366,6 +366,17 @@ export function createTabManager(component) {
       animatedTabs: new Set(),
       fadingTabs: new Set(),
       previewTabId: null,
+      splitView: {
+        enabled: false,
+        leftPaneTabIds: [],
+        rightPaneTabIds: [],
+        leftActiveTabId: null,
+        rightActiveTabId: null,
+        leftPanePreviewTabId: null,
+        rightPanePreviewTabId: null,
+        activePaneId: 'left',
+        splitterPosition: 50
+      }
     });
   };
 

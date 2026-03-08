@@ -5,7 +5,6 @@ import "./CommandPalette.css";
 
 const ACTIONS = [
   { id: "action:toggle-theme", label: "Toggle Dark Mode", type: "action" },
-  { id: "action:close-tab", label: "Close Active Tab", hint: "\u2303Q", type: "action" },
   { id: "action:close-all", label: "Close All Tabs", type: "action" },
 ];
 

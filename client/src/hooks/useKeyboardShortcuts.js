@@ -64,9 +64,6 @@ export function createKeyboardShortcutsManager(component) {
 
   const handlePaletteAction = (actionId) => {
     switch (actionId) {
-      case "action:close-tab":
-        component.closeActiveTab();
-        break;
       case "action:close-all":
         component.closeAllTabs();
         break;
