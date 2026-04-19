@@ -50,8 +50,8 @@ export const detectSidebarDropZone = (clientX, stageRect, splitView, tabCount) =
   if (splitView.enabled) return detectSplitPaneDropZone(clientX, stageRect, splitView.splitterPosition);
   if (tabCount === 0) return 'add-tab';
   const relX = (clientX - stageRect.left) / stageRect.width;
-  if (relX < 0.33) return 'split-left';
-  if (relX > 0.66) return 'split-right';
+  if (relX < 0.375) return 'split-left';
+  if (relX > 0.625) return 'split-right';
   return 'add-tab';
 };
 

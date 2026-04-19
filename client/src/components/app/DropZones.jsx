@@ -36,7 +36,7 @@ const DropZones = ({
     if (dropZone === 'split-left') {
       return (
         <div className="stage-drop-zone stage-drop-zone--active"
-          style={{ position: 'absolute', left: 0, top: 0, width: '33%', height: '100%' }}>
+          style={{ position: 'absolute', left: 0, top: 0, width: '50%', height: '100%' }}>
           <span className="stage-drop-zone-label">Split left</span>
         </div>
       );
@@ -44,7 +44,7 @@ const DropZones = ({
     if (dropZone === 'add-tab') {
       return (
         <div className="stage-drop-zone stage-drop-zone--active"
-          style={{ position: 'absolute', left: '33%', top: 0, width: '34%', height: '100%' }}>
+          style={{ position: 'absolute', left: '12.5%', top: 0, width: '75%', height: '100%' }}>
           <span className="stage-drop-zone-label">Open here</span>
         </div>
       );
@@ -52,7 +52,7 @@ const DropZones = ({
     if (dropZone === 'split-right') {
       return (
         <div className="stage-drop-zone stage-drop-zone--active"
-          style={{ position: 'absolute', right: 0, top: 0, width: '33%', height: '100%' }}>
+          style={{ position: 'absolute', right: 0, top: 0, width: '50%', height: '100%' }}>
           <span className="stage-drop-zone-label">Split right</span>
         </div>
       );
