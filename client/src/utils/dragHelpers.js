@@ -46,6 +46,15 @@ export const updateGhostPosition = (ghostElement, clientX, clientY) => {
   ghostElement.style.top = `${clientY}px`;
 };
 
+export const detectSidebarDropZone = (clientX, stageRect, splitView, tabCount) => {
+  if (splitView.enabled) return detectSplitPaneDropZone(clientX, stageRect, splitView.splitterPosition);
+  if (tabCount === 0) return 'add-tab';
+  const relX = (clientX - stageRect.left) / stageRect.width;
+  if (relX < 0.375) return 'split-left';
+  if (relX > 0.625) return 'split-right';
+  return 'add-tab';
+};
+
 export const removeGhostElement = (ghostElement) => {
   if (ghostElement && ghostElement.parentNode) {
     ghostElement.parentNode.removeChild(ghostElement);

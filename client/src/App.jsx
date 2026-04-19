@@ -36,7 +36,7 @@ function App() {
   const splitViewActions = useSplitView(stateRef, dispatch, stageRef);
   const splitViewActionsRef = useRef(splitViewActions);
   splitViewActionsRef.current = splitViewActions;
-  const { handleTabMouseDown } = useDragDrop(stateRef, dispatch, stageRef, splitViewActionsRef);
+  const { handleTabMouseDown, handleWorkItemMouseDown } = useDragDrop(stateRef, dispatch, stageRef, splitViewActionsRef);
   const resize = useResize(stateRef, dispatch);
   const keyboard = useKeyboardShortcuts(stateRef, dispatch, tabActions);
   const isMobile = useIsMobile(dispatch);
@@ -212,9 +212,11 @@ function App() {
                   <div className="work-list-items">
                     {section.items.map((item) => (
                       <button key={item.id} type="button"
+                        data-work-item-id={item.id}
                         className={`work-item ${state.activeTabId === item.id ? "work-item--selected" : ""}`}
                         onClick={() => keyboard.handleWorkItemClick(item)}
                         onDoubleClick={() => keyboard.handleWorkItemDoubleClick(item)}
+                        onMouseDown={(e) => !isMobile && handleWorkItemMouseDown(e, item)}
                       >
                         <span className="work-item-title">{item.title}</span>
                         <span className="work-item-description">{item.description}</span>
@@ -290,6 +292,7 @@ function App() {
                     splitViewEnabled={state.splitView.enabled}
                     openTabsCount={state.openTabs.length}
                     splitterPosition={state.splitView.splitterPosition}
+                    dragSource={state.dragThreshold.dragSource}
                   />
                 )}
               </div>

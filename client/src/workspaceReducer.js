@@ -270,6 +270,22 @@ export function workspaceReducer(state, action) {
     case 'INITIATE_SPLIT':
       return initiateSplit(state, action.dropZone, action.tabId);
 
+    case 'SIDEBAR_DROP': {
+      const { item, dropZone } = action;
+      if (dropZone === 'add-tab' || !dropZone) {
+        return openPersistent(state, item);
+      }
+      if (dropZone === 'left' || dropZone === 'right') {
+        const added = openPersistent(state, item);
+        return moveTabToPane(added, dropZone, item.id);
+      }
+      if (dropZone === 'split-left' || dropZone === 'split-right') {
+        const added = openPersistent(state, item);
+        return initiateSplit(added, dropZone, item.id);
+      }
+      return openPersistent(state, item);
+    }
+
     case 'MOVE_TAB_TO_PANE':
       return moveTabToPane(state, action.targetPane, action.tabId);
 
