@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 test.describe("Debug Split View", () => {
   test("check if app loads and tabs work", async ({ page }) => {
     // Navigate and wait for app
-    await page.goto("http://localhost:5173");
+    await page.goto("/");
 
     // Take screenshot of initial state
     await page.screenshot({ path: "test-results/images/debug-initial.png" });

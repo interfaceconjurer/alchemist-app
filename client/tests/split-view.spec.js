@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Split View Tab System', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5173?test=' + Date.now());
+    await page.goto('/?test=' + Date.now());
 
     await page.evaluate(() => {
       localStorage.clear();

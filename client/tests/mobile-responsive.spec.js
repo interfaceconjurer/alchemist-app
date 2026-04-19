@@ -6,7 +6,7 @@ const DESKTOP_VIEWPORT = { width: 1280, height: 800 };
 test.describe('Mobile Responsive View', () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5173');
+    await page.goto('/');
     await page.waitForSelector('.App', { timeout: 10000 });
     await page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
     await page.reload();
