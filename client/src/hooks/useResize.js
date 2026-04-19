@@ -16,8 +16,9 @@ export function useResize(stateRef, dispatch) {
   const handleResizeMove = useCallback((e) => {
     if (!isResizingRef.current) return;
     const diff = e.clientX - startXRef.current;
-    const width = Math.min(Math.max(startWidthRef.current + diff, LEFT_PANEL_MIN_WIDTH), getLeftPanelMaxWidth());
-    dispatch({ type: 'SET_LEFT_PANEL_WIDTH', width });
+    const newWidth = startWidthRef.current + diff;
+    const clampedWidth = Math.min(Math.max(newWidth, LEFT_PANEL_MIN_WIDTH), getLeftPanelMaxWidth());
+    dispatch({ leftPanelWidth: clampedWidth });
   }, [dispatch]);
 
   const handleResizeEnd = useCallback(() => {
@@ -27,7 +28,7 @@ export function useResize(stateRef, dispatch) {
   const handleWindowResize = useCallback(() => {
     const maxWidth = getLeftPanelMaxWidth();
     if (stateRef.current.leftPanelWidth > maxWidth) {
-      dispatch({ type: 'SET_LEFT_PANEL_WIDTH', width: maxWidth });
+      dispatch({ leftPanelWidth: maxWidth });
     }
   }, [stateRef, dispatch]);
 

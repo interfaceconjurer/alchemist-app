@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react';
-import { DRAG_THRESHOLD_DISTANCE, DRAG_THRESHOLD_TIME } from '../utils/stateHelpers';
+import { DRAG_THRESHOLD_DISTANCE, DRAG_THRESHOLD_TIME, getDefaultDragThreshold } from '../utils/stateHelpers';
 import {
   calculateDistance, isDragThresholdMet,
   createGhostElement, updateGhostPosition, removeGhostElement,
@@ -9,13 +9,18 @@ import {
 export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
   const dragStateRef = useRef(null);
   const ghostRef = useRef(null);
+  const dragDetectionRef = useRef(null);
+  const dragMoveRef = useRef(null);
+  const dragEndRef = useRef(null);
 
   const detectDropZone = useCallback((e) => {
     if (!stageRef.current) return null;
     const stageRect = stageRef.current.getBoundingClientRect();
     if (!isOverStage(e.clientX, e.clientY, stageRect)) return null;
     const state = stateRef.current;
-    if (!state.splitView.enabled) return detectSinglePaneDropZone(e.clientX, stageRect, state.openTabs.length);
+    if (!state.splitView.enabled) {
+      return detectSinglePaneDropZone(e.clientX, stageRect, state.openTabs.length);
+    }
     return detectSplitPaneDropZone(e.clientX, stageRect, state.splitView.splitterPosition);
   }, [stageRef, stateRef]);
 
@@ -23,7 +28,10 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
     if (e.target.classList.contains('stage-tab-close')) return;
     e.preventDefault();
 
-    dragStateRef.current = { startX: e.clientX, startY: e.clientY, startTime: Date.now(), tabId, potentialDrag: true };
+    dragStateRef.current = {
+      startX: e.clientX, startY: e.clientY,
+      startTime: Date.now(), tabId, potentialDrag: true
+    };
 
     const onDetect = (e) => {
       const ds = dragStateRef.current;
@@ -36,7 +44,7 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
       ghostRef.current = createGhostElement(tabElement, e.clientX, e.clientY);
       if (ghostRef.current) document.body.appendChild(ghostRef.current);
 
-      dispatch({ type: 'SET_DRAG_STATE', payload: { isDragging: true, tabId: ds.tabId }, draggedTabId: ds.tabId });
+      dispatch({ dragThreshold: { ...stateRef.current.dragThreshold, isDragging: true, tabId: ds.tabId }, draggedTabId: ds.tabId });
 
       document.removeEventListener('mousemove', onDetect);
       document.addEventListener('mousemove', onMove);
@@ -48,7 +56,7 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
       updateGhostPosition(ghostRef.current, e.clientX, e.clientY);
       const dropZone = detectDropZone(e);
       if (dropZone !== stateRef.current.dragThreshold.dropZone) {
-        dispatch({ type: 'SET_DRAG_STATE', payload: { dropZone } });
+        dispatch({ dragThreshold: { ...stateRef.current.dragThreshold, dropZone } });
       }
     };
 
@@ -68,7 +76,7 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
         }
       }
 
-      dispatch({ type: 'CLEAR_DRAG' });
+      dispatch({ dragThreshold: getDefaultDragThreshold(), draggedTabId: null, dropTargetIndex: null });
       dragStateRef.current = null;
     };
 
@@ -77,6 +85,10 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
       document.removeEventListener('mouseup', onCancel);
       dragStateRef.current = null;
     };
+
+    dragDetectionRef.current = onDetect;
+    dragMoveRef.current = onMove;
+    dragEndRef.current = onEnd;
 
     document.addEventListener('mousemove', onDetect);
     document.addEventListener('mouseup', onCancel);

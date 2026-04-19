@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import "./App.css";
 import Resume from "./resume/Jordan_L_Wright.pdf";
 import Icon from "./components/icon/view";
@@ -15,35 +15,35 @@ import TabBar from "./components/app/TabBar";
 import TabContent from "./components/app/TabContent";
 import DropZones from "./components/app/DropZones";
 import { LEFT_PANEL_MIN_WIDTH, LEFT_PANEL_DEFAULT_WIDTH, getLeftPanelMaxWidth, getInitialState } from "./utils/stateHelpers";
-import { workspaceReducer } from "./workspaceReducer";
 import { useTabManager } from "./hooks/useTabManager";
 import { useDragDrop } from "./hooks/useDragDrop";
 import { useSplitView } from "./hooks/useSplitView";
 import { useResize } from "./hooks/useResize";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
-import { useIsMobile } from "./hooks/useIsMobile";
-import { useSwipeBack } from "./hooks/useSwipeBack";
 
 function App() {
-  const [state, dispatch] = useReducer(workspaceReducer, undefined, getInitialState);
+  const [state, setStateRaw] = useState(getInitialState);
   const stateRef = useRef(state);
   stateRef.current = state;
+
+  const dispatch = useCallback((updates) => {
+    setStateRaw((prev) => ({ ...prev, ...updates }));
+  }, []);
 
   const stageRef = useRef(null);
   const tabListRef = useRef(null);
 
-  const tabActions = useTabManager(dispatch);
+  const tabActions = useTabManager(stateRef, dispatch);
   const splitViewActions = useSplitView(stateRef, dispatch, stageRef);
   const splitViewActionsRef = useRef(splitViewActions);
   splitViewActionsRef.current = splitViewActions;
   const { handleTabMouseDown } = useDragDrop(stateRef, dispatch, stageRef, splitViewActionsRef);
   const resize = useResize(stateRef, dispatch);
   const keyboard = useKeyboardShortcuts(stateRef, dispatch, tabActions);
-  const isMobile = useIsMobile(dispatch);
-  useSwipeBack(stageRef, isMobile, !!state.activeTabId, dispatch);
 
   const { debouncedSave, flush } = useMemo(() => createDebouncedSave(500), []);
 
+  // Load persisted state on mount
   useEffect(() => {
     loadState().then((persisted) => {
       const openTabs = resolveWorkItemsByIds(persisted.openTabIds);
@@ -81,10 +81,11 @@ function App() {
         }
       }
 
-      dispatch({ type: 'LOAD_PERSISTED', payload: { openTabs, activeTabId, previewTabId, leftPanelWidth, stateLoaded: true, animatedTabs, splitView } });
+      dispatch({ openTabs, activeTabId, previewTabId, leftPanelWidth, stateLoaded: true, animatedTabs, splitView });
     });
-  }, []);
+  }, [dispatch]);
 
+  // Persist state on changes
   useEffect(() => {
     if (!state.stateLoaded) return;
     debouncedSave({
@@ -96,6 +97,7 @@ function App() {
     });
   }, [state.openTabs, state.activeTabId, state.previewTabId, state.leftPanelWidth, state.splitView, state.stateLoaded, debouncedSave]);
 
+  // Global event listeners
   useEffect(() => {
     const onBeforeUnload = () => flush();
     document.addEventListener("mousemove", resize.handleResizeMove);
@@ -126,9 +128,21 @@ function App() {
     }
     return (
       <TabBar
-        tabs={tabs} paneId={paneId} activeTabId={activeTabId} previewTabId={previewTabId}
-        isInactivePane={isInactivePane} dropTargetIndex={state.dropTargetIndex} draggedTabId={state.draggedTabId} tabListRef={tabListRef}
-        onTabClick={(tabId, clickPaneId) => dispatch({ type: 'PANE_TAB_CLICK', tabId, paneId: clickPaneId })}
+        tabs={tabs}
+        paneId={paneId}
+        activeTabId={activeTabId}
+        previewTabId={previewTabId}
+        isInactivePane={isInactivePane}
+        dropTargetIndex={state.dropTargetIndex}
+        draggedTabId={state.draggedTabId}
+        tabListRef={tabListRef}
+        onTabClick={(tabId, clickPaneId) => {
+          const paneActiveKey = clickPaneId === 'left' ? 'leftActiveTabId' : 'rightActiveTabId';
+          dispatch({
+            splitView: { ...stateRef.current.splitView, activePaneId: clickPaneId, [paneActiveKey]: tabId },
+            activeTabId: tabId
+          });
+        }}
         onTabDoubleClick={keyboard.handleTabDoubleClick}
         onTabMouseDown={handleTabMouseDown}
         onTabClose={tabActions.closeTab}
@@ -144,33 +158,43 @@ function App() {
     }
     return (
       <TabContent
-        tabs={tabs} activeTabId={activeTabId} animatedTabs={state.animatedTabs} fadingTabs={state.fadingTabs}
-        onStartTabFade={tabActions.startTabFade} onMarkAnimationComplete={tabActions.markAnimationComplete}
+        tabs={tabs}
+        activeTabId={activeTabId}
+        animatedTabs={state.animatedTabs}
+        fadingTabs={state.fadingTabs}
+        onStartTabFade={tabActions.startTabFade}
+        onMarkAnimationComplete={tabActions.markAnimationComplete}
       />
     );
   };
 
-  const leftPaneTabs = state.splitView.enabled ? state.openTabs.filter(t => state.splitView.leftPaneTabIds.includes(t.id)) : [];
-  const rightPaneTabs = state.splitView.enabled ? state.openTabs.filter(t => state.splitView.rightPaneTabIds.includes(t.id)) : [];
+  const focusPane = (paneId) => {
+    if (state.splitView.activePaneId === paneId) return;
+    const activeKey = paneId === 'left' ? 'leftActiveTabId' : 'rightActiveTabId';
+    dispatch({
+      splitView: { ...state.splitView, activePaneId: paneId },
+      activeTabId: state.splitView[activeKey]
+    });
+  };
+
+  const leftPaneTabs = state.splitView.enabled
+    ? state.openTabs.filter(t => state.splitView.leftPaneTabIds.includes(t.id))
+    : [];
+  const rightPaneTabs = state.splitView.enabled
+    ? state.openTabs.filter(t => state.splitView.rightPaneTabIds.includes(t.id))
+    : [];
 
   return (
     <ThemeProvider>
       <div className="App">
         <CommandPalette
           isOpen={state.commandPaletteOpen}
-          onClose={() => dispatch({ type: 'CLOSE_COMMAND_PALETTE' })}
+          onClose={() => dispatch({ commandPaletteOpen: false })}
           onSelectItem={tabActions.openWorkItem}
           onAction={keyboard.handlePaletteAction}
           openTabIds={state.openTabs.map((t) => t.id)}
         />
         <div className="top-bar">
-          {isMobile && state.activeTabId && (
-            <button type="button" className="top-bar-back" onClick={() => dispatch({ type: 'CLOSE_ACTIVE_TAB' })} aria-label="Back to sidebar">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-            </button>
-          )}
           <button type="button" className="top-bar-search" onClick={keyboard.toggleCommandPalette} aria-label="Search">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8" />
@@ -181,8 +205,8 @@ function App() {
           <ThemeToggle />
         </div>
         <main className="main">
-          <section className="left-panel" style={isMobile ? undefined : { width: state.leftPanelWidth }}>
-            {!isMobile && <div className="left-panel-resize-handle" onMouseDown={resize.handleResizeStart} aria-label="Resize left panel" />}
+          <section className="left-panel" style={{ width: state.leftPanelWidth }}>
+            <div className="left-panel-resize-handle" onMouseDown={resize.handleResizeStart} aria-label="Resize left panel" />
             <section className="left-panel-top">
               <header className="App-header">
                 <AlchemySymbol />
@@ -193,13 +217,16 @@ function App() {
               </header>
               <nav className="nav">
                 <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="http://www.linkedin.com/in/jordan-l-wright-91b17321">
-                  <Icon title="Out-Bound Link" icon={icons.linkedin} assistiveText="Out-Bound Link" /><span>LinkedIn</span>
+                  <Icon title="Out-Bound Link" icon={icons.linkedin} assistiveText="Out-Bound Link" />
+                  <span>LinkedIn</span>
                 </a>
                 <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href={Resume}>
-                  <Icon title="Out-Bound Link" icon={icons.resume} assistiveText="Out-Bound Link" /><span>Resume</span>
+                  <Icon title="Out-Bound Link" icon={icons.resume} assistiveText="Out-Bound Link" />
+                  <span>Resume</span>
                 </a>
                 <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://github.com/interfaceconjurer">
-                  <Icon title="Out-Bound Link" icon={icons.github} assistiveText="Out-Bound Link" /><span>GitHub</span>
+                  <Icon title="Out-Bound Link" icon={icons.github} assistiveText="Out-Bound Link" />
+                  <span>GitHub</span>
                 </a>
               </nav>
             </section>
@@ -211,7 +238,9 @@ function App() {
                   <p className="work-list-section-tagline">{section.tagline}</p>
                   <div className="work-list-items">
                     {section.items.map((item) => (
-                      <button key={item.id} type="button"
+                      <button
+                        key={item.id}
+                        type="button"
                         className={`work-item ${state.activeTabId === item.id ? "work-item--selected" : ""}`}
                         onClick={() => keyboard.handleWorkItemClick(item)}
                         onDoubleClick={() => keyboard.handleWorkItemDoubleClick(item)}
@@ -226,22 +255,28 @@ function App() {
               ))}
             </section>
           </section>
-          <section className={`stage${isMobile && !state.activeTabId ? ' stage--hidden' : ''}`}>
+          <section className="stage">
             <div className="stage-editor">
               <div className="stage-main" ref={stageRef} style={{ position: 'relative' }}>
-                {isMobile || !state.splitView.enabled ? (
+                {!state.splitView.enabled ? (
                   <>
-                    {!isMobile && renderTabs(state.openTabs)}
-                    {state.openTabs.length > 0 ? renderTabContent(state.openTabs) : (
+                    {renderTabs(state.openTabs)}
+                    {state.openTabs.length > 0 ? (
+                      renderTabContent(state.openTabs)
+                    ) : (
                       <div className="stage-empty">
                         <div className="stage-empty-icon-wrap">
                           <svg className="stage-empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 122" width={144} height={144} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
                             <defs>
-                              <clipPath id="stage-empty-beaker-clip"><path fill="black" d={icons.beaker} /></clipPath>
+                              <clipPath id="stage-empty-beaker-clip">
+                                <path fill="black" d={icons.beaker} />
+                              </clipPath>
                               <linearGradient id="stage-empty-shimmer-grad" gradientUnits="objectBoundingBox" x1="1" y1="1" x2="0" y2="0">
-                                <stop offset="0" stopColor="transparent" /><stop offset="0.35" stopColor="transparent" />
+                                <stop offset="0" stopColor="transparent" />
+                                <stop offset="0.35" stopColor="transparent" />
                                 <stop offset="0.5" stopColor="rgba(120, 120, 120, 0.35)" />
-                                <stop offset="0.65" stopColor="transparent" /><stop offset="1" stopColor="transparent" />
+                                <stop offset="0.65" stopColor="transparent" />
+                                <stop offset="1" stopColor="transparent" />
                               </linearGradient>
                             </defs>
                             <path fill="currentColor" d={icons.beaker} />
@@ -253,7 +288,9 @@ function App() {
                         <div className="stage-empty-content">
                           <p className="stage-empty-title">No open files</p>
                           <div className="stage-empty-hints">
-                            <p className="stage-empty-hint"><kbd className="stage-empty-kbd">{"\u2318"}K</kbd> to search</p>
+                            <p className="stage-empty-hint">
+                              <kbd className="stage-empty-kbd">{"\u2318"}K</kbd> to search
+                            </p>
                             <p className="stage-empty-hint">or select from My Work in the sidebar</p>
                           </div>
                         </div>
@@ -265,7 +302,7 @@ function App() {
                     <div
                       className={`stage-pane stage-pane--left ${state.splitView.activePaneId === 'left' ? 'stage-pane--active' : 'stage-pane--inactive'}`}
                       style={{ width: `${state.splitView.splitterPosition}%` }}
-                      onClick={() => dispatch({ type: 'FOCUS_PANE', paneId: 'left' })}
+                      onClick={() => focusPane('left')}
                     >
                       {renderTabs(leftPaneTabs, 'left')}
                       {renderTabContent(leftPaneTabs, 'left')}
@@ -276,25 +313,26 @@ function App() {
                     <div
                       className={`stage-pane stage-pane--right ${state.splitView.activePaneId === 'right' ? 'stage-pane--active' : 'stage-pane--inactive'}`}
                       style={{ width: `${100 - state.splitView.splitterPosition}%` }}
-                      onClick={() => dispatch({ type: 'FOCUS_PANE', paneId: 'right' })}
+                      onClick={() => focusPane('right')}
                     >
                       {renderTabs(rightPaneTabs, 'right')}
                       {renderTabContent(rightPaneTabs, 'right')}
                     </div>
                   </div>
                 )}
-                {!isMobile && (
-                  <DropZones
-                    isDragging={state.dragThreshold.isDragging && !!stageRef.current}
-                    dropZone={state.dragThreshold.dropZone}
-                    splitViewEnabled={state.splitView.enabled}
-                    openTabsCount={state.openTabs.length}
-                    splitterPosition={state.splitView.splitterPosition}
-                  />
-                )}
+                <DropZones
+                  isDragging={state.dragThreshold.isDragging && !!stageRef.current}
+                  dropZone={state.dragThreshold.dropZone}
+                  splitViewEnabled={state.splitView.enabled}
+                  openTabsCount={state.openTabs.length}
+                  splitterPosition={state.splitView.splitterPosition}
+                />
               </div>
-              {!isMobile && state.activeTabId && (
-                <StatusBar activeTab={state.openTabs.find((t) => t.id === state.activeTabId)} sectionLabel={getSectionForItem(state.activeTabId)} />
+              {state.activeTabId && (
+                <StatusBar
+                  activeTab={state.openTabs.find((t) => t.id === state.activeTabId)}
+                  sectionLabel={getSectionForItem(state.activeTabId)}
+                />
               )}
             </div>
           </section>
