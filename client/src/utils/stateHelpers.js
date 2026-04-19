@@ -6,6 +6,7 @@ export const getLeftPanelMaxWidth = () => Math.floor(window.innerWidth / 2);
 
 // Initial state structure
 export const getInitialState = () => ({
+  isMobile: false,
   leftPanelWidth: LEFT_PANEL_DEFAULT_WIDTH,
   openTabs: [],
   activeTabId: null,

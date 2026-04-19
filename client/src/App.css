@@ -743,8 +743,67 @@ a:active {
 
 /* ====== /Split View ======= */
 
-/* ======SMALL VIEW======= */
-@media only screen and (max-width: 550px) and (min-width: 0px) {
+/* ====== Mobile (<900px) ====== */
+@media (max-width: 899px) {
+  .main {
+    position: relative;
+  }
+
+  .left-panel {
+    width: 100% !important;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .left-panel-resize-handle {
+    display: none;
+  }
+
+  .stage {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    background: var(--panel-bg);
+  }
+
+  .stage--hidden {
+    display: none;
+  }
+
+  .stage-tabs {
+    display: none;
+  }
+
+  .top-bar-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--text-color);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .work-item {
+    min-height: 2.75rem;
+    padding: 0.625rem 0.75rem;
+  }
+
+  .out-bound-link {
+    min-height: 2.75rem;
+    padding: 0.5rem 0;
+  }
+
+  .symbolContainer {
+    height: 200px;
+  }
+}
+
+@media (max-width: 550px) {
   .App-header {
     top: 1rem;
     left: 1rem;
