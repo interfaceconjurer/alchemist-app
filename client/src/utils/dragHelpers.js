@@ -26,17 +26,28 @@ export const detectSplitPaneDropZone = (clientX, stageRect, splitterPosition) =>
   return clientX < splitterX ? 'left' : 'right';
 };
 
-export const createGhostElement = (tabElement, clientX, clientY) => {
-  if (!tabElement) return null;
-  const ghost = tabElement.cloneNode(true);
-  ghost.className = 'stage-drag-ghost';
+export const createGhostElement = (sourceElement, clientX, clientY, { preserveStyle = false } = {}) => {
+  if (!sourceElement) return null;
+  const ghost = sourceElement.cloneNode(true);
+  if (!preserveStyle) {
+    ghost.className = 'stage-drag-ghost';
+  }
   ghost.style.position = 'fixed';
   ghost.style.pointerEvents = 'none';
   ghost.style.zIndex = '1000';
-  ghost.style.opacity = '0.8';
   ghost.style.left = `${clientX}px`;
   ghost.style.top = `${clientY}px`;
-  ghost.style.transform = 'translate(-50%, -50%)';
+  if (preserveStyle) {
+    const rect = sourceElement.getBoundingClientRect();
+    ghost.style.width = `${rect.width}px`;
+    ghost.style.opacity = '0.85';
+    ghost.style.transform = 'translate(-50%, -50%) rotate(-4deg)';
+    ghost.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
+    ghost.style.transition = 'transform 0.15s ease-out';
+  } else {
+    ghost.style.opacity = '0.8';
+    ghost.style.transform = 'translate(-50%, -50%)';
+  }
   return ghost;
 };
 

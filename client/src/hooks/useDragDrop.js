@@ -96,7 +96,7 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
       if (!isDragThresholdMet(distance, timeDelta, DRAG_THRESHOLD_DISTANCE, DRAG_THRESHOLD_TIME)) return;
 
       const el = document.querySelector(`[data-work-item-id="${ds.item.id}"]`);
-      ghostRef.current = createGhostElement(el, e.clientX, e.clientY);
+      ghostRef.current = createGhostElement(el, e.clientX, e.clientY, { preserveStyle: true });
       if (ghostRef.current) document.body.appendChild(ghostRef.current);
 
       dispatch({ type: 'SET_DRAG_STATE', payload: { isDragging: true, dragSource: 'sidebar' } });
@@ -124,7 +124,13 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
     const onEnd = () => {
       const { dropZone } = stateRef.current.dragThreshold;
       const item = dragStateRef.current?.item;
-      removeGhostElement(ghostRef.current);
+      const ghost = ghostRef.current;
+      if (ghost) {
+        ghost.style.transform = 'translate(-50%, -50%) rotate(0deg)';
+        ghost.style.opacity = '0';
+        ghost.addEventListener('transitionend', () => removeGhostElement(ghost), { once: true });
+        setTimeout(() => removeGhostElement(ghost), 200);
+      }
       ghostRef.current = null;
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onEnd);
