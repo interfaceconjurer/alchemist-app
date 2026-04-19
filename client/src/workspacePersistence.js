@@ -1,64 +1,28 @@
 const STORAGE_KEY = 'workspace-state';
-const API_URL = '/api/workspace-state';
 
-/**
- * Load persisted workspace state.
- * Tries the server first; falls back to localStorage.
- */
-export async function loadState() {
-  try {
-    const res = await fetch(API_URL);
-    if (res.ok) {
-      const data = await res.json();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      return data;
-    }
-    throw new Error(`Server returned ${res.status}`);
-  } catch (err) {
-    console.warn('Server state unavailable, falling back to localStorage:', err.message);
-    return loadFromLocalStorage();
-  }
-}
+const EMPTY_STATE = { openTabIds: [], activeTabId: null };
 
-function loadFromLocalStorage() {
+export function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) return Promise.resolve(JSON.parse(raw));
   } catch {
     // corrupted data
   }
-  return { openTabIds: [], activeTabId: null };
+  return Promise.resolve(EMPTY_STATE);
 }
 
-/**
- * Save workspace state to server and localStorage.
- */
-export async function saveState(state) {
+function saveState(state) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-
-  try {
-    await fetch(API_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(state),
-    });
-  } catch (err) {
-    console.warn('Failed to save state to server:', err.message);
-  }
 }
 
-/**
- * Creates a debounced save with a flush() for beforeunload.
- */
 export function createDebouncedSave(delayMs = 500) {
   let timeoutId = null;
   let latestState = null;
 
   function debouncedSave(state) {
     latestState = state;
-    if (timeoutId !== null) {
-      clearTimeout(timeoutId);
-    }
+    if (timeoutId !== null) clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
       timeoutId = null;
       saveState(state);
@@ -71,11 +35,7 @@ export function createDebouncedSave(delayMs = 500) {
       clearTimeout(timeoutId);
       timeoutId = null;
     }
-    // Only write to localStorage on beforeunload — not to the server.
-    // The debounced save already syncs to the server every 500ms,
-    // so the server is at most half a second behind.
-    // Avoiding sendBeacon here prevents race conditions with the clear-state script.
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(latestState));
+    saveState(latestState);
     latestState = null;
   }
 

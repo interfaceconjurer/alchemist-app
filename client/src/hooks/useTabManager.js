@@ -1,449 +1,278 @@
-import {
-  isTabInPane,
-  isPreviewTab,
-  getPaneTabCount
-} from '../utils/tabHelpers';
-import {
-  getPaneKeys,
-  getActivePaneId,
-  shouldCloseSplit
-} from '../utils/splitViewHelpers';
+import { useCallback } from 'react';
+import { getDefaultSplitViewState } from '../utils/stateHelpers';
 
-// Factory function to create tab manager with component instance binding
-export function createTabManager(component) {
-  // Helper method to scroll a tab into view
-  const scrollTabIntoView = (tabId) => {
-    // Use requestAnimationFrame to ensure DOM is updated before scrolling
-    requestAnimationFrame(() => {
-      const tabElement = document.querySelector(`[data-tab-id="${tabId}"]`);
+function scrollTabIntoView(tabId) {
+  requestAnimationFrame(() => {
+    const tabElement = document.querySelector(`[data-tab-id="${tabId}"]`);
+    if (!tabElement) return;
+    const tabContainer = tabElement.closest('.stage-tabs-list');
+    if (!tabContainer) return;
+    const containerRect = tabContainer.getBoundingClientRect();
+    const tabRect = tabElement.getBoundingClientRect();
+    if (tabRect.left < containerRect.left || tabRect.right > containerRect.right) {
+      tabElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  });
+}
 
-      if (tabElement) {
-        // Find the parent tab container (stage-tabs-list)
-        const tabContainer = tabElement.closest('.stage-tabs-list');
-
-        if (tabContainer) {
-          const containerRect = tabContainer.getBoundingClientRect();
-          const tabRect = tabElement.getBoundingClientRect();
-
-          // Check if tab is not fully visible
-          if (tabRect.left < containerRect.left || tabRect.right > containerRect.right) {
-            // Scroll the tab into view with smooth animation
-            tabElement.scrollIntoView({
-              behavior: 'smooth',
-              block: 'nearest',
-              inline: 'center'
-            });
-          }
-        }
-      }
-    });
+function paneKeys(paneId) {
+  return {
+    tabsKey: paneId === 'left' ? 'leftPaneTabIds' : 'rightPaneTabIds',
+    activeKey: paneId === 'left' ? 'leftActiveTabId' : 'rightActiveTabId',
+    previewKey: paneId === 'left' ? 'leftPanePreviewTabId' : 'rightPanePreviewTabId'
   };
+}
 
-  const openWorkItemAsPreview = (item) => {
-    component.setState((state) => {
-      // Handle split view mode with per-pane preview tabs
-      if (state.splitView.enabled) {
-        const activePaneId = getActivePaneId(state.splitView);
-        const { tabsKey: paneTabsKey, activeKey: paneActiveKey, previewKey: panePreviewKey } = getPaneKeys(activePaneId);
-        const currentPanePreviewId = state.splitView[panePreviewKey];
+export function useTabManager(stateRef, dispatch) {
+  const openWorkItemAsPreview = useCallback((item) => {
+    const state = stateRef.current;
 
-        // Check if item is already open as persistent in any pane
-        const isInLeftPane = isTabInPane(item.id, 'left', state.splitView);
-        const isInRightPane = isTabInPane(item.id, 'right', state.splitView);
-        const isLeftPreview = state.splitView.leftPanePreviewTabId === item.id;
-        const isRightPreview = state.splitView.rightPanePreviewTabId === item.id;
+    if (state.splitView.enabled) {
+      const activePaneId = state.splitView.activePaneId || 'left';
+      const { tabsKey, activeKey, previewKey } = paneKeys(activePaneId);
+      const currentPanePreviewId = state.splitView[previewKey];
 
-        // If already open as persistent (not preview), just activate it
-        if ((isInLeftPane && !isLeftPreview) || (isInRightPane && !isRightPreview)) {
-          const targetPane = isInLeftPane ? 'left' : 'right';
-          return {
-            activeTabId: item.id,
-            splitView: {
-              ...state.splitView,
-              activePaneId: targetPane,
-              [targetPane === 'left' ? 'leftActiveTabId' : 'rightActiveTabId']: item.id
-            }
-          };
-        }
+      const isInLeft = state.splitView.leftPaneTabIds.includes(item.id);
+      const isInRight = state.splitView.rightPaneTabIds.includes(item.id);
+      const isLeftPreview = state.splitView.leftPanePreviewTabId === item.id;
+      const isRightPreview = state.splitView.rightPanePreviewTabId === item.id;
 
-        // If already a preview tab somewhere, just activate it
-        if (isLeftPreview || isRightPreview) {
-          const targetPane = isLeftPreview ? 'left' : 'right';
-          return {
-            activeTabId: item.id,
-            splitView: {
-              ...state.splitView,
-              activePaneId: targetPane,
-              [targetPane === 'left' ? 'leftActiveTabId' : 'rightActiveTabId']: item.id
-            }
-          };
-        }
-
-        // Replace existing preview tab in the active pane if it exists
-        if (currentPanePreviewId !== null) {
-          const openTabs = state.openTabs.map((tab) =>
-            tab.id === currentPanePreviewId ? { ...item } : tab
-          );
-          const animatedTabs = new Set(state.animatedTabs);
-          animatedTabs.delete(currentPanePreviewId);
-          const fadingTabs = new Set(state.fadingTabs);
-          fadingTabs.delete(currentPanePreviewId);
-
-          // Update the active pane's tab IDs
-          const newPaneTabIds = state.splitView[paneTabsKey].map(id =>
-            id === currentPanePreviewId ? item.id : id
-          );
-
-          return {
-            openTabs,
-            activeTabId: item.id,
-            animatedTabs,
-            fadingTabs,
-            splitView: {
-              ...state.splitView,
-              [paneTabsKey]: newPaneTabIds,
-              [paneActiveKey]: item.id,
-              [panePreviewKey]: item.id
-            }
-          };
-        }
-
-        // No preview tab in active pane — append new one
-        return {
-          openTabs: [...state.openTabs, { ...item }],
+      if ((isInLeft && !isLeftPreview) || (isInRight && !isRightPreview)) {
+        const targetPane = isInLeft ? 'left' : 'right';
+        dispatch({
           activeTabId: item.id,
-          splitView: {
-            ...state.splitView,
-            [paneTabsKey]: [...state.splitView[paneTabsKey], item.id],
-            [paneActiveKey]: item.id,
-            [panePreviewKey]: item.id
-          }
-        };
+          splitView: { ...state.splitView, activePaneId: targetPane, [paneKeys(targetPane).activeKey]: item.id }
+        });
+        return;
       }
 
-      // Original non-split logic (unchanged)
-      // Already open as persistent tab — just activate
-      if (state.openTabs.some((tab) => tab.id === item.id && tab.id !== state.previewTabId)) {
-        return { activeTabId: item.id };
+      if (isLeftPreview || isRightPreview) {
+        const targetPane = isLeftPreview ? 'left' : 'right';
+        dispatch({
+          activeTabId: item.id,
+          splitView: { ...state.splitView, activePaneId: targetPane, [paneKeys(targetPane).activeKey]: item.id }
+        });
+        return;
       }
-      // Already the preview tab — just activate
-      if (state.previewTabId === item.id) {
-        return { activeTabId: item.id };
-      }
-      // Replace existing preview tab in-place
-      if (state.previewTabId !== null) {
-        const openTabs = state.openTabs.map((tab) => (tab.id === state.previewTabId ? { ...item } : tab));
+
+      if (currentPanePreviewId !== null) {
+        const openTabs = state.openTabs.map((tab) => tab.id === currentPanePreviewId ? { ...item } : tab);
         const animatedTabs = new Set(state.animatedTabs);
-        animatedTabs.delete(state.previewTabId);
+        animatedTabs.delete(currentPanePreviewId);
         const fadingTabs = new Set(state.fadingTabs);
-        fadingTabs.delete(state.previewTabId);
-        return { openTabs, activeTabId: item.id, previewTabId: item.id, animatedTabs, fadingTabs };
+        fadingTabs.delete(currentPanePreviewId);
+        const newPaneTabIds = state.splitView[tabsKey].map(id => id === currentPanePreviewId ? item.id : id);
+        dispatch({
+          openTabs, activeTabId: item.id, animatedTabs, fadingTabs,
+          splitView: { ...state.splitView, [tabsKey]: newPaneTabIds, [activeKey]: item.id, [previewKey]: item.id }
+        });
+        scrollTabIntoView(item.id);
+        return;
       }
-      // No preview tab — append new one
-      return {
+
+      dispatch({
         openTabs: [...state.openTabs, { ...item }],
         activeTabId: item.id,
-        previewTabId: item.id,
-      };
-    }, () => {
-      // Scroll the newly opened tab into view
+        splitView: { ...state.splitView, [tabsKey]: [...state.splitView[tabsKey], item.id], [activeKey]: item.id, [previewKey]: item.id }
+      });
       scrollTabIntoView(item.id);
+      return;
+    }
+
+    if (state.openTabs.some((tab) => tab.id === item.id && tab.id !== state.previewTabId)) {
+      dispatch({ activeTabId: item.id });
+      return;
+    }
+    if (state.previewTabId === item.id) {
+      dispatch({ activeTabId: item.id });
+      return;
+    }
+    if (state.previewTabId !== null) {
+      const openTabs = state.openTabs.map((tab) => tab.id === state.previewTabId ? { ...item } : tab);
+      const animatedTabs = new Set(state.animatedTabs);
+      animatedTabs.delete(state.previewTabId);
+      const fadingTabs = new Set(state.fadingTabs);
+      fadingTabs.delete(state.previewTabId);
+      dispatch({ openTabs, activeTabId: item.id, previewTabId: item.id, animatedTabs, fadingTabs });
+      scrollTabIntoView(item.id);
+      return;
+    }
+    dispatch({
+      openTabs: [...state.openTabs, { ...item }],
+      activeTabId: item.id,
+      previewTabId: item.id
     });
-  };
+    scrollTabIntoView(item.id);
+  }, [stateRef, dispatch]);
 
-  const openWorkItemAsPersistent = (item) => {
-    component.setState((state) => {
-      // Handle split view mode with per-pane preview tabs
-      if (state.splitView.enabled) {
-        const activePaneId = getActivePaneId(state.splitView);
-        const { tabsKey: paneTabsKey, activeKey: paneActiveKey } = getPaneKeys(activePaneId);
+  const openWorkItemAsPersistent = useCallback((item) => {
+    const state = stateRef.current;
 
-        // Check if item exists in any pane
-        const isInLeftPane = isTabInPane(item.id, 'left', state.splitView);
-        const isInRightPane = isTabInPane(item.id, 'right', state.splitView);
-        const isLeftPreview = state.splitView.leftPanePreviewTabId === item.id;
-        const isRightPreview = state.splitView.rightPanePreviewTabId === item.id;
+    if (state.splitView.enabled) {
+      const activePaneId = state.splitView.activePaneId || 'left';
+      const { tabsKey, activeKey } = paneKeys(activePaneId);
 
-        // Promote preview tab to persistent if it's a preview
-        if (isLeftPreview || isRightPreview) {
-          const targetPane = isLeftPreview ? 'left' : 'right';
-          const previewKey = targetPane === 'left' ? 'leftPanePreviewTabId' : 'rightPanePreviewTabId';
+      const isInLeft = state.splitView.leftPaneTabIds.includes(item.id);
+      const isInRight = state.splitView.rightPaneTabIds.includes(item.id);
+      const isLeftPreview = state.splitView.leftPanePreviewTabId === item.id;
+      const isRightPreview = state.splitView.rightPanePreviewTabId === item.id;
 
-          return {
-            activeTabId: item.id,
-            splitView: {
-              ...state.splitView,
-              activePaneId: targetPane,
-              [targetPane === 'left' ? 'leftActiveTabId' : 'rightActiveTabId']: item.id,
-              [previewKey]: null  // Clear the preview status
-            }
-          };
-        }
-
-        // Already open as persistent — just activate
-        if (isInLeftPane || isInRightPane) {
-          const targetPane = isInLeftPane ? 'left' : 'right';
-          return {
-            activeTabId: item.id,
-            splitView: {
-              ...state.splitView,
-              activePaneId: targetPane,
-              [targetPane === 'left' ? 'leftActiveTabId' : 'rightActiveTabId']: item.id
-            }
-          };
-        }
-
-        // Not open — append as persistent to active pane
-        return {
-          openTabs: [...state.openTabs, { ...item }],
+      if (isLeftPreview || isRightPreview) {
+        const targetPane = isLeftPreview ? 'left' : 'right';
+        const previewKey = targetPane === 'left' ? 'leftPanePreviewTabId' : 'rightPanePreviewTabId';
+        dispatch({
           activeTabId: item.id,
-          splitView: {
-            ...state.splitView,
-            [paneTabsKey]: [...state.splitView[paneTabsKey], item.id],
-            [paneActiveKey]: item.id
-            // Note: NOT setting the preview key, so it's persistent
-          }
-        };
+          splitView: { ...state.splitView, activePaneId: targetPane, [paneKeys(targetPane).activeKey]: item.id, [previewKey]: null }
+        });
+        scrollTabIntoView(item.id);
+        return;
       }
 
-      // Original non-split logic (unchanged)
-      // Promote current preview tab
-      if (state.previewTabId === item.id) {
-        return { activeTabId: item.id, previewTabId: null };
+      if (isInLeft || isInRight) {
+        const targetPane = isInLeft ? 'left' : 'right';
+        dispatch({
+          activeTabId: item.id,
+          splitView: { ...state.splitView, activePaneId: targetPane, [paneKeys(targetPane).activeKey]: item.id }
+        });
+        scrollTabIntoView(item.id);
+        return;
       }
-      // Already open as persistent — just activate
-      if (state.openTabs.some((tab) => tab.id === item.id)) {
-        return { activeTabId: item.id };
-      }
-      // Not open — append as persistent
-      return {
+
+      dispatch({
         openTabs: [...state.openTabs, { ...item }],
         activeTabId: item.id,
-      };
-    }, () => {
-      // Scroll the newly opened tab into view
+        splitView: { ...state.splitView, [tabsKey]: [...state.splitView[tabsKey], item.id], [activeKey]: item.id }
+      });
       scrollTabIntoView(item.id);
-    });
-  };
+      return;
+    }
 
-  // CommandPalette and programmatic use — always persistent
-  const openWorkItem = (item) => {
-    openWorkItemAsPersistent(item);
-  };
+    if (state.previewTabId === item.id) {
+      dispatch({ activeTabId: item.id, previewTabId: null });
+      return;
+    }
+    if (state.openTabs.some((tab) => tab.id === item.id)) {
+      dispatch({ activeTabId: item.id });
+      scrollTabIntoView(item.id);
+      return;
+    }
+    dispatch({ openTabs: [...state.openTabs, { ...item }], activeTabId: item.id });
+    scrollTabIntoView(item.id);
+  }, [stateRef, dispatch]);
 
-  const closeTab = (e, tabId) => {
+  const closeTab = useCallback((e, tabId) => {
     e.stopPropagation();
-    component.setState((state) => {
-      const openTabs = state.openTabs.filter((tab) => tab.id !== tabId);
-      const wasActive = state.activeTabId === tabId;
+    const state = stateRef.current;
+    const openTabs = state.openTabs.filter((tab) => tab.id !== tabId);
+    const wasActive = state.activeTabId === tabId;
+    const animatedTabs = new Set(state.animatedTabs);
+    animatedTabs.delete(tabId);
+    const fadingTabs = new Set(state.fadingTabs);
+    fadingTabs.delete(tabId);
 
-      // Handle split view
-      if (state.splitView.enabled) {
-        const newLeftTabs = state.splitView.leftPaneTabIds.filter(id => id !== tabId);
-        const newRightTabs = state.splitView.rightPaneTabIds.filter(id => id !== tabId);
+    if (state.splitView.enabled) {
+      const newLeftTabs = state.splitView.leftPaneTabIds.filter(id => id !== tabId);
+      const newRightTabs = state.splitView.rightPaneTabIds.filter(id => id !== tabId);
 
-        // Check if we should close the split (one pane empty)
-        if (shouldCloseSplit(newLeftTabs.length, newRightTabs.length)) {
-          const allTabIds = [...newLeftTabs, ...newRightTabs];
-          const newActiveTabId = wasActive && allTabIds.length > 0
-            ? allTabIds[allTabIds.length - 1]
-            : state.activeTabId === tabId ? null : state.activeTabId;
+      if (newLeftTabs.length === 0 || newRightTabs.length === 0) {
+        let globalPreviewTabId = null;
+        if (newLeftTabs.length > 0 && state.splitView.leftPanePreviewTabId) globalPreviewTabId = state.splitView.leftPanePreviewTabId;
+        else if (newRightTabs.length > 0 && state.splitView.rightPanePreviewTabId) globalPreviewTabId = state.splitView.rightPanePreviewTabId;
 
-          const animatedTabs = new Set(state.animatedTabs);
-          animatedTabs.delete(tabId);
-          const fadingTabs = new Set(state.fadingTabs);
-          fadingTabs.delete(tabId);
-
-          // Determine which preview tab becomes the global preview when closing split
-          // Prefer the preview tab from the remaining pane
-          let globalPreviewTabId = null;
-          if (newLeftTabs.length > 0 && state.splitView.leftPanePreviewTabId) {
-            globalPreviewTabId = state.splitView.leftPanePreviewTabId;
-          } else if (newRightTabs.length > 0 && state.splitView.rightPanePreviewTabId) {
-            globalPreviewTabId = state.splitView.rightPanePreviewTabId;
-          }
-
-          return {
-            openTabs,
-            activeTabId: newActiveTabId,
-            animatedTabs,
-            fadingTabs,
-            previewTabId: globalPreviewTabId,
-            splitView: {
-              enabled: false,
-              leftPaneTabIds: [],
-              rightPaneTabIds: [],
-              leftActiveTabId: null,
-              rightActiveTabId: null,
-              leftPanePreviewTabId: null,
-              rightPanePreviewTabId: null,
-              activePaneId: 'left',
-              splitterPosition: 50
-            }
-          };
-        }
-
-        // Still in split view - determine new active tab for affected pane
-        const wasInLeft = state.splitView.leftPaneTabIds.includes(tabId);
-        const wasInRight = state.splitView.rightPaneTabIds.includes(tabId);
-
-        let newLeftActiveTabId = state.splitView.leftActiveTabId;
-        let newRightActiveTabId = state.splitView.rightActiveTabId;
-        let newLeftPreviewTabId = state.splitView.leftPanePreviewTabId;
-        let newRightPreviewTabId = state.splitView.rightPanePreviewTabId;
-
-        if (wasInLeft) {
-          newLeftPreviewTabId = newLeftPreviewTabId === tabId ? null : newLeftPreviewTabId;
-          if (state.splitView.leftActiveTabId === tabId) {
-            newLeftActiveTabId = newLeftTabs.length > 0 ? newLeftTabs[newLeftTabs.length - 1] : null;
-          }
-        }
-
-        if (wasInRight) {
-          newRightPreviewTabId = newRightPreviewTabId === tabId ? null : newRightPreviewTabId;
-          if (state.splitView.rightActiveTabId === tabId) {
-            newRightActiveTabId = newRightTabs.length > 0 ? newRightTabs[newRightTabs.length - 1] : null;
-          }
-        }
-
-        const animatedTabs = new Set(state.animatedTabs);
-        animatedTabs.delete(tabId);
-        const fadingTabs = new Set(state.fadingTabs);
-        fadingTabs.delete(tabId);
-
-        return {
-          openTabs,
-          activeTabId: wasActive
-            ? (wasInLeft ? newLeftActiveTabId : newRightActiveTabId) || state.activeTabId
-            : state.activeTabId,
-          animatedTabs,
-          fadingTabs,
-          splitView: {
-            ...state.splitView,
-            leftPaneTabIds: newLeftTabs,
-            rightPaneTabIds: newRightTabs,
-            leftActiveTabId: newLeftActiveTabId,
-            rightActiveTabId: newRightActiveTabId,
-            leftPanePreviewTabId: newLeftPreviewTabId,
-            rightPanePreviewTabId: newRightPreviewTabId
-          }
-        };
+        const allTabIds = [...newLeftTabs, ...newRightTabs];
+        const newActiveTabId = wasActive && allTabIds.length > 0 ? allTabIds[allTabIds.length - 1] : (state.activeTabId === tabId ? null : state.activeTabId);
+        dispatch({ openTabs, activeTabId: newActiveTabId, animatedTabs, fadingTabs, previewTabId: globalPreviewTabId, splitView: getDefaultSplitViewState() });
+        return;
       }
 
-      // Original single-pane logic
-      const activeTabId = wasActive
-        ? openTabs.length > 0
-          ? openTabs[openTabs.length - 1].id
-          : null
-        : state.activeTabId;
-      const animatedTabs = new Set(state.animatedTabs);
-      animatedTabs.delete(tabId);
-      const fadingTabs = new Set(state.fadingTabs);
-      fadingTabs.delete(tabId);
-      const previewTabId = state.previewTabId === tabId ? null : state.previewTabId;
-      return { openTabs, activeTabId, animatedTabs, fadingTabs, previewTabId };
-    });
-  };
+      const wasInLeft = state.splitView.leftPaneTabIds.includes(tabId);
+      let newLeftActiveTabId = state.splitView.leftActiveTabId;
+      let newRightActiveTabId = state.splitView.rightActiveTabId;
+      let newLeftPreviewTabId = state.splitView.leftPanePreviewTabId === tabId ? null : state.splitView.leftPanePreviewTabId;
+      let newRightPreviewTabId = state.splitView.rightPanePreviewTabId === tabId ? null : state.splitView.rightPanePreviewTabId;
 
-  const closeActiveTab = () => {
-    component.setState((state) => {
-      if (!state.activeTabId) return null;
-      const openTabs = state.openTabs.filter((tab) => tab.id !== state.activeTabId);
-      const activeTabId = openTabs.length > 0 ? openTabs[openTabs.length - 1].id : null;
-      const animatedTabs = new Set(state.animatedTabs);
-      animatedTabs.delete(state.activeTabId);
-      const fadingTabs = new Set(state.fadingTabs);
-      fadingTabs.delete(state.activeTabId);
-      const previewTabId = state.previewTabId === state.activeTabId ? null : state.previewTabId;
-      return { openTabs, activeTabId, animatedTabs, fadingTabs, previewTabId };
-    });
-  };
-
-  const closeAllTabs = () => {
-    component.setState({
-      openTabs: [],
-      activeTabId: null,
-      animatedTabs: new Set(),
-      fadingTabs: new Set(),
-      previewTabId: null,
-      splitView: {
-        enabled: false,
-        leftPaneTabIds: [],
-        rightPaneTabIds: [],
-        leftActiveTabId: null,
-        rightActiveTabId: null,
-        leftPanePreviewTabId: null,
-        rightPanePreviewTabId: null,
-        activePaneId: 'left',
-        splitterPosition: 50
+      if (wasInLeft && state.splitView.leftActiveTabId === tabId) {
+        newLeftActiveTabId = newLeftTabs.length > 0 ? newLeftTabs[newLeftTabs.length - 1] : null;
       }
-    });
-  };
+      if (!wasInLeft && state.splitView.rightActiveTabId === tabId) {
+        newRightActiveTabId = newRightTabs.length > 0 ? newRightTabs[newRightTabs.length - 1] : null;
+      }
 
-  const selectTab = (tabId) => {
-    component.setState((state) => {
-      // Handle split view - update pane-specific active tab
-      if (state.splitView.enabled) {
-        const inLeftPane = state.splitView.leftPaneTabIds.includes(tabId);
-        const inRightPane = state.splitView.rightPaneTabIds.includes(tabId);
-
-        if (inLeftPane) {
-          return {
-            activeTabId: tabId,
-            splitView: {
-              ...state.splitView,
-              leftActiveTabId: tabId,
-              activePaneId: 'left'
-            }
-          };
-        } else if (inRightPane) {
-          return {
-            activeTabId: tabId,
-            splitView: {
-              ...state.splitView,
-              rightActiveTabId: tabId,
-              activePaneId: 'right'
-            }
-          };
+      dispatch({
+        openTabs, animatedTabs, fadingTabs,
+        activeTabId: wasActive ? (wasInLeft ? newLeftActiveTabId : newRightActiveTabId) || state.activeTabId : state.activeTabId,
+        splitView: {
+          ...state.splitView,
+          leftPaneTabIds: newLeftTabs, rightPaneTabIds: newRightTabs,
+          leftActiveTabId: newLeftActiveTabId, rightActiveTabId: newRightActiveTabId,
+          leftPanePreviewTabId: newLeftPreviewTabId, rightPanePreviewTabId: newRightPreviewTabId
         }
+      });
+      return;
+    }
+
+    const activeTabId = wasActive ? (openTabs.length > 0 ? openTabs[openTabs.length - 1].id : null) : state.activeTabId;
+    const previewTabId = state.previewTabId === tabId ? null : state.previewTabId;
+    dispatch({ openTabs, activeTabId, animatedTabs, fadingTabs, previewTabId });
+  }, [stateRef, dispatch]);
+
+  const closeActiveTab = useCallback(() => {
+    const state = stateRef.current;
+    if (!state.activeTabId) return;
+    const openTabs = state.openTabs.filter((tab) => tab.id !== state.activeTabId);
+    const activeTabId = openTabs.length > 0 ? openTabs[openTabs.length - 1].id : null;
+    const animatedTabs = new Set(state.animatedTabs);
+    animatedTabs.delete(state.activeTabId);
+    const fadingTabs = new Set(state.fadingTabs);
+    fadingTabs.delete(state.activeTabId);
+    const previewTabId = state.previewTabId === state.activeTabId ? null : state.previewTabId;
+    dispatch({ openTabs, activeTabId, animatedTabs, fadingTabs, previewTabId });
+  }, [stateRef, dispatch]);
+
+  const closeAllTabs = useCallback(() => {
+    dispatch({
+      openTabs: [], activeTabId: null, animatedTabs: new Set(), fadingTabs: new Set(),
+      previewTabId: null, splitView: getDefaultSplitViewState()
+    });
+  }, [dispatch]);
+
+  const selectTab = useCallback((tabId) => {
+    const state = stateRef.current;
+    if (state.splitView.enabled) {
+      if (state.splitView.leftPaneTabIds.includes(tabId)) {
+        dispatch({ activeTabId: tabId, splitView: { ...state.splitView, leftActiveTabId: tabId, activePaneId: 'left' } });
+      } else if (state.splitView.rightPaneTabIds.includes(tabId)) {
+        dispatch({ activeTabId: tabId, splitView: { ...state.splitView, rightActiveTabId: tabId, activePaneId: 'right' } });
       }
+    } else {
+      dispatch({ activeTabId: tabId });
+    }
+    scrollTabIntoView(tabId);
+  }, [stateRef, dispatch]);
 
-      return { activeTabId: tabId };
-    }, () => {
-      // Scroll the selected tab into view
-      scrollTabIntoView(tabId);
-    });
-  };
+  const startTabFade = useCallback((tabId) => {
+    const fadingTabs = new Set(stateRef.current.fadingTabs);
+    fadingTabs.add(tabId);
+    dispatch({ fadingTabs });
+  }, [stateRef, dispatch]);
 
-  const startTabFade = (tabId) => {
-    component.setState((state) => {
-      const fadingTabs = new Set(state.fadingTabs);
-      fadingTabs.add(tabId);
-      return { fadingTabs };
-    });
-  };
+  const markAnimationComplete = useCallback((tabId) => {
+    const animatedTabs = new Set(stateRef.current.animatedTabs);
+    animatedTabs.add(tabId);
+    const fadingTabs = new Set(stateRef.current.fadingTabs);
+    fadingTabs.delete(tabId);
+    dispatch({ animatedTabs, fadingTabs });
+  }, [stateRef, dispatch]);
 
-  const markAnimationComplete = (tabId) => {
-    component.setState((state) => {
-      const animatedTabs = new Set(state.animatedTabs);
-      animatedTabs.add(tabId);
-      const fadingTabs = new Set(state.fadingTabs);
-      fadingTabs.delete(tabId);
-      return { animatedTabs, fadingTabs };
-    });
-  };
-
-  // Return the public API
   return {
     openWorkItemAsPreview,
     openWorkItemAsPersistent,
-    openWorkItem,
+    openWorkItem: openWorkItemAsPersistent,
     closeTab,
     closeActiveTab,
     closeAllTabs,
     selectTab,
     startTabFade,
-    markAnimationComplete,
-    scrollTabIntoView
+    markAnimationComplete
   };
 }
