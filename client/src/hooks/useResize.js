@@ -1,51 +1,35 @@
-import {
-  LEFT_PANEL_MIN_WIDTH,
-  getLeftPanelMaxWidth
-} from '../utils/stateHelpers';
+import { useCallback, useRef } from 'react';
+import { LEFT_PANEL_MIN_WIDTH, getLeftPanelMaxWidth } from '../utils/stateHelpers';
 
-// Factory function to create resize manager with component instance binding
-export function createResizeManager(component) {
-  const handleResizeStart = (e) => {
+export function useResize(stateRef, dispatch) {
+  const isResizingRef = useRef(false);
+  const startXRef = useRef(0);
+  const startWidthRef = useRef(0);
+
+  const handleResizeStart = useCallback((e) => {
     e.preventDefault();
-    component.isResizing = true;
-    component.startX = e.clientX;
-    component.startWidth = component.state.leftPanelWidth;
-  };
+    isResizingRef.current = true;
+    startXRef.current = e.clientX;
+    startWidthRef.current = stateRef.current.leftPanelWidth;
+  }, [stateRef]);
 
-  const handleResizeMove = (e) => {
-    if (!component.isResizing) return;
+  const handleResizeMove = useCallback((e) => {
+    if (!isResizingRef.current) return;
+    const diff = e.clientX - startXRef.current;
+    const width = Math.min(Math.max(startWidthRef.current + diff, LEFT_PANEL_MIN_WIDTH), getLeftPanelMaxWidth());
+    dispatch({ type: 'SET_LEFT_PANEL_WIDTH', width });
+  }, [dispatch]);
 
-    const diff = e.clientX - component.startX;
-    const newWidth = component.startWidth + diff;
-    const clampedWidth = Math.min(Math.max(newWidth, LEFT_PANEL_MIN_WIDTH), getLeftPanelMaxWidth());
+  const handleResizeEnd = useCallback(() => {
+    isResizingRef.current = false;
+  }, []);
 
-    component.setState({ leftPanelWidth: clampedWidth });
-  };
+  const handleWindowResize = useCallback(() => {
+    const maxWidth = getLeftPanelMaxWidth();
+    if (stateRef.current.leftPanelWidth > maxWidth) {
+      dispatch({ type: 'SET_LEFT_PANEL_WIDTH', width: maxWidth });
+    }
+  }, [stateRef, dispatch]);
 
-  const handleResizeEnd = () => {
-    component.isResizing = false;
-  };
-
-  const handleWindowResize = () => {
-    component.setState((state) => {
-      const maxWidth = getLeftPanelMaxWidth();
-      if (state.leftPanelWidth > maxWidth) {
-        return { leftPanelWidth: maxWidth };
-      }
-      return null;
-    });
-  };
-
-  const handleMainClassState = (config) => {
-    component.setState({ mainClass: config });
-  };
-
-  // Return the public API
-  return {
-    handleResizeStart,
-    handleResizeMove,
-    handleResizeEnd,
-    handleWindowResize,
-    handleMainClassState
-  };
+  return { handleResizeStart, handleResizeMove, handleResizeEnd, handleWindowResize };
 }

@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const PORT = process.env.TEST_PORT || 5199;
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
@@ -8,7 +10,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: `http://localhost:${PORT}`,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -22,8 +24,8 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm start',
-    url: 'http://localhost:5173',
+    command: `npx vite --port ${PORT}`,
+    url: `http://localhost:${PORT}`,
     reuseExistingServer: true,
     timeout: 120 * 1000,
   },

@@ -62,17 +62,15 @@ export function buildTerminalOutput(item) {
         { text: ", ", color: "dim" },
         { text: "react-dom", color: "magenta" },
         { text: ", ", color: "dim" },
-        { text: "react-router-dom", color: "magenta" },
+        { text: "three", color: "magenta" },
         { text: ", ", color: "dim" },
-        { text: "@emotion/react", color: "magenta" },
+        { text: "@react-three/fiber", color: "magenta" },
       ],
     },
     {
       delay: 18,
       spans: [
-        { text: "    @radix-ui/react-dialog", color: "magenta" },
-        { text: ", ", color: "dim" },
-        { text: "@radix-ui/react-tooltip", color: "magenta" },
+        { text: "    @react-three/drei", color: "magenta" },
       ],
     },
     {

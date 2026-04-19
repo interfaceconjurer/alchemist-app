@@ -1,182 +1,86 @@
+import { useCallback, useRef } from 'react';
+import { DRAG_THRESHOLD_DISTANCE, DRAG_THRESHOLD_TIME } from '../utils/stateHelpers';
 import {
-  DRAG_THRESHOLD_DISTANCE,
-  DRAG_THRESHOLD_TIME,
-  getDefaultDragThreshold
-} from '../utils/stateHelpers';
-import {
-  calculateDistance,
-  isDragThresholdMet,
-  createGhostElement,
-  updateGhostPosition,
-  removeGhostElement,
-  isOverStage,
-  detectSinglePaneDropZone,
-  detectSplitPaneDropZone
+  calculateDistance, isDragThresholdMet,
+  createGhostElement, updateGhostPosition, removeGhostElement,
+  isOverStage, detectSinglePaneDropZone, detectSplitPaneDropZone
 } from '../utils/dragHelpers';
 
-// Factory function to create drag & drop manager with component instance binding
-export function createDragDropManager(component) {
-  // Enhanced drag handlers with thresholds
-  const handleTabMouseDown = (e, tabId) => {
-    // Prevent drag on close button
-    if (e.target.classList.contains('stage-tab-close')) return;
+export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
+  const dragStateRef = useRef(null);
+  const ghostRef = useRef(null);
 
+  const detectDropZone = useCallback((e) => {
+    if (!stageRef.current) return null;
+    const stageRect = stageRef.current.getBoundingClientRect();
+    if (!isOverStage(e.clientX, e.clientY, stageRect)) return null;
+    const state = stateRef.current;
+    if (!state.splitView.enabled) return detectSinglePaneDropZone(e.clientX, stageRect, state.openTabs.length);
+    return detectSplitPaneDropZone(e.clientX, stageRect, state.splitView.splitterPosition);
+  }, [stageRef, stateRef]);
+
+  const handleTabMouseDown = useCallback((e, tabId) => {
+    if (e.target.classList.contains('stage-tab-close')) return;
     e.preventDefault();
-    component.dragState = {
-      startX: e.clientX,
-      startY: e.clientY,
-      startTime: Date.now(),
-      tabId: tabId,
-      potentialDrag: true
+
+    dragStateRef.current = { startX: e.clientX, startY: e.clientY, startTime: Date.now(), tabId, potentialDrag: true };
+
+    const onDetect = (e) => {
+      const ds = dragStateRef.current;
+      if (!ds || !ds.potentialDrag) return;
+      const distance = calculateDistance(ds.startX, ds.startY, e.clientX, e.clientY);
+      const timeDelta = Date.now() - ds.startTime;
+      if (!isDragThresholdMet(distance, timeDelta, DRAG_THRESHOLD_DISTANCE, DRAG_THRESHOLD_TIME)) return;
+
+      const tabElement = document.querySelector(`[data-tab-id="${ds.tabId}"]`);
+      ghostRef.current = createGhostElement(tabElement, e.clientX, e.clientY);
+      if (ghostRef.current) document.body.appendChild(ghostRef.current);
+
+      dispatch({ type: 'SET_DRAG_STATE', payload: { isDragging: true, tabId: ds.tabId }, draggedTabId: ds.tabId });
+
+      document.removeEventListener('mousemove', onDetect);
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onEnd);
+      document.body.style.cursor = 'grabbing';
     };
 
-    // Add mouse move/up listeners for drag detection
-    document.addEventListener('mousemove', handleDragDetection);
-    document.addEventListener('mouseup', handleDragCancel);
-  };
+    const onMove = (e) => {
+      updateGhostPosition(ghostRef.current, e.clientX, e.clientY);
+      const dropZone = detectDropZone(e);
+      if (dropZone !== stateRef.current.dragThreshold.dropZone) {
+        dispatch({ type: 'SET_DRAG_STATE', payload: { dropZone } });
+      }
+    };
 
-  const handleDragDetection = (e) => {
-    if (!component.dragState || !component.dragState.potentialDrag) return;
+    const onEnd = () => {
+      const { dropZone, tabId: dtTabId } = stateRef.current.dragThreshold;
+      removeGhostElement(ghostRef.current);
+      ghostRef.current = null;
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onEnd);
+      document.body.style.cursor = '';
 
-    const distance = calculateDistance(
-      component.dragState.startX,
-      component.dragState.startY,
-      e.clientX,
-      e.clientY
-    );
-    const timeDelta = Date.now() - component.dragState.startTime;
-
-    // Check thresholds
-    if (isDragThresholdMet(distance, timeDelta, DRAG_THRESHOLD_DISTANCE, DRAG_THRESHOLD_TIME)) {
-      initiateDrag(e);
-    }
-  };
-
-  const initiateDrag = (e) => {
-    const { tabId } = component.dragState;
-
-    // Create ghost element
-    const tabElement = document.querySelector(`[data-tab-id="${tabId}"]`);
-    component.ghostElement = createGhostElement(tabElement, e.clientX, e.clientY);
-    if (component.ghostElement) {
-      document.body.appendChild(component.ghostElement);
-    }
-
-    // Update state to show we're dragging
-    component.setState({
-      dragThreshold: {
-        ...component.state.dragThreshold,
-        isDragging: true,
-        tabId: tabId
-      },
-      draggedTabId: tabId
-    });
-
-    // Switch to drag move handler
-    document.removeEventListener('mousemove', handleDragDetection);
-    document.addEventListener('mousemove', handleDragMove);
-    document.addEventListener('mouseup', handleDragEnd);
-    document.body.style.cursor = 'grabbing';
-  };
-
-  const handleDragMove = (e) => {
-    if (!component.state.dragThreshold.isDragging) return;
-
-    // Update ghost position
-    updateGhostPosition(component.ghostElement, e.clientX, e.clientY);
-
-    // Detect drop zone
-    const dropZone = detectDropZone(e);
-    if (dropZone !== component.state.dragThreshold.dropZone) {
-      component.setState(state => ({
-        dragThreshold: { ...state.dragThreshold, dropZone }
-      }));
-    }
-  };
-
-  const detectDropZone = (e) => {
-    if (!component.stageRef.current) return null;
-
-    const { clientX, clientY } = e;
-    const stageRect = component.stageRef.current.getBoundingClientRect();
-
-    // Check if cursor is over the stage area
-    if (!isOverStage(clientX, clientY, stageRect)) {
-      return null;
-    }
-
-    if (!component.state.splitView.enabled) {
-      return detectSinglePaneDropZone(clientX, stageRect, component.state.openTabs.length);
-    } else {
-      return detectSplitPaneDropZone(clientX, stageRect, component.state.splitView.splitterPosition);
-    }
-  };
-
-  const handleDragEnd = (e) => {
-    const { dropZone, tabId } = component.state.dragThreshold;
-
-    // Clean up ghost element
-    removeGhostElement(component.ghostElement);
-    component.ghostElement = null;
-
-    // Clean up event listeners
-    document.removeEventListener('mousemove', handleDragMove);
-    document.removeEventListener('mouseup', handleDragEnd);
-    document.body.style.cursor = '';
-
-    // Handle the drop
-    if (dropZone && tabId) {
-      if (dropZone === 'split-left' || dropZone === 'split-right') {
-        // Note: initiateSplit will be handled by splitViewManager
-        if (component.initiateSplit) {
-          component.initiateSplit(dropZone, tabId);
-        }
-      } else if (dropZone === 'left' || dropZone === 'right') {
-        // Note: moveTabToPane will be handled by splitViewManager
-        if (component.moveTabToPane) {
-          component.moveTabToPane(dropZone, tabId);
+      if (dropZone && dtTabId) {
+        if (dropZone === 'split-left' || dropZone === 'split-right') {
+          splitViewActions.current.initiateSplit(dropZone, dtTabId);
+        } else if (dropZone === 'left' || dropZone === 'right') {
+          splitViewActions.current.moveTabToPane(dropZone, dtTabId);
         }
       }
-      // 'reorder' case will be handled by existing tab reorder logic
-    }
 
-    // Reset drag state
-    component.setState({
-      dragThreshold: getDefaultDragThreshold(),
-      draggedTabId: null,
-      dropTargetIndex: null
-    });
+      dispatch({ type: 'CLEAR_DRAG' });
+      dragStateRef.current = null;
+    };
 
-    component.dragState = null;
-  };
+    const onCancel = () => {
+      document.removeEventListener('mousemove', onDetect);
+      document.removeEventListener('mouseup', onCancel);
+      dragStateRef.current = null;
+    };
 
-  const handleDragCancel = () => {
-    // Clean up if drag was never initiated
-    document.removeEventListener('mousemove', handleDragDetection);
-    document.removeEventListener('mouseup', handleDragCancel);
-    component.dragState = null;
-  };
+    document.addEventListener('mousemove', onDetect);
+    document.addEventListener('mouseup', onCancel);
+  }, [stateRef, dispatch, detectDropZone, splitViewActions]);
 
-  // Keep old drag handlers for backward compatibility but they won't be used
-  const handleTabDragStart = (e) => { e.preventDefault(); };
-  const handleTabDragOver = (e) => { e.preventDefault(); };
-  const handleTabDragLeave = () => {};
-  const handleTabDrop = () => {};
-  const handleTabDragEnd = () => {};
-
-  // Return the public API
-  return {
-    handleTabMouseDown,
-    handleDragDetection,
-    initiateDrag,
-    handleDragMove,
-    detectDropZone,
-    handleDragEnd,
-    handleDragCancel,
-    handleTabDragStart,
-    handleTabDragOver,
-    handleTabDragLeave,
-    handleTabDrop,
-    handleTabDragEnd
-  };
+  return { handleTabMouseDown };
 }

@@ -8,13 +8,9 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/vitest.setup.js'],
+    exclude: ['tests/**', 'node_modules/**'],
   },
   server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5001',
-        changeOrigin: true,
-      },
-    },
+    port: 5173,
   },
 });

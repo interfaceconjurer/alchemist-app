@@ -154,14 +154,6 @@ test.describe('Comprehensive Split View Tests', () => {
     await rightPaneTab.click();
     await page.waitForTimeout(200);
 
-    // Listen for the debounced PUT that contains the complete split view state.
-    // Filter on the body to skip any intermediate PUTs from earlier debounce cycles.
-    const putResponse = page.waitForResponse((res) => {
-      if (!res.url().includes('workspace-state')) return false;
-      if (res.request().method() !== 'PUT') return false;
-      const body = res.request().postDataJSON();
-      return body?.splitView?.enabled === true;
-    }, { timeout: 8000 });
     await page.locator('.work-item').nth(3).click();
     await page.waitForTimeout(300);
 
@@ -174,8 +166,8 @@ test.describe('Comprehensive Split View Tests', () => {
     await expect(page.locator('.stage-pane--right .stage-tab')).toHaveCount(2);
     await expect(page.locator('.stage-pane--right .stage-tab--preview')).toHaveCount(1);
 
-    // Wait for the debounced save to complete on the server, then reload
-    await putResponse;
+    // Wait for debounced localStorage save (500ms debounce + margin)
+    await page.waitForTimeout(800);
     await page.reload();
     await page.waitForSelector('.App', { timeout: 5000 });
     await page.waitForSelector('.stage-split-container', { state: 'visible', timeout: 10000 });

@@ -1,98 +1,62 @@
+import { useCallback, useRef } from 'react';
 import { DOUBLE_CLICK_DELAY } from '../utils/stateHelpers';
 
-// Factory function to create keyboard shortcuts manager with component instance binding
-export function createKeyboardShortcutsManager(component) {
-  const handleWorkItemClick = (item) => {
-    if (component._clickTimer && component._clickedItemId !== item.id) {
-      clearTimeout(component._clickTimer);
-      component._clickTimer = null;
+export function useKeyboardShortcuts(stateRef, dispatch, tabActions) {
+  const clickTimerRef = useRef(null);
+  const clickedItemIdRef = useRef(null);
+
+  const handleWorkItemClick = useCallback((item) => {
+    if (clickTimerRef.current && clickedItemIdRef.current !== item.id) {
+      clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = null;
     }
-    if (component._clickTimer && component._clickedItemId === item.id) {
-      return;
-    }
-    component._clickedItemId = item.id;
-    component._clickTimer = setTimeout(() => {
-      component._clickTimer = null;
-      component._clickedItemId = null;
-      component.openWorkItemAsPreview(item);
+    if (clickTimerRef.current && clickedItemIdRef.current === item.id) return;
+
+    clickedItemIdRef.current = item.id;
+    clickTimerRef.current = setTimeout(() => {
+      clickTimerRef.current = null;
+      clickedItemIdRef.current = null;
+      tabActions.openWorkItemAsPreview(item);
     }, DOUBLE_CLICK_DELAY);
-  };
+  }, [tabActions]);
 
-  const handleWorkItemDoubleClick = (item) => {
-    if (component._clickTimer) {
-      clearTimeout(component._clickTimer);
-      component._clickTimer = null;
-      component._clickedItemId = null;
+  const handleWorkItemDoubleClick = useCallback((item) => {
+    if (clickTimerRef.current) {
+      clearTimeout(clickTimerRef.current);
+      clickTimerRef.current = null;
+      clickedItemIdRef.current = null;
     }
-    component.openWorkItemAsPersistent(item);
-  };
+    tabActions.openWorkItemAsPersistent(item);
+  }, [tabActions]);
 
-  const handleTabDoubleClick = (tabId) => {
-    component.setState((state) => {
-      // Handle split view - clear preview status for the specific pane
-      if (state.splitView.enabled) {
-        if (state.splitView.leftPanePreviewTabId === tabId) {
-          return {
-            splitView: {
-              ...state.splitView,
-              leftPanePreviewTabId: null
-            }
-          };
-        }
-        if (state.splitView.rightPanePreviewTabId === tabId) {
-          return {
-            splitView: {
-              ...state.splitView,
-              rightPanePreviewTabId: null
-            }
-          };
-        }
-        return null;
-      }
+  const handleTabDoubleClick = useCallback((tabId) => {
+    dispatch({ type: 'TAB_DOUBLE_CLICK', tabId });
+  }, [dispatch]);
 
-      // Original single-pane logic
-      if (state.previewTabId === tabId) {
-        return { previewTabId: null };
-      }
-      return null;
-    });
-  };
+  const toggleCommandPalette = useCallback(() => {
+    dispatch({ type: 'TOGGLE_COMMAND_PALETTE' });
+  }, [dispatch]);
 
-  const toggleCommandPalette = () => {
-    component.setState((state) => ({ commandPaletteOpen: !state.commandPaletteOpen }));
-  };
+  const handlePaletteAction = useCallback((actionId) => {
+    if (actionId === 'action:close-all') tabActions.closeAllTabs();
+  }, [tabActions]);
 
-  const handlePaletteAction = (actionId) => {
-    switch (actionId) {
-      case "action:close-all":
-        component.closeAllTabs();
-        break;
-      default:
-        break;
-    }
-  };
-
-  const handleGlobalKeyDown = (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+  const handleGlobalKeyDown = useCallback((e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
       toggleCommandPalette();
       return;
     }
-    if (component.state.commandPaletteOpen) return;
-    if (e.ctrlKey && e.key === "q") {
+    if (stateRef.current.commandPaletteOpen) return;
+    if (e.ctrlKey && e.key === 'q') {
       e.preventDefault();
-      component.closeActiveTab();
-      return;
+      tabActions.closeActiveTab();
     }
-  };
+  }, [stateRef, toggleCommandPalette, tabActions]);
 
-  // Return the public API
-  return {
-    handleWorkItemClick,
-    handleWorkItemDoubleClick,
-    handleTabDoubleClick,
-    toggleCommandPalette,
-    handlePaletteAction,
-    handleGlobalKeyDown
-  };
+  const cleanup = useCallback(() => {
+    if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
+  }, []);
+
+  return { handleWorkItemClick, handleWorkItemDoubleClick, handleTabDoubleClick, toggleCommandPalette, handlePaletteAction, handleGlobalKeyDown, cleanup };
 }

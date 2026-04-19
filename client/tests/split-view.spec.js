@@ -1,28 +1,13 @@
 import { test, expect } from '@playwright/test';
 
-// These tests can start failing when (1) more specs run in parallel and leave tabs/split state,
-// or (2) the app loads state from the server (Vite proxies /api to Express): clearing only
-// localStorage then reloading still yields server state. beforeEach clears storage, resets server
-// state when the API is available, and closes any remaining tabs without using stale refs.
-
 test.describe('Split View Tab System', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:5173?test=' + Date.now());
+    await page.goto('/?test=' + Date.now());
 
     await page.evaluate(() => {
       localStorage.clear();
       sessionStorage.clear();
     });
-
-    // Reset server state so reload gives a clean slate (no-op if only Vite is running)
-    try {
-      await page.request.put('http://localhost:5173/api/workspace-state', {
-        data: { openTabIds: [], activeTabId: null },
-        timeout: 2000,
-      });
-    } catch {
-      // Server not available (e.g. only npm start / Vite)
-    }
 
     await page.reload();
 

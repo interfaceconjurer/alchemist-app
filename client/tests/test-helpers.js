@@ -22,7 +22,7 @@ export async function cleanupTabs(page) {
 
 export async function ensureCleanState(page) {
   // Navigate to the app with a cache-busting parameter to force clean state
-  await page.goto('http://localhost:5173?test=' + Date.now());
+  await page.goto('/?test=' + Date.now());
 
   // Clear localStorage and sessionStorage
   await page.evaluate(() => {

@@ -1,16 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import MetatronsCube3D from './MetatronsCube3D';
-import FlowerOfLife3D from './FlowerOfLife3D';
-import Tetrahedron3D from './Tetrahedron3D';
-import Cube3D from './Cube3D';
-import Octahedron3D from './Octahedron3D';
-import Dodecahedron3D from './Dodecahedron3D';
-import Icosahedron3D from './Icosahedron3D';
+import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import './view.css';
+
+const Tetrahedron3D = lazy(() => import('./Tetrahedron3D'));
+const Cube3D = lazy(() => import('./Cube3D'));
+const Octahedron3D = lazy(() => import('./Octahedron3D'));
+const Dodecahedron3D = lazy(() => import('./Dodecahedron3D'));
+const Icosahedron3D = lazy(() => import('./Icosahedron3D'));
 
 const COMPONENTS = [Tetrahedron3D, Cube3D, Octahedron3D, Dodecahedron3D, Icosahedron3D];
 
-// const COMPONENTS = [Icosahedron3D];
 const HOLD_DURATION = 5000; // How long to display each shape
 const SHRINK_DURATION = 1600; // Shrink-out time (ms) — matches CSS
 const GROW_DURATION = 1600; // Grow-in time (ms) — matches CSS
@@ -57,7 +55,9 @@ function AlchemySymbol() {
     <article className="symbolContainer">
       <section className="symbol" style={{ opacity: 1 }}>
         <div className={wrapperClass}>
-          <ActiveComponent />
+          <Suspense fallback={null}>
+            <ActiveComponent />
+          </Suspense>
         </div>
       </section>
     </article>
