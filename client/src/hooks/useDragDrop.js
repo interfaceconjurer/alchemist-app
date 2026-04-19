@@ -3,7 +3,8 @@ import { DRAG_THRESHOLD_DISTANCE, DRAG_THRESHOLD_TIME } from '../utils/stateHelp
 import {
   calculateDistance, isDragThresholdMet,
   createGhostElement, updateGhostPosition, removeGhostElement,
-  isOverStage, detectSinglePaneDropZone, detectSplitPaneDropZone
+  isOverStage, detectSinglePaneDropZone, detectSplitPaneDropZone,
+  detectSidebarDropZone
 } from '../utils/dragHelpers';
 
 export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
@@ -82,5 +83,70 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
     document.addEventListener('mouseup', onCancel);
   }, [stateRef, dispatch, detectDropZone, splitViewActions]);
 
-  return { handleTabMouseDown };
+  const handleWorkItemMouseDown = useCallback((e, item) => {
+    e.preventDefault();
+
+    dragStateRef.current = { startX: e.clientX, startY: e.clientY, startTime: Date.now(), item, potentialDrag: true };
+
+    const onDetect = (e) => {
+      const ds = dragStateRef.current;
+      if (!ds || !ds.potentialDrag) return;
+      const distance = calculateDistance(ds.startX, ds.startY, e.clientX, e.clientY);
+      const timeDelta = Date.now() - ds.startTime;
+      if (!isDragThresholdMet(distance, timeDelta, DRAG_THRESHOLD_DISTANCE, DRAG_THRESHOLD_TIME)) return;
+
+      const el = document.querySelector(`[data-work-item-id="${ds.item.id}"]`);
+      ghostRef.current = createGhostElement(el, e.clientX, e.clientY);
+      if (ghostRef.current) document.body.appendChild(ghostRef.current);
+
+      dispatch({ type: 'SET_DRAG_STATE', payload: { isDragging: true, dragSource: 'sidebar' } });
+
+      document.removeEventListener('mousemove', onDetect);
+      document.removeEventListener('mouseup', onCancel);
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onEnd);
+      document.body.style.cursor = 'grabbing';
+    };
+
+    const onMove = (e) => {
+      updateGhostPosition(ghostRef.current, e.clientX, e.clientY);
+      if (!stageRef.current) return;
+      const stageRect = stageRef.current.getBoundingClientRect();
+      const state = stateRef.current;
+      const dropZone = isOverStage(e.clientX, e.clientY, stageRect)
+        ? detectSidebarDropZone(e.clientX, stageRect, state.splitView, state.openTabs.length)
+        : null;
+      if (dropZone !== state.dragThreshold.dropZone) {
+        dispatch({ type: 'SET_DRAG_STATE', payload: { dropZone } });
+      }
+    };
+
+    const onEnd = () => {
+      const { dropZone } = stateRef.current.dragThreshold;
+      const item = dragStateRef.current?.item;
+      removeGhostElement(ghostRef.current);
+      ghostRef.current = null;
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onEnd);
+      document.body.style.cursor = '';
+
+      if (dropZone && item) {
+        dispatch({ type: 'SIDEBAR_DROP', item, dropZone });
+      }
+
+      dispatch({ type: 'CLEAR_DRAG' });
+      dragStateRef.current = null;
+    };
+
+    const onCancel = () => {
+      document.removeEventListener('mousemove', onDetect);
+      document.removeEventListener('mouseup', onCancel);
+      dragStateRef.current = null;
+    };
+
+    document.addEventListener('mousemove', onDetect);
+    document.addEventListener('mouseup', onCancel);
+  }, [stateRef, dispatch, stageRef]);
+
+  return { handleTabMouseDown, handleWorkItemMouseDown };
 }

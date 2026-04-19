@@ -36,7 +36,8 @@ export const getInitialState = () => ({
     startTime: 0,
     tabId: null,
     isDragging: false,
-    dropZone: null
+    dropZone: null,
+    dragSource: null
   }
 });
 
@@ -54,7 +55,8 @@ export const getDefaultDragThreshold = () => ({
   startTime: 0,
   tabId: null,
   isDragging: false,
-  dropZone: null
+  dropZone: null,
+  dragSource: null
 });
 
 // Get default split view state
