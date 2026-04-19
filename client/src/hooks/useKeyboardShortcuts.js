@@ -30,31 +30,15 @@ export function useKeyboardShortcuts(stateRef, dispatch, tabActions) {
   }, [tabActions]);
 
   const handleTabDoubleClick = useCallback((tabId) => {
-    const state = stateRef.current;
-    if (state.splitView.enabled) {
-      if (state.splitView.leftPanePreviewTabId === tabId) {
-        dispatch({ splitView: { ...state.splitView, leftPanePreviewTabId: null } });
-        return;
-      }
-      if (state.splitView.rightPanePreviewTabId === tabId) {
-        dispatch({ splitView: { ...state.splitView, rightPanePreviewTabId: null } });
-        return;
-      }
-      return;
-    }
-    if (state.previewTabId === tabId) {
-      dispatch({ previewTabId: null });
-    }
-  }, [stateRef, dispatch]);
+    dispatch({ type: 'TAB_DOUBLE_CLICK', tabId });
+  }, [dispatch]);
 
   const toggleCommandPalette = useCallback(() => {
-    dispatch({ commandPaletteOpen: !stateRef.current.commandPaletteOpen });
-  }, [stateRef, dispatch]);
+    dispatch({ type: 'TOGGLE_COMMAND_PALETTE' });
+  }, [dispatch]);
 
   const handlePaletteAction = useCallback((actionId) => {
-    if (actionId === 'action:close-all') {
-      tabActions.closeAllTabs();
-    }
+    if (actionId === 'action:close-all') tabActions.closeAllTabs();
   }, [tabActions]);
 
   const handleGlobalKeyDown = useCallback((e) => {
@@ -74,13 +58,5 @@ export function useKeyboardShortcuts(stateRef, dispatch, tabActions) {
     if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
   }, []);
 
-  return {
-    handleWorkItemClick,
-    handleWorkItemDoubleClick,
-    handleTabDoubleClick,
-    toggleCommandPalette,
-    handlePaletteAction,
-    handleGlobalKeyDown,
-    cleanup
-  };
+  return { handleWorkItemClick, handleWorkItemDoubleClick, handleTabDoubleClick, toggleCommandPalette, handlePaletteAction, handleGlobalKeyDown, cleanup };
 }
