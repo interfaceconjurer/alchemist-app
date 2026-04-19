@@ -41,7 +41,12 @@ function closeSplitIfEmpty(state, newLeftTabs, newRightTabs, closedTabId, wasAct
   };
 }
 
+function openMobile(state, item) {
+  return { ...state, openTabs: [{ ...item }], activeTabId: item.id, previewTabId: null, animatedTabs: new Set(), fadingTabs: new Set() };
+}
+
 function openPreview(state, item) {
+  if (state.isMobile) return openMobile(state, item);
   if (state.splitView.enabled) {
     const activePaneId = state.splitView.activePaneId || 'left';
     const { tabsKey, activeKey, previewKey } = paneKeys(activePaneId);
@@ -78,6 +83,7 @@ function openPreview(state, item) {
 }
 
 function openPersistent(state, item) {
+  if (state.isMobile) return openMobile(state, item);
   if (state.splitView.enabled) {
     const activePaneId = state.splitView.activePaneId || 'left';
     const { tabsKey, activeKey } = paneKeys(activePaneId);
@@ -191,6 +197,21 @@ function moveTabToPane(state, targetPane, tabId) {
 
 export function workspaceReducer(state, action) {
   switch (action.type) {
+    case 'SET_MOBILE': {
+      const newState = { ...state, isMobile: action.isMobile };
+      if (action.isMobile) {
+        if (newState.splitView.enabled) {
+          newState.splitView = getDefaultSplitViewState();
+        }
+        if (newState.openTabs.length > 1 && newState.activeTabId) {
+          const activeTab = newState.openTabs.find(t => t.id === newState.activeTabId);
+          newState.openTabs = activeTab ? [activeTab] : [];
+          newState.previewTabId = null;
+        }
+      }
+      return newState;
+    }
+
     case 'LOAD_PERSISTED':
       return { ...state, ...action.payload };
 

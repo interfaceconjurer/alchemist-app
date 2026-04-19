@@ -21,6 +21,8 @@ import { useDragDrop } from "./hooks/useDragDrop";
 import { useSplitView } from "./hooks/useSplitView";
 import { useResize } from "./hooks/useResize";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { useIsMobile } from "./hooks/useIsMobile";
+import { useSwipeBack } from "./hooks/useSwipeBack";
 
 function App() {
   const [state, dispatch] = useReducer(workspaceReducer, undefined, getInitialState);
@@ -37,6 +39,8 @@ function App() {
   const { handleTabMouseDown } = useDragDrop(stateRef, dispatch, stageRef, splitViewActionsRef);
   const resize = useResize(stateRef, dispatch);
   const keyboard = useKeyboardShortcuts(stateRef, dispatch, tabActions);
+  const isMobile = useIsMobile(dispatch);
+  useSwipeBack(stageRef, isMobile, !!state.activeTabId, dispatch);
 
   const { debouncedSave, flush } = useMemo(() => createDebouncedSave(500), []);
 
@@ -160,6 +164,13 @@ function App() {
           openTabIds={state.openTabs.map((t) => t.id)}
         />
         <div className="top-bar">
+          {isMobile && state.activeTabId && (
+            <button type="button" className="top-bar-back" onClick={() => dispatch({ type: 'CLOSE_ACTIVE_TAB' })} aria-label="Back to sidebar">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+          )}
           <button type="button" className="top-bar-search" onClick={keyboard.toggleCommandPalette} aria-label="Search">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8" />
@@ -170,8 +181,8 @@ function App() {
           <ThemeToggle />
         </div>
         <main className="main">
-          <section className="left-panel" style={{ width: state.leftPanelWidth }}>
-            <div className="left-panel-resize-handle" onMouseDown={resize.handleResizeStart} aria-label="Resize left panel" />
+          <section className="left-panel" style={isMobile ? undefined : { width: state.leftPanelWidth }}>
+            {!isMobile && <div className="left-panel-resize-handle" onMouseDown={resize.handleResizeStart} aria-label="Resize left panel" />}
             <section className="left-panel-top">
               <header className="App-header">
                 <AlchemySymbol />
@@ -215,12 +226,12 @@ function App() {
               ))}
             </section>
           </section>
-          <section className="stage">
+          <section className={`stage${isMobile && !state.activeTabId ? ' stage--hidden' : ''}`}>
             <div className="stage-editor">
               <div className="stage-main" ref={stageRef} style={{ position: 'relative' }}>
-                {!state.splitView.enabled ? (
+                {isMobile || !state.splitView.enabled ? (
                   <>
-                    {renderTabs(state.openTabs)}
+                    {!isMobile && renderTabs(state.openTabs)}
                     {state.openTabs.length > 0 ? renderTabContent(state.openTabs) : (
                       <div className="stage-empty">
                         <div className="stage-empty-icon-wrap">
@@ -272,15 +283,17 @@ function App() {
                     </div>
                   </div>
                 )}
-                <DropZones
-                  isDragging={state.dragThreshold.isDragging && !!stageRef.current}
-                  dropZone={state.dragThreshold.dropZone}
-                  splitViewEnabled={state.splitView.enabled}
-                  openTabsCount={state.openTabs.length}
-                  splitterPosition={state.splitView.splitterPosition}
-                />
+                {!isMobile && (
+                  <DropZones
+                    isDragging={state.dragThreshold.isDragging && !!stageRef.current}
+                    dropZone={state.dragThreshold.dropZone}
+                    splitViewEnabled={state.splitView.enabled}
+                    openTabsCount={state.openTabs.length}
+                    splitterPosition={state.splitView.splitterPosition}
+                  />
+                )}
               </div>
-              {state.activeTabId && (
+              {!isMobile && state.activeTabId && (
                 <StatusBar activeTab={state.openTabs.find((t) => t.id === state.activeTabId)} sectionLabel={getSectionForItem(state.activeTabId)} />
               )}
             </div>
