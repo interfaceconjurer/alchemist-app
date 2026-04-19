@@ -19,8 +19,7 @@
     "test": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:debug": "playwright test --debug",
-    "update:packages": "node wipe-dependencies.js && rm -rf node_modules && npm update --save-dev && npm update --save"
+    "test:e2e:debug": "playwright test --debug"
   },
   "engines": {
     "npm": ">=9.0.0",
