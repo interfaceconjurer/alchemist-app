@@ -697,13 +697,17 @@ a:active {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease-out;
 }
 
 .stage-drop-zone--active {
   background: var(--drop-zone-active-bg);
   border-color: var(--drop-zone-active-border);
   box-shadow: var(--drop-zone-active-shadow);
+}
+
+.stage-drop-zone--animated {
+  transition: left 0.18s ease-out, width 0.18s ease-out;
 }
 
 .stage-drop-zone-label {

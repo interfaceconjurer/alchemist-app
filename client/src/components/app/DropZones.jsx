@@ -33,31 +33,22 @@ const DropZones = ({
   }
 
   if (isSidebar && openTabsCount >= 1) {
+    let left, width, label;
     if (dropZone === 'split-left') {
-      return (
-        <div className="stage-drop-zone stage-drop-zone--active"
-          style={{ position: 'absolute', left: 0, top: 0, width: '50%', height: '100%' }}>
-          <span className="stage-drop-zone-label">Split left</span>
-        </div>
-      );
+      left = '0%'; width = '50%'; label = 'Split left';
+    } else if (dropZone === 'add-tab') {
+      left = '0%'; width = '100%'; label = 'Open here';
+    } else if (dropZone === 'split-right') {
+      left = '50%'; width = '50%'; label = 'Split right';
+    } else {
+      return null;
     }
-    if (dropZone === 'add-tab') {
-      return (
-        <div className="stage-drop-zone stage-drop-zone--active"
-          style={{ position: 'absolute', left: '12.5%', top: 0, width: '75%', height: '100%' }}>
-          <span className="stage-drop-zone-label">Open here</span>
-        </div>
-      );
-    }
-    if (dropZone === 'split-right') {
-      return (
-        <div className="stage-drop-zone stage-drop-zone--active"
-          style={{ position: 'absolute', right: 0, top: 0, width: '50%', height: '100%' }}>
-          <span className="stage-drop-zone-label">Split right</span>
-        </div>
-      );
-    }
-    return null;
+    return (
+      <div className="stage-drop-zone stage-drop-zone--active stage-drop-zone--animated"
+        style={{ position: 'absolute', left, top: 0, width, height: '100%' }}>
+        <span className="stage-drop-zone-label">{label}</span>
+      </div>
+    );
   }
 
   if (isSidebar) {

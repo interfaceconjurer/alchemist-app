@@ -136,6 +136,8 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
 
       dispatch({ type: 'CLEAR_DRAG' });
       dragStateRef.current = null;
+
+      window.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); }, { capture: true, once: true });
     };
 
     const onCancel = () => {
