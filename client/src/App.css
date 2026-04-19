@@ -334,8 +334,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .stage-empty-icon-wrap {
-  width: 144px;
-  height: 144px;
+  width: 110px;
+  height: 110px;
   flex-shrink: 0;
 }
 
@@ -344,8 +344,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .stage-empty-icon {
-  width: 144px;
-  height: 144px;
+  width: 110px;
+  height: 110px;
   display: block;
   color: var(--stage-empty-icon-color);
 }
