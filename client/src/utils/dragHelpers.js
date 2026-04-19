@@ -41,7 +41,7 @@ export const createGhostElement = (sourceElement, clientX, clientY, { preserveSt
     const rect = sourceElement.getBoundingClientRect();
     ghost.style.width = `${rect.width}px`;
     ghost.style.opacity = '0.85';
-    ghost.style.transform = 'translate(-50%, -50%) rotate(-4deg)';
+    ghost.style.transform = 'translate(-50%, -50%) rotate(4deg)';
     ghost.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
     ghost.style.transition = 'transform 0.15s ease-out';
   } else {
