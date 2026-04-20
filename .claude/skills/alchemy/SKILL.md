@@ -36,11 +36,13 @@ The alchemist-app lives at `/Users/j.wright/git-repos/alchemist-app`. Project da
    - `direction` — "Direction" (vision, strategy, north star work)
    - `sidequests` — "Side quests" (tinkering, experiments, curiosity-driven)
 
-5. **Generate the project JSON** and write it to `client/src/data/projects/<repo-name>.json`.
+5. **Generate the project JSON** following the template at `.claude/skills/alchemy/template.json`. Read the template first — it defines the tone, structure, and level of detail expected. Write the result to `client/src/data/projects/<repo-name>.json`.
 
 6. **Present what you created** — show the user the full JSON in a readable format so they can see what they got.
 
 ### Project JSON schema
+
+**Reference template:** `.claude/skills/alchemy/template.json` — read this file before generating. It shows the expected structure, editorial tone, and artifact detail level.
 
 ```json
 {
