@@ -1,6 +1,44 @@
 import React from "react";
 import "./WorkContent.css";
 
+function ArtifactRenderer({ artifact, index }) {
+  const type = artifact.type || 'image';
+
+  if (type === 'diagram') {
+    return (
+      <div className="work-content-artifact work-content-artifact--diagram">
+        <div className="work-content-image-placeholder">
+          <img src={artifact.src} alt={artifact.alt} loading="lazy" />
+        </div>
+        {artifact.label && <h4 className="work-content-artifact-label">{artifact.label}</h4>}
+        {artifact.description && <p className="work-content-artifact-description">{artifact.description}</p>}
+      </div>
+    );
+  }
+
+  if (type === 'code') {
+    return (
+      <div className="work-content-artifact work-content-artifact--code">
+        {artifact.label && <h4 className="work-content-artifact-label">{artifact.label}</h4>}
+        <pre className="work-content-code"><code>{artifact.code}</code></pre>
+        {artifact.description && <p className="work-content-artifact-description">{artifact.description}</p>}
+      </div>
+    );
+  }
+
+  return (
+    <div className="work-content-artifact">
+      <div className="work-content-image-placeholder">
+        <img src={artifact.src} alt={artifact.alt} loading="lazy" />
+      </div>
+      <div className="work-content-artifact-copy">
+        {artifact.label && <h4 className="work-content-artifact-label">{artifact.label}</h4>}
+        {artifact.description && <p className="work-content-artifact-description">{artifact.description}</p>}
+      </div>
+    </div>
+  );
+}
+
 function WorkContent({ content }) {
   if (!content) {
     return <p className="stage-content-placeholder">Content for this work item will go here.</p>;
@@ -27,15 +65,7 @@ function WorkContent({ content }) {
           <h3 className="work-content-heading">Artifacts</h3>
           <div className="work-content-artifacts">
             {content.artifacts.map((artifact, i) => (
-              <div key={i} className="work-content-artifact">
-                <div className="work-content-image-placeholder">
-                  <img src={artifact.src} alt={artifact.alt} loading="lazy" />
-                </div>
-                <div className="work-content-artifact-copy">
-                  {artifact.label && <h4 className="work-content-artifact-label">{artifact.label}</h4>}
-                  {artifact.description && <p className="work-content-artifact-description">{artifact.description}</p>}
-                </div>
-              </div>
+              <ArtifactRenderer key={i} artifact={artifact} index={i} />
             ))}
           </div>
         </section>
