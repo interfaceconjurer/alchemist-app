@@ -1,0 +1,64 @@
+{
+  "id": "fine-tunes",
+  "section": "sidequests",
+  "title": "Fine Tunes",
+  "description": "Custom AI art model training via CLI — no GPU required.",
+  "date": "2025",
+  "tags": ["Python", "CLI", "Replicate", "Flux LoRA", "Generative AI"],
+  "repo": "https://github.com/interfaceconjurer/fine-tunes",
+  "content": {
+    "context": "A command-line tool for training custom Flux LoRA models on Replicate's infrastructure. Born from wanting to develop a personal visual style for AI-generated art without managing GPUs or wrangling notebook environments — just point it at a folder of reference images and go. The showcase model, Android Dream v4, is trained on painterly Blade Runner 2049-inspired poster art with atmospheric cyberpunk cityscapes and dramatic scale.",
+    "goals": [
+      "Build a zero-GPU-setup CLI for end-to-end model training and inference",
+      "Support the full creative loop: train, tune, generate, iterate with img2img",
+      "Make LoRA parameter tuning accessible through clear documentation and diagrams",
+      "Train a custom model that produces a cohesive, recognizable visual style"
+    ],
+    "artifacts": [
+      {
+        "type": "diagram",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Pipeline%20%E2%80%94%20Dark.svg",
+        "alt": "Flux style pipeline showing train, status, and generate stages",
+        "label": "Training Pipeline",
+        "description": "The full pipeline from dataset preparation through training to image generation — all orchestrated through a single CLI with three commands."
+      },
+      {
+        "type": "code",
+        "code": "# 1. Train your model\npython flux_style_finetune.py train --images-dir ./my_artwork --model-name my-style --username you\n\n# 2. Check training status\npython flux_style_finetune.py status\n\n# 3. Generate images\npython flux_style_finetune.py generate --prompt \"your prompt\" --model-name my-style --username you\n\n# 3b. Transform existing images (img2img)\npython flux_style_finetune.py generate --image ./photo.jpg --prompt \"style it\" --model-name my-style --username you",
+        "alt": "CLI usage showing the three-step workflow",
+        "label": "Three-Step Workflow",
+        "description": "The entire creative loop distilled to three commands. Train a model, check when it's ready, then generate infinite variations — including img2img style transfer."
+      },
+      {
+        "type": "diagram",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/LoRA%20Scale%20Guide%20%E2%80%94%20Dark.svg",
+        "alt": "LoRA scale guide showing style strength from subtle to dominant",
+        "label": "LoRA Scale Tuning",
+        "description": "Visual guide to the key creative control — LoRA scale determines how strongly your trained style overrides the base model, from subtle influence to full stylistic dominance."
+      },
+      {
+        "type": "diagram",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Costs%20%E2%80%94%20Dark.svg",
+        "alt": "Cost breakdown for training and generation on Replicate",
+        "label": "Cost Model",
+        "description": "Transparent cost breakdown — training a model runs about $1.50, and generation is fractions of a cent per image. Makes experimentation cheap."
+      },
+      {
+        "type": "image",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/android-dream-v4-cover.webp",
+        "alt": "Android Dream v4 hero image — painterly cyberpunk cityscape",
+        "label": "Android Dream v4",
+        "description": "The showcase model. Trained on 7 captioned images of painterly Blade Runner 2049-inspired poster art. Features atmospheric cyberpunk cityscapes with dramatic scale, bold warm-vs-cool palettes, and contemplative isolation."
+      }
+    ],
+    "outcome": [
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/gallery-1.png", "alt": "Generated cyberpunk cityscape with towering architecture", "caption": "Android Dream v4 — atmospheric scale" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/gallery-2.png", "alt": "Generated scene with holographic projections", "caption": "Android Dream v4 — holographic elements" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/gallery-3.png", "alt": "Generated dystopian landscape with god rays", "caption": "Android Dream v4 — light and fog" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/gallery-4.png", "alt": "Generated scene with warm-cool color contrast", "caption": "Android Dream v4 — color palette" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/gallery-5.png", "alt": "Generated brutalist architecture scene", "caption": "Android Dream v4 — brutalist grandeur" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/gallery-6.png", "alt": "Generated silhouetted figure against massive structure", "caption": "Android Dream v4 — human scale" }
+    ],
+    "whatsNext": "Exploring multi-model blending — combining Android Dream with other trained styles to produce hybrid aesthetics. Also eyeing an automated prompt-sweep tool that generates parameter matrices for systematic exploration of the style space."
+  }
+}
