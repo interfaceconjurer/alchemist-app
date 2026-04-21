@@ -1,0 +1,87 @@
+{
+  "id": "fine-tunes",
+  "section": "sidequests",
+  "title": "Fine Tunes",
+  "description": "Curate images, run a prompt, get a trained model. That's it.",
+  "date": "2025",
+  "tags": ["Python", "CLI", "Replicate", "Flux LoRA", "Generative AI"],
+  "repo": "https://github.com/interfaceconjurer/fine-tunes",
+  "content": {
+    "context": "Training a custom image model sounds like it should be hard — GPU provisioning, notebook wrangling, cryptic hyperparameters. It isn't, if someone breaks it down for you. Fine Tunes distills the entire Flux LoRA fine-tuning process into a single repo that an AI agent can clone, set up, and walk you through. Curate a folder of images, point the agent at it, and everything else is automated. The goal was to make model training legible — not just possible, but something a curious person could understand end to end by following along.",
+    "goals": [
+      "Distill fine-tuning into succinct, digestible steps anyone can follow",
+      "Automate the full workflow so a user only needs to curate images and run a prompt",
+      "Make LoRA parameter tuning accessible through clear documentation and visual guides",
+      "Produce a showcase model that proves the pipeline works — Android Dream v4"
+    ],
+    "artifacts": [
+      {
+        "type": "diagram",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/fine_tunes_logo_dark.svg",
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/fine_tunes_logo_light.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/fine_tunes_logo_dark.svg"
+        },
+        "alt": "Fine Tunes logo",
+        "label": "Project Identity",
+        "description": "The logo for the Python CLI that powers the entire fine-tuning workflow."
+      },
+      {
+        "type": "diagram",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Pipeline%20%E2%80%94%20Dark.svg",
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Pipeline%20%E2%80%94%20Light.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Pipeline%20%E2%80%94%20Dark.svg"
+        },
+        "alt": "Flux style pipeline showing train, status, and generate stages",
+        "label": "Training Pipeline",
+        "description": "The full pipeline from dataset preparation through training to image generation — all orchestrated through a single CLI with three commands."
+      },
+      {
+        "type": "code",
+        "code": "# 1. Train your model\npython flux_style_finetune.py train --images-dir ./my_artwork --model-name my-style --username you\n\n# 2. Check training status\npython flux_style_finetune.py status\n\n# 3. Generate images\npython flux_style_finetune.py generate --prompt \"your prompt\" --model-name my-style --username you\n\n# 3b. Transform existing images (img2img)\npython flux_style_finetune.py generate --image ./photo.jpg --prompt \"style it\" --model-name my-style --username you",
+        "alt": "CLI usage showing the three-step workflow",
+        "label": "Three-Step Workflow",
+        "description": "The entire creative loop distilled to three commands. Train a model, check when it's ready, then generate infinite variations — including img2img style transfer."
+      },
+      {
+        "type": "diagram",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/LoRA%20Scale%20Guide%20%E2%80%94%20Dark.svg",
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/LoRA%20Scale%20Guide%20%E2%80%94%20Light.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/LoRA%20Scale%20Guide%20%E2%80%94%20Dark.svg"
+        },
+        "alt": "LoRA scale guide showing style strength from subtle to dominant",
+        "label": "LoRA Scale Tuning",
+        "description": "Visual guide to the key creative control — LoRA scale determines how strongly your trained style overrides the base model, from subtle influence to full stylistic dominance."
+      },
+      {
+        "type": "diagram",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Costs%20%E2%80%94%20Dark.svg",
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Costs%20%E2%80%94%20Light.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Costs%20%E2%80%94%20Dark.svg"
+        },
+        "alt": "Cost breakdown for training and generation on Replicate",
+        "label": "Cost Model",
+        "description": "Transparent cost breakdown — training a model runs about $1.50, and generation is fractions of a cent per image. Makes experimentation cheap."
+      },
+      {
+        "type": "image",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/android-dream-v4-cover.webp",
+        "alt": "Android Dream v4 hero image — painterly cyberpunk cityscape",
+        "label": "Android Dream v4",
+        "description": "The showcase model. Trained on 7 captioned images of painterly Blade Runner 2049-inspired poster art. Features atmospheric cyberpunk cityscapes with dramatic scale, bold warm-vs-cool palettes, and contemplative isolation."
+      }
+    ],
+    "outcome": [
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/gallery-1.png", "alt": "Generated cyberpunk cityscape with towering architecture", "caption": "Android Dream v4 — atmospheric scale" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/gallery-2.png", "alt": "Generated scene with holographic projections", "caption": "Android Dream v4 — holographic elements" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/gallery-3.png", "alt": "Generated dystopian landscape with god rays", "caption": "Android Dream v4 — light and fog" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/gallery-4.png", "alt": "Generated scene with warm-cool color contrast", "caption": "Android Dream v4 — color palette" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/gallery-5.png", "alt": "Generated brutalist architecture scene", "caption": "Android Dream v4 — brutalist grandeur" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/gallery-6.png", "alt": "Generated silhouetted figure against massive structure", "caption": "Android Dream v4 — human scale" }
+    ],
+    "whatsNext": "Next step is packaging the agent prompt so anyone can run it cold — clone the repo, provide a folder of images, and have a trained model generating in under thirty minutes. Also exploring multi-model blending and automated prompt-sweep tools for systematic style space exploration."
+  }
+}

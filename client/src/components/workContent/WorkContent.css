@@ -3,7 +3,7 @@
 }
 
 .work-content-section {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .work-content-section:last-child {
@@ -58,7 +58,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
 }
 
 .work-content-artifact-label {
@@ -75,6 +75,7 @@
   color: var(--text-color);
   opacity: 0.85;
   margin: 0;
+  padding-bottom: 1rem;
 }
 
 /* Outcome — horizontal scrollable row */
@@ -119,4 +120,31 @@
   color: var(--text-color);
   opacity: 0.8;
   margin-top: 0.5rem;
+}
+
+/* Diagram artifacts — full width */
+.work-content-artifact--diagram {
+  grid-column: 1 / -1;
+  padding-bottom: 1rem;
+}
+
+.work-content-artifact--diagram .work-content-image-placeholder {
+  aspect-ratio: auto;
+}
+
+/* Code artifacts — full width */
+.work-content-artifact--code {
+  grid-column: 1 / -1;
+}
+
+.work-content-code {
+  background-color: var(--stage-tabs-bg);
+  border: 1px solid var(--border-color-light);
+  border-radius: 0.375rem;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin: 0.5rem 0;
 }

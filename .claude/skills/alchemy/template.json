@@ -1,0 +1,56 @@
+{
+  "id": "project-slug",
+  "section": "trenches|direction|sidequests",
+  "title": "Placeholder Project Alpha",
+  "description": "Design & development — day to day.",
+  "date": "January 15, 2024",
+  "tags": ["React", "TypeScript", "Figma"],
+  "repo": "https://github.com/owner/repo",
+  "content": {
+    "context": "A greenfield product build from zero to launch. The team needed a designer who could also ship production code, bridging the gap between design intent and implementation detail.",
+    "goals": [
+      "Deliver a fully responsive web app in 12 weeks",
+      "Establish a component library that scales across features",
+      "Reduce design-to-dev handoff friction through shared tooling"
+    ],
+    "artifacts": [
+      {
+        "type": "image",
+        "src": "/images/placeholder.png",
+        "alt": "Component library overview",
+        "label": "Component Library",
+        "description": "The component library grew to 40+ primitives, each with documented props and usage examples. Every component was tested in isolation and composed into page-level layouts."
+      },
+      {
+        "type": "image",
+        "src": "/images/placeholder.png",
+        "alt": "Design token system",
+        "label": "Token System",
+        "description": "A shared token system ensured visual consistency between Figma and code. Colors, spacing, and typography all derived from a single source of truth."
+      },
+      {
+        "type": "diagram",
+        "src": "/images/placeholder-dark.svg",
+        "sources": {
+          "light": "/images/placeholder-light.svg",
+          "dark": "/images/placeholder-dark.svg"
+        },
+        "alt": "Storybook documentation",
+        "label": "Living Documentation",
+        "description": "Storybook served as the single reference for all component states, edge cases, and accessibility annotations. Use 'sources' with light/dark URLs when the README has theme variants."
+      },
+      {
+        "type": "image",
+        "src": "/images/placeholder.png",
+        "alt": "CI/CD pipeline diagram",
+        "label": "Automated Pipeline",
+        "description": "Visual regression tests ran on every PR, catching unintended style changes before they reached production."
+      }
+    ],
+    "outcome": [
+      { "src": "/images/placeholder.png", "alt": "Final product screenshot", "caption": "Launched product — landing page" },
+      { "src": "/images/placeholder.png", "alt": "Mobile responsive view", "caption": "Responsive mobile layout" }
+    ],
+    "whatsNext": "The component library is now being adopted by two other teams. Next step is extracting it into a standalone package with versioned releases."
+  }
+}
