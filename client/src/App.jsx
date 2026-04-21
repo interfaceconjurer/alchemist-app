@@ -236,23 +236,23 @@ function App() {
                     {!isMobile && renderTabs(state.openTabs)}
                     {state.openTabs.length > 0 ? renderTabContent(state.openTabs) : (
                       <div className="stage-empty">
-                        <div className="stage-empty-icon-wrap">
-                          <svg className="stage-empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 122" width={144} height={144} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-                            <defs>
-                              <clipPath id="stage-empty-beaker-clip"><path fill="black" d={icons.beaker} /></clipPath>
-                              <linearGradient id="stage-empty-shimmer-grad" gradientUnits="objectBoundingBox" x1="1" y1="1" x2="0" y2="0">
-                                <stop offset="0" stopColor="transparent" /><stop offset="0.35" stopColor="transparent" />
-                                <stop offset="0.5" stopColor="rgba(120, 120, 120, 0.35)" />
-                                <stop offset="0.65" stopColor="transparent" /><stop offset="1" stopColor="transparent" />
-                              </linearGradient>
-                            </defs>
-                            <path fill="currentColor" d={icons.beaker} />
-                            <g clipPath="url(#stage-empty-beaker-clip)">
-                              <rect className="stage-empty-icon-shimmer-rect" x={-282} y={0} width={500} height={200} fill="url(#stage-empty-shimmer-grad)" />
-                            </g>
-                          </svg>
-                        </div>
                         <div className="stage-empty-content">
+                          <div className="stage-empty-icon-wrap">
+                            <svg className="stage-empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 122" width={80} height={80} preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                              <defs>
+                                <clipPath id="stage-empty-beaker-clip"><path fill="black" d={icons.beaker} /></clipPath>
+                                <linearGradient id="stage-empty-shimmer-grad" gradientUnits="objectBoundingBox" x1="1" y1="1" x2="0" y2="0">
+                                  <stop offset="0" stopColor="transparent" /><stop offset="0.35" stopColor="transparent" />
+                                  <stop offset="0.5" stopColor="rgba(120, 120, 120, 0.35)" />
+                                  <stop offset="0.65" stopColor="transparent" /><stop offset="1" stopColor="transparent" />
+                                </linearGradient>
+                              </defs>
+                              <path fill="currentColor" d={icons.beaker} />
+                              <g clipPath="url(#stage-empty-beaker-clip)">
+                                <rect className="stage-empty-icon-shimmer-rect" x={-282} y={0} width={500} height={200} fill="url(#stage-empty-shimmer-grad)" />
+                              </g>
+                            </svg>
+                          </div>
                           <p className="stage-empty-title">No open files</p>
                           <div className="stage-empty-hints">
                             <p className="stage-empty-hint"><kbd className="stage-empty-kbd">{"\u2318"}K</kbd> to search</p>

@@ -3,7 +3,7 @@
 }
 
 .work-content-section {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .work-content-section:last-child {
@@ -58,7 +58,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
 }
 
 .work-content-artifact-label {
@@ -75,6 +75,7 @@
   color: var(--text-color);
   opacity: 0.85;
   margin: 0;
+  padding-bottom: 1rem;
 }
 
 /* Outcome — horizontal scrollable row */
@@ -124,6 +125,7 @@
 /* Diagram artifacts — full width */
 .work-content-artifact--diagram {
   grid-column: 1 / -1;
+  padding-bottom: 1rem;
 }
 
 .work-content-artifact--diagram .work-content-image-placeholder {

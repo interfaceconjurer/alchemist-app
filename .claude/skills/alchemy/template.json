@@ -30,10 +30,14 @@
       },
       {
         "type": "diagram",
-        "src": "/images/placeholder.png",
+        "src": "/images/placeholder-dark.svg",
+        "sources": {
+          "light": "/images/placeholder-light.svg",
+          "dark": "/images/placeholder-dark.svg"
+        },
         "alt": "Storybook documentation",
         "label": "Living Documentation",
-        "description": "Storybook served as the single reference for all component states, edge cases, and accessibility annotations."
+        "description": "Storybook served as the single reference for all component states, edge cases, and accessibility annotations. Use 'sources' with light/dark URLs when the README has theme variants."
       },
       {
         "type": "image",

@@ -2,22 +2,37 @@
   "id": "fine-tunes",
   "section": "sidequests",
   "title": "Fine Tunes",
-  "description": "Custom AI art model training via CLI — no GPU required.",
+  "description": "Curate images, run a prompt, get a trained model. That's it.",
   "date": "2025",
   "tags": ["Python", "CLI", "Replicate", "Flux LoRA", "Generative AI"],
   "repo": "https://github.com/interfaceconjurer/fine-tunes",
   "content": {
-    "context": "A command-line tool for training custom Flux LoRA models on Replicate's infrastructure. Born from wanting to develop a personal visual style for AI-generated art without managing GPUs or wrangling notebook environments — just point it at a folder of reference images and go. The showcase model, Android Dream v4, is trained on painterly Blade Runner 2049-inspired poster art with atmospheric cyberpunk cityscapes and dramatic scale.",
+    "context": "Training a custom image model sounds like it should be hard — GPU provisioning, notebook wrangling, cryptic hyperparameters. It isn't, if someone breaks it down for you. Fine Tunes distills the entire Flux LoRA fine-tuning process into a single repo that an AI agent can clone, set up, and walk you through. Curate a folder of images, point the agent at it, and everything else is automated. The goal was to make model training legible — not just possible, but something a curious person could understand end to end by following along.",
     "goals": [
-      "Build a zero-GPU-setup CLI for end-to-end model training and inference",
-      "Support the full creative loop: train, tune, generate, iterate with img2img",
-      "Make LoRA parameter tuning accessible through clear documentation and diagrams",
-      "Train a custom model that produces a cohesive, recognizable visual style"
+      "Distill fine-tuning into succinct, digestible steps anyone can follow",
+      "Automate the full workflow so a user only needs to curate images and run a prompt",
+      "Make LoRA parameter tuning accessible through clear documentation and visual guides",
+      "Produce a showcase model that proves the pipeline works — Android Dream v4"
     ],
     "artifacts": [
       {
         "type": "diagram",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/fine_tunes_logo_dark.svg",
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/fine_tunes_logo_light.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/fine_tunes_logo_dark.svg"
+        },
+        "alt": "Fine Tunes logo",
+        "label": "Project Identity",
+        "description": "The logo for the Python CLI that powers the entire fine-tuning workflow."
+      },
+      {
+        "type": "diagram",
         "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Pipeline%20%E2%80%94%20Dark.svg",
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Pipeline%20%E2%80%94%20Light.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Pipeline%20%E2%80%94%20Dark.svg"
+        },
         "alt": "Flux style pipeline showing train, status, and generate stages",
         "label": "Training Pipeline",
         "description": "The full pipeline from dataset preparation through training to image generation — all orchestrated through a single CLI with three commands."
@@ -32,6 +47,10 @@
       {
         "type": "diagram",
         "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/LoRA%20Scale%20Guide%20%E2%80%94%20Dark.svg",
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/LoRA%20Scale%20Guide%20%E2%80%94%20Light.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/LoRA%20Scale%20Guide%20%E2%80%94%20Dark.svg"
+        },
         "alt": "LoRA scale guide showing style strength from subtle to dominant",
         "label": "LoRA Scale Tuning",
         "description": "Visual guide to the key creative control — LoRA scale determines how strongly your trained style overrides the base model, from subtle influence to full stylistic dominance."
@@ -39,6 +58,10 @@
       {
         "type": "diagram",
         "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Costs%20%E2%80%94%20Dark.svg",
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Costs%20%E2%80%94%20Light.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Costs%20%E2%80%94%20Dark.svg"
+        },
         "alt": "Cost breakdown for training and generation on Replicate",
         "label": "Cost Model",
         "description": "Transparent cost breakdown — training a model runs about $1.50, and generation is fractions of a cent per image. Makes experimentation cheap."
@@ -59,6 +82,6 @@
       { "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/gallery-5.png", "alt": "Generated brutalist architecture scene", "caption": "Android Dream v4 — brutalist grandeur" },
       { "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/gallery-6.png", "alt": "Generated silhouetted figure against massive structure", "caption": "Android Dream v4 — human scale" }
     ],
-    "whatsNext": "Exploring multi-model blending — combining Android Dream with other trained styles to produce hybrid aesthetics. Also eyeing an automated prompt-sweep tool that generates parameter matrices for systematic exploration of the style space."
+    "whatsNext": "Next step is packaging the agent prompt so anyone can run it cold — clone the repo, provide a folder of images, and have a trained model generating in under thirty minutes. Also exploring multi-model blending and automated prompt-sweep tools for systematic style space exploration."
   }
 }

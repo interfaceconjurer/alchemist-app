@@ -1,17 +1,20 @@
 import React from "react";
+import { useTheme } from "../../contexts/ThemeContext";
 import "./WorkContent.css";
 
 function ArtifactRenderer({ artifact, index }) {
+  const { theme } = useTheme();
   const type = artifact.type || 'image';
 
   if (type === 'diagram') {
+    const src = artifact.sources?.[theme] || artifact.src;
     return (
       <div className="work-content-artifact work-content-artifact--diagram">
-        <div className="work-content-image-placeholder">
-          <img src={artifact.src} alt={artifact.alt} loading="lazy" />
-        </div>
         {artifact.label && <h4 className="work-content-artifact-label">{artifact.label}</h4>}
         {artifact.description && <p className="work-content-artifact-description">{artifact.description}</p>}
+        <div className="work-content-image-placeholder">
+          <img src={src} alt={artifact.alt} loading="lazy" />
+        </div>
       </div>
     );
   }
@@ -20,20 +23,20 @@ function ArtifactRenderer({ artifact, index }) {
     return (
       <div className="work-content-artifact work-content-artifact--code">
         {artifact.label && <h4 className="work-content-artifact-label">{artifact.label}</h4>}
-        <pre className="work-content-code"><code>{artifact.code}</code></pre>
         {artifact.description && <p className="work-content-artifact-description">{artifact.description}</p>}
+        <pre className="work-content-code"><code>{artifact.code}</code></pre>
       </div>
     );
   }
 
   return (
     <div className="work-content-artifact">
-      <div className="work-content-image-placeholder">
-        <img src={artifact.src} alt={artifact.alt} loading="lazy" />
-      </div>
       <div className="work-content-artifact-copy">
         {artifact.label && <h4 className="work-content-artifact-label">{artifact.label}</h4>}
         {artifact.description && <p className="work-content-artifact-description">{artifact.description}</p>}
+      </div>
+      <div className="work-content-image-placeholder">
+        <img src={artifact.src} alt={artifact.alt} loading="lazy" />
       </div>
     </div>
   );

@@ -334,8 +334,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .stage-empty-icon-wrap {
-  width: 110px;
-  height: 110px;
+  width: 80px;
+  height: 80px;
   flex-shrink: 0;
 }
 
@@ -344,8 +344,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .stage-empty-icon {
-  width: 110px;
-  height: 110px;
+  width: 80px;
+  height: 80px;
   display: block;
   color: var(--stage-empty-icon-color);
 }
@@ -354,10 +354,10 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 2rem 2.5rem;
+  gap: 1.25rem;
+  padding: 2.5rem 3.5rem;
   border: 1px dashed var(--stage-empty-content-border-color);
-  border-radius: 5px;
+  border-radius: 12px;
   background-color: var(--stage-empty-content-bg);
 }
 
@@ -490,6 +490,11 @@ a:active {
 
 .nav .icon-container {
   color: var(--text-color);
+}
+
+:root:not([data-theme="dark"]) .nav .out-bound-link,
+:root:not([data-theme="dark"]) .nav .icon-container {
+  color: var(--text-color-dark);
 }
 
 /* ====== /nav ====== */

@@ -60,6 +60,7 @@ The alchemist-app lives at `/Users/j.wright/git-repos/alchemist-app`. Project da
       {
         "type": "image|diagram|code",
         "src": "https://raw.githubusercontent.com/owner/repo/main/path/to/image.png",
+        "sources": { "light": "...Light.svg", "dark": "...Dark.svg" },
         "alt": "Descriptive alt text",
         "label": "Short label",
         "description": "What this artifact shows and why it matters"
@@ -81,20 +82,38 @@ The alchemist-app lives at `/Users/j.wright/git-repos/alchemist-app`. Project da
 
 Convert GitHub image references to raw.githubusercontent.com URLs:
 - `docs/diagram.svg` → `https://raw.githubusercontent.com/{owner}/{repo}/main/docs/diagram.svg`
-- For images with light/dark variants, prefer the dark variant (matches the portfolio's dark mode)
 - Use `.svg` or `.png` — avoid `.webp` if an alternative exists (browser compat)
+
+### Light/dark variant support
+
+The portfolio site has a theme toggle (light/dark). When a README uses `<picture>` with `prefers-color-scheme` media queries or has paired light/dark image files (e.g., `Pipeline — Dark.svg` / `Pipeline — Light.svg`), include **both** variants using the `sources` field on the artifact:
+
+```json
+{
+  "type": "diagram",
+  "src": "https://raw.githubusercontent.com/.../Dark.svg",
+  "sources": {
+    "light": "https://raw.githubusercontent.com/.../Light.svg",
+    "dark": "https://raw.githubusercontent.com/.../Dark.svg"
+  }
+}
+```
+
+- `sources` is optional. When present, the renderer picks the URL matching the current theme. When absent, it falls back to `src`.
+- `src` should still be set to the dark variant as the default fallback.
+- Look for `<picture><source media="(prefers-color-scheme: ...)">` patterns and paired filenames (Light/Dark, light/dark) in the README to detect variants.
 
 ### Artifact types
 
 - `"image"` (default, can be omitted) — standard image with label and description, rendered in a 3-column grid
-- `"diagram"` — full-width image, typically architectural/flow diagrams. Use for SVG diagrams, pipeline visualizations, etc.
+- `"diagram"` — full-width image, typically architectural/flow diagrams. Use for SVG diagrams, pipeline visualizations, and project logos/identity images that benefit from full-width display.
 - `"code"` — styled code block. Uses `code` field instead of `src`. Use sparingly — only for the signature CLI interface or key API.
 
 ### Editorial guidelines
 
 - **Context**: Write like a case study intro. What problem does this solve? Why did Jordan build it? Don't just restate the README's first paragraph — synthesize.
 - **Goals**: Action-oriented. "Build a CLI that..." not "The CLI does..."
-- **Artifacts**: Quality over quantity. 3-5 max. Pick the ones that tell the story visually.
+- **Artifacts**: Quality over quantity. 3-5 max. Pick the ones that tell the story visually. Label and description render above the image, so write descriptions that ground the reader before they see the visual.
 - **Outcome**: The gallery — what the finished thing looks like or produces.
 - **What's Next**: Forward-looking but grounded. Not aspirational fluff.
 - **Description**: One line for the sidebar. Punchy. Think subtitle, not abstract.
