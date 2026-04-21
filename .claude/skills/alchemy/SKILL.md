@@ -113,7 +113,7 @@ The portfolio site has a theme toggle (light/dark). When a README uses `<picture
 
 - **Context**: Write like a case study intro. What problem does this solve? Why did Jordan build it? Don't just restate the README's first paragraph — synthesize.
 - **Goals**: Action-oriented. "Build a CLI that..." not "The CLI does..."
-- **Artifacts**: Quality over quantity. 3-5 max. Pick the ones that tell the story visually. Label and description render above the image, so write descriptions that ground the reader before they see the visual.
+- **Artifacts**: Quality over quantity. 3-5 max. Pick the ones that tell the story visually. Write descriptions that ground the reader before they see the visual.
 - **Outcome**: The gallery — what the finished thing looks like or produces.
 - **What's Next**: Forward-looking but grounded. Not aspirational fluff.
 - **Description**: One line for the sidebar. Punchy. Think subtitle, not abstract.
