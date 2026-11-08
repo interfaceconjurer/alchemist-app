@@ -61,9 +61,9 @@ const LIGHTS = [
  * On the WebGL2 fallback WGSL can't compile, so three's MaterialX noise nodes
  * give a simpler approximation of the same layers.
  */
-function fields(p, useWgsl) {
+function fields(p, useWgsl, animationTime) {
   if (useWgsl) {
-    const t = { position: p, timeSeconds: time };
+    const t = { position: p, timeSeconds: animationTime };
     const at = { position: p };
     return {
       bands: onyxBands(t),
@@ -148,7 +148,7 @@ function bumpedNormal(n, height, strength) {
  */
 export function createCrystalMaterial({
   envTexture, useWgsl = true, uLight = uniform(0), withEdges = false,
-  side = THREE.FrontSide, transparent = false, uClarity = uniform(0.55),
+  side = THREE.FrontSide, transparent = false, uClarity = uniform(0.55), animationTime = time,
 }) {
   const uDispersion = uniform(0.22); // red→violet IOR spread (exaggerated vs real glass, but restrained)
   const uBandGain = uniform(0.4);
@@ -163,7 +163,7 @@ export function createCrystalMaterial({
   const uBump = uniform(0.02); // surface undulation / pitting
 
   const p = positionLocal.mul(1.1);
-  const f = fields(p, useWgsl);
+  const f = fields(p, useWgsl, animationTime);
 
   // Fracture zone: a ragged band along the real polygon edges, widest where
   // the fracture noise is strong — like the chipped, conchoidal rims in onyx.
@@ -229,14 +229,14 @@ export function createCrystalMaterial({
   // Coloured light from behind, seen through the stone. Thin faces near the
   // silhouette transmit more (fresnel), and the translucent bands carry it —
   // dark polished areas stay dark, as in real onyx.
-  const backlit = transmittedBacklight(midRay, { sharpness: 3.5 })
+  const backlit = transmittedBacklight(midRay, { sharpness: 3.5, animationTime })
     .mul(mix(0.1, 1.0, fresnel))
     .mul(mix(0.55, 1.1, mist))
     .mul(uBacklight);
-  const backlitCracks = backlightMix(0.18).mul(f.bands).mul(uOnyxBands).mul(uBacklight);
+  const backlitCracks = backlightMix(0.18, animationTime).mul(f.bands).mul(uOnyxBands).mul(uBacklight);
 
   // Rim picks up whichever backlight colours are currently up.
-  const rim = vec3(0.45, 0.48, 0.55).mul(0.06).add(backlightMix(0.22)).mul(fresnel);
+  const rim = vec3(0.45, 0.48, 0.55).mul(0.06).add(backlightMix(0.22, animationTime)).mul(fresnel);
 
   const material = new THREE.MeshPhysicalNodeMaterial({
     color: 0x020203,
@@ -298,7 +298,7 @@ export function createCrystalMaterial({
  * Mostly black; it only shows where a glancing angle catches a reflection
  * (Fresnel × environment), with a faint spectral tint at the very rim.
  */
-export function createFilamentMaterial({ envTexture, intensity = 1, uLight = uniform(0) } = {}) {
+export function createFilamentMaterial({ envTexture, intensity = 1, uLight = uniform(0), animationTime = time } = {}) {
   const material = new THREE.MeshBasicNodeMaterial();
   const viewDir = normalize(positionWorld.sub(cameraPosition));
   const n = normalWorld;
@@ -306,10 +306,10 @@ export function createFilamentMaterial({ envTexture, intensity = 1, uLight = uni
   const reflected = envTexture
     ? pmremTexture(envTexture, reflect(viewDir, n), float(0.12)).rgb
     : vec3(0.6);
-  const hue = fract(positionWorld.y.mul(0.1).add(positionWorld.x.mul(0.04)).add(time.mul(0.03)));
+  const hue = fract(positionWorld.y.mul(0.1).add(positionWorld.x.mul(0.04)).add(animationTime.mul(0.03)));
   const tint = mix(vec3(0.8, 0.82, 0.88), spectrumRgb(hue), 0.15);
   const base = vec3(0.035, 0.038, 0.045); // dark glass body of the edge
-  const caught = reflected.mul(tint).mul(0.55).add(backlightMix(0.35)).mul(grazing);
+  const caught = reflected.mul(tint).mul(0.55).add(backlightMix(0.35, animationTime)).mul(grazing);
   // Light mode: edges are a slightly darker grey than the body, so facets read
   // as bevels without drawing a dark outline around the solid.
   const lightBase = vec3(...LIGHT_BODY).mul(0.72);

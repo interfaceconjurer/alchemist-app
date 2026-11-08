@@ -1,0 +1,59 @@
+{
+  "runtime": "v24.16.0",
+  "samplesPerTransition": 504,
+  "artifactBytes": 85598,
+  "artifactGzipBytes": 43410,
+  "expandedBytes": 202350,
+  "decodeMs": 1.0985000000000014,
+  "prepareMs": 0.37083300000000463,
+  "transitions": [
+    {
+      "transition": "pyramid -> cube",
+      "candidates": 56,
+      "referenceP50Ms": 0.01549999999999585,
+      "referenceP95Ms": 0.03737499999999727,
+      "compiledP50Ms": 0.013291999999992754,
+      "compiledP95Ms": 0.024374999999999147
+    },
+    {
+      "transition": "cube -> octahedron",
+      "candidates": 80,
+      "referenceP50Ms": 0.02879199999999571,
+      "referenceP95Ms": 0.05749999999999034,
+      "compiledP50Ms": 0.020333000000007928,
+      "compiledP95Ms": 0.03458299999999781
+    },
+    {
+      "transition": "octahedron -> dodecahedron",
+      "candidates": 188,
+      "referenceP50Ms": 0.057292000000018106,
+      "referenceP95Ms": 0.08683300000001282,
+      "compiledP50Ms": 0.033542000000011285,
+      "compiledP95Ms": 0.055125000000003865
+    },
+    {
+      "transition": "dodecahedron -> icosahedron",
+      "candidates": 320,
+      "referenceP50Ms": 0.18441699999999628,
+      "referenceP95Ms": 0.24387500000000273,
+      "compiledP50Ms": 0.0777079999999728,
+      "compiledP95Ms": 0.10779199999996081
+    },
+    {
+      "transition": "icosahedron -> triacontahedron",
+      "candidates": 1400,
+      "referenceP50Ms": 0.7894999999999754,
+      "referenceP95Ms": 1.0485419999999976,
+      "compiledP50Ms": 0.2728749999999991,
+      "compiledP95Ms": 0.35074999999994816
+    },
+    {
+      "transition": "triacontahedron -> pyramid",
+      "candidates": 654,
+      "referenceP50Ms": 0.21370900000010806,
+      "referenceP95Ms": 0.32312500000011823,
+      "compiledP50Ms": 0.06612500000005639,
+      "compiledP95Ms": 0.1266249999998763
+    }
+  ]
+}

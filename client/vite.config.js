@@ -9,7 +9,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/vitest.setup.js'],
-    exclude: ['tests/**', 'node_modules/**'],
+    exclude: ['tests/**', 'scripts/**', 'node_modules/**'],
   },
   server: {
     port: 5173,

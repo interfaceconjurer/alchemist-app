@@ -1,5 +1,8 @@
-import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useRef, lazy, memo, Suspense } from 'react';
 import './view.css';
+import { GraphicsBoundary, StaticSymbol } from './GraphicsBoundary';
+import { useSymbolVisibility } from './useSymbolVisibility';
+import { profileObserver } from './profileObserver';
 
 const Pyramid3D = lazy(() => import('./Pyramid3D'));
 const Cube3D = lazy(() => import('./Cube3D'));
@@ -21,23 +24,28 @@ const GROW_DURATION = 1600; // Grow-in time (ms) — matches CSS
 
 // Phases: 'showing' -> 'shrinking' -> 'growing' -> 'showing'
 function AlchemySymbol() {
-  if (TRANSITION === 'morph') {
-    return (
-      <article className="symbolContainer">
-        <section className="symbol" style={{ opacity: 1 }}>
-          <div className="symbol-transition symbol-visible">
-            <Suspense fallback={null}>
-              <MorphingSolid />
+  const ref = useRef(null);
+  const { active, reducedMotion, started } = useSymbolVisibility(ref);
+  useEffect(() => { profileObserver?.visibility({ at: performance.now(), active }); }, [active]);
+  const renderState = reducedMotion ? 'reduced-motion' : active ? 'active' : 'paused';
+  return (
+    <article className="symbolContainer" ref={ref} data-render-state={renderState}>
+      <section className="symbol" style={{ opacity: 1 }}>
+        {reducedMotion ? <StaticSymbol reason="reduced-motion" /> : !started ? <StaticSymbol reason="paused" /> : (
+          <GraphicsBoundary>
+            <Suspense fallback={<StaticSymbol reason="loading" />}>
+              {TRANSITION === 'morph' ? (
+                <div className="symbol-transition symbol-visible"><MorphingSolid active={active} /></div>
+              ) : <FadeSequence active={active} />}
             </Suspense>
-          </div>
-        </section>
-      </article>
-    );
-  }
-  return <FadeSequence />;
+          </GraphicsBoundary>
+        )}
+      </section>
+    </article>
+  );
 }
 
-function FadeSequence() {
+function FadeSequence({ active }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [phase, setPhase] = useState('growing');
 
@@ -46,6 +54,7 @@ function FadeSequence() {
   }, []);
 
   useEffect(() => {
+    if (!active) return;
     if (phase === 'showing') {
       const timer = setTimeout(advanceShape, HOLD_DURATION);
       return () => clearTimeout(timer);
@@ -65,7 +74,7 @@ function FadeSequence() {
       }, GROW_DURATION);
       return () => clearTimeout(timer);
     }
-  }, [phase, advanceShape]);
+  }, [phase, advanceShape, active]);
 
   const ActiveComponent = COMPONENTS[activeIndex];
 
@@ -75,16 +84,10 @@ function FadeSequence() {
   else wrapperClass += ' symbol-visible';
 
   return (
-    <article className="symbolContainer">
-      <section className="symbol" style={{ opacity: 1 }}>
-        <div className={wrapperClass}>
-          <Suspense fallback={null}>
-            <ActiveComponent />
-          </Suspense>
-        </div>
-      </section>
-    </article>
+    <div className={wrapperClass}>
+      <ActiveComponent active={active} />
+    </div>
   );
 }
 
-export default AlchemySymbol;
+export default memo(AlchemySymbol);

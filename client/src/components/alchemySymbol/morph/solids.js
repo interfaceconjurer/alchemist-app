@@ -1,4 +1,4 @@
-import { intersectHalfspaces, planesFromVertices } from './halfspace';
+import { intersectHalfspaces, planesFromVertices } from './halfspace.js';
 
 const PHI = (1 + Math.sqrt(5)) / 2;
 

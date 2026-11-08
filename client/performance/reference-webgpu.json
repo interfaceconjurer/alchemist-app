@@ -1,0 +1,299 @@
+{
+  "recordedAt": "2026-11-08T04:23:13.200Z",
+  "settings": {
+    "targetHz": 60,
+    "width": 1440,
+    "height": 1000,
+    "dpr": 2,
+    "maxSeconds": 120,
+    "headless": false
+  },
+  "refresh": {
+    "medianIntervalMs": 8.300000000000068,
+    "estimatedHz": 120.48192771084238
+  },
+  "backend": {
+    "actual": "webgpu",
+    "adapter": {
+      "vendor": "apple",
+      "architecture": "metal-3",
+      "device": "",
+      "description": ""
+    },
+    "renderer": "Google Inc. (Apple) ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Max, Version 27.2 (Build 26B123))",
+    "software": false
+  },
+  "coverage": {
+    "ok": true,
+    "reasons": [],
+    "missingTransitions": [],
+    "missingInteriorTransitions": [],
+    "observedTransitions": [
+      "pyramid->cube",
+      "cube->octahedron",
+      "octahedron->dodecahedron",
+      "dodecahedron->icosahedron",
+      "icosahedron->triacontahedron",
+      "triacontahedron->pyramid"
+    ],
+    "hardwareQualified": true
+  },
+  "budget": {
+    "limits": {
+      "p95Ms": 18.333333333333336,
+      "p99Ms": 33.333333333333336,
+      "missedRefreshRatio": 0.01,
+      "warmLongTasks": 0
+    },
+    "passed": true
+  },
+  "complete": true,
+  "cold": {
+    "introFinishedMs": 7397.900000095367,
+    "frames": {
+      "targetHz": 60,
+      "budgetMs": 16.666666666666668,
+      "intervalCount": 435,
+      "omittedIntervals": 5650,
+      "activeDurationMs": 7184.3,
+      "p50Ms": 8.300000000000182,
+      "p95Ms": 9.299999999999272,
+      "p99Ms": 14.28399999999992,
+      "maxMs": 3099.7999999999997,
+      "meanFps": 60.54869646312097,
+      "lateFrameCount": 4,
+      "lateFrameRatio": 0.009195402298850575,
+      "estimatedMissedRefreshes": 211,
+      "estimatedMissedRefreshRatio": 0.326625386996904
+    },
+    "longTasks": {
+      "count": 1,
+      "totalActiveDurationMs": 122,
+      "blockingActiveDurationMs": 72,
+      "maxActiveDurationMs": 122,
+      "p50Ms": 122,
+      "p95Ms": 122,
+      "p99Ms": 122,
+      "maxMs": 122
+    },
+    "interactions": {
+      "eventCount": 18,
+      "interactionCount": 0,
+      "unattributedEventCount": 18,
+      "p50Ms": null,
+      "p95Ms": null,
+      "p99Ms": null,
+      "maxMs": null
+    },
+    "firstSceneUpdateMs": 1187.2000000476837,
+    "firstRenderSubmitMs": 1221.6000000238419
+  },
+  "warm": {
+    "frames": {
+      "targetHz": 60,
+      "budgetMs": 16.666666666666668,
+      "intervalCount": 5649,
+      "omittedIntervals": 436,
+      "activeDurationMs": 47374.7,
+      "p50Ms": 8.30000000000291,
+      "p95Ms": 9.299999999995634,
+      "p99Ms": 9.30000000000291,
+      "maxMs": 183.3000000000029,
+      "meanFps": 119.24086062814119,
+      "lateFrameCount": 3,
+      "lateFrameRatio": 0.0005310674455655868,
+      "estimatedMissedRefreshes": 17,
+      "estimatedMissedRefreshRatio": 0.0030003529827038475
+    },
+    "longTasks": {
+      "count": 0,
+      "totalActiveDurationMs": 0,
+      "blockingActiveDurationMs": 0,
+      "maxActiveDurationMs": 0,
+      "p50Ms": null,
+      "p95Ms": null,
+      "p99Ms": null,
+      "maxMs": null
+    },
+    "interactions": {
+      "eventCount": 68,
+      "interactionCount": 4,
+      "unattributedEventCount": 57,
+      "p50Ms": 140,
+      "p95Ms": 237.6,
+      "p99Ms": 239.51999999999998,
+      "maxMs": 240
+    }
+  },
+  "cpu": {
+    "byTransition": {
+      "pyramid->cube": {
+        "count": 337,
+        "totalMs": 26.5999995470047,
+        "meanMs": 0.07893174939764006,
+        "p50Ms": 0.10000002384185791,
+        "p95Ms": 0.20000004768371582,
+        "p99Ms": 0.20000004768371582,
+        "maxMs": 0.5
+      },
+      "cube->octahedron": {
+        "count": 337,
+        "totalMs": 33.99999821186066,
+        "meanMs": 0.10089020240908207,
+        "p50Ms": 0.10000002384185791,
+        "p95Ms": 0.20000004768371582,
+        "p99Ms": 0.20000004768371582,
+        "maxMs": 0.5
+      },
+      "octahedron->dodecahedron": {
+        "count": 337,
+        "totalMs": 50.80000054836273,
+        "meanMs": 0.1507418413898004,
+        "p50Ms": 0.19999992847442627,
+        "p95Ms": 0.2999999523162842,
+        "p99Ms": 0.30000007152557373,
+        "maxMs": 0.3999999761581421
+      },
+      "dodecahedron->icosahedron": {
+        "count": 337,
+        "totalMs": 149.099999666214,
+        "meanMs": 0.442433233430902,
+        "p50Ms": 0.3999999761581421,
+        "p95Ms": 0.7000000476837158,
+        "p99Ms": 0.8000000715255737,
+        "maxMs": 2.100000023841858
+      },
+      "icosahedron->triacontahedron": {
+        "count": 338,
+        "totalMs": 428.8999991416931,
+        "meanMs": 1.268934908703234,
+        "p50Ms": 1.2999999523162842,
+        "p95Ms": 1.600000023841858,
+        "p99Ms": 1.7629999876022335,
+        "maxMs": 2
+      },
+      "triacontahedron->pyramid": {
+        "count": 337,
+        "totalMs": 144.8999980688095,
+        "meanMs": 0.42997032067895996,
+        "p50Ms": 0.3999999761581421,
+        "p95Ms": 0.6999999284744263,
+        "p99Ms": 0.7000000476837158,
+        "maxMs": 0.7999999523162842
+      }
+    },
+    "renderSubmission": {
+      "count": 5651,
+      "totalMs": 3646.8000049591064,
+      "meanMs": 0.6453371093539385,
+      "p50Ms": 0.6000000238418579,
+      "p95Ms": 1,
+      "p99Ms": 1.399999976158142,
+      "maxMs": 2.9000000953674316
+    },
+    "sceneUpdate": {
+      "count": 5651,
+      "totalMs": 848.1999958753586,
+      "meanMs": 0.15009732717666938,
+      "p50Ms": 0,
+      "p95Ms": 1.0999999642372131,
+      "p99Ms": 1.5,
+      "maxMs": 2.100000023841858
+    }
+  },
+  "dprValues": [
+    1.5
+  ],
+  "actions": [
+    {
+      "name": "theme",
+      "simulationMs": 15135.399999976158
+    },
+    {
+      "name": "search",
+      "simulationMs": 30024.599999904673
+    },
+    {
+      "name": "orbit",
+      "simulationMs": 40023.50000000005
+    }
+  ],
+  "errors": [],
+  "pausedRanges": [
+    {
+      "startMs": 237.80000007152557,
+      "endMs": 398.10000002384186
+    }
+  ],
+  "gpu": {
+    "devices": [
+      {
+        "vendorId": 4203,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Apple)",
+        "deviceString": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Max, Version 27.2 (Build 26B123))",
+        "driverVendor": "Apple",
+        "driverVersion": "27.2"
+      }
+    ],
+    "featureStatus": {
+      "2d_canvas": "enabled",
+      "direct_rendering_display_compositor": "disabled_off_ok",
+      "gpu_compositing": "enabled",
+      "multiple_raster_threads": "enabled_on",
+      "opengl": "enabled_on",
+      "rasterization": "enabled",
+      "skia_graphite": "enabled_on",
+      "trees_in_viz": "disabled_off",
+      "video_decode": "enabled",
+      "video_encode": "enabled",
+      "webgl": "enabled",
+      "webgpu": "enabled",
+      "webnn": "disabled_off"
+    }
+  },
+  "measurement": "rAF cadence estimates browser delivery opportunities; CPU submission spans are not GPU execution times. Synthetic EventTiming is not field INP. Hardware qualification applies only to this recorded device and viewport.",
+  "geometryMode": "reference",
+  "reportSchemaVersion": 1,
+  "pageMetrics": {
+    "lcpMs": 604,
+    "cls": 0.00014734567901234568
+  },
+  "observedRefreshCadence": {
+    "frames": {
+      "targetHz": 120,
+      "budgetMs": 8.333333333333334,
+      "intervalCount": 5649,
+      "omittedIntervals": 436,
+      "activeDurationMs": 47374.7,
+      "p50Ms": 8.30000000000291,
+      "p95Ms": 9.299999999995634,
+      "p99Ms": 9.30000000000291,
+      "maxMs": 183.3000000000029,
+      "meanFps": 119.24086062814119,
+      "lateFrameCount": 426,
+      "lateFrameRatio": 0.07541157727031333,
+      "estimatedMissedRefreshes": 36,
+      "estimatedMissedRefreshRatio": 0.0063324538258575196
+    },
+    "longTasks": {
+      "count": 0,
+      "totalActiveDurationMs": 0,
+      "blockingActiveDurationMs": 0,
+      "maxActiveDurationMs": 0,
+      "p50Ms": null,
+      "p95Ms": null,
+      "p99Ms": null,
+      "maxMs": null
+    },
+    "interactions": {
+      "eventCount": 68,
+      "interactionCount": 4,
+      "unattributedEventCount": 57,
+      "p50Ms": 140,
+      "p95Ms": 237.6,
+      "p99Ms": 239.51999999999998,
+      "maxMs": 240
+    }
+  }
+}

@@ -31,3 +31,6 @@ yarn-error.log*
 # workspace state (legacy — server persistence removed)
 /data/
 .context/
+
+# Local animation profiles and raw samples
+**/performance-results/

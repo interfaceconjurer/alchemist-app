@@ -16,17 +16,17 @@ export const BACKLIGHTS = [
 ];
 
 /** 0..1 breathing envelope with soft dark gaps between pulses. */
-function fade({ period, phase }) {
-  const wave = sin(time.mul((Math.PI * 2) / period).add(phase)).mul(0.5).add(0.5);
+function fade({ period, phase }, animationTime) {
+  const wave = sin(animationTime.mul((Math.PI * 2) / period).add(phase)).mul(0.5).add(0.5);
   return smoothstep(0.15, 1.0, wave);
 }
 
 /** Shared TSL nodes so every material breathes in sync. */
-export function backlightNodes() {
+export function backlightNodes(animationTime = time) {
   return BACKLIGHTS.map((l) => ({
     color: color(l.hex),
     dir: normalize(vec3(...l.dir)),
-    fade: fade(l),
+    fade: fade(l, animationTime),
   }));
 }
 
@@ -34,24 +34,24 @@ export function backlightNodes() {
  * Light transmitted through the glass from the backlights, for a ray that has
  * been refracted into the solid. `sharpness` controls how broad the glow is.
  */
-export function transmittedBacklight(ray, { sharpness = 5, gain = 1 } = {}) {
-  return backlightNodes().reduce(
+export function transmittedBacklight(ray, { sharpness = 5, gain = 1, animationTime = time } = {}) {
+  return backlightNodes(animationTime).reduce(
     (acc, l) => acc.add(l.color.mul(l.fade).mul(max(ray.dot(l.dir), 0).pow(sharpness))),
     vec3(0),
   ).mul(gain);
 }
 
 /** Sum of the current backlight colours (for rims, edges, and the halo). */
-export function backlightMix(gain = 1) {
-  return backlightNodes().reduce((acc, l) => acc.add(l.color.mul(l.fade)), vec3(0)).mul(float(gain));
+export function backlightMix(gain = 1, animationTime = time) {
+  return backlightNodes(animationTime).reduce((acc, l) => acc.add(l.color.mul(l.fade)), vec3(0)).mul(float(gain));
 }
 
 /**
  * Soft additive glow card that sits behind the solid. Each backlight paints an
  * offset radial blob in its colour, so the halo shifts hue as they breathe.
  */
-export function createHaloColorNode(uvNode, gain = 0.35) {
-  return backlightNodes().reduce((acc, l, i) => {
+export function createHaloColorNode(uvNode, gain = 0.35, animationTime = time) {
+  return backlightNodes(animationTime).reduce((acc, l, i) => {
     const src = BACKLIGHTS[i].dir;
     // Offset each blob toward its light's screen direction.
     const center = vec3(0.5 + src[0] * 0.14, 0.5 + src[1] * 0.14, 0);

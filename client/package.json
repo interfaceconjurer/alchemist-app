@@ -7,12 +7,12 @@
     "@react-three/fiber": "^9.8.2",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "three": "^0.187.0",
+    "three": "0.187.0",
     "vgpu": "^0.6.0"
   },
   "scripts": {
     "start": "vite",
-    "build": "vite build",
+    "build": "node scripts/patch-three-webgl-disposal.mjs && npm run check:morph && vite build",
     "build:clean": "rm -rf dist node_modules/.vite",
     "clean": "npm run build:clean",
     "clean:all": "npm run build:clean && rm -rf node_modules",
@@ -20,11 +20,19 @@
     "test": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:debug": "playwright test --debug"
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:resilience": "playwright test --config playwright.resilience.config.js",
+    "check:bundle": "node scripts/check-bundle-budget.mjs",
+    "postinstall": "node scripts/patch-three-webgl-disposal.mjs",
+    "profile:animation": "node scripts/profile-animation.mjs",
+    "test:profile": "node --test scripts/performance-metrics.test.mjs",
+    "generate:morph": "node src/components/alchemySymbol/morph/generateMorphTables.mjs",
+    "check:morph": "node src/components/alchemySymbol/morph/generateMorphTables.mjs --check",
+    "bench:morph": "node src/components/alchemySymbol/morph/benchmarkMorphs.mjs"
   },
   "engines": {
-    "npm": ">=9.0.0",
-    "node": ">=18.0.0"
+    "node": ">=24.15.0 <25",
+    "npm": ">=11 <12"
   },
   "browserslist": [
     ">0.2%",
@@ -41,5 +49,11 @@
     "playwright": "^1.65.0",
     "vite": "^8.3.6",
     "vitest": "^5.1.0"
-  }
+  },
+  "overrides": {
+    "vgpu": {
+      "@modelcontextprotocol/server": "2.3.0"
+    }
+  },
+  "type": "module"
 }

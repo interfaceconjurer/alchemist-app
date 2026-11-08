@@ -2,8 +2,13 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three/webgpu';
-import { pass, vec4, luminance, clamp } from 'three/tsl';
-import { bloom } from 'three/addons/tsl/display/BloomNode.js';
+import { uniform } from 'three/tsl';
+import { createBloomPipeline } from './bloomPipeline';
+import { useGraphicsFailure } from './GraphicsBoundary';
+import RenderPolicyController from './RenderPolicyController';
+import { animationDelta } from './renderPolicy';
+import { useRenderDpr } from './useRenderDpr';
+import { profileObserver } from './profileObserver';
 import { useThemeColor } from './useThemeColor';
 import FloatingBubbles from './FloatingBubbles';
 import { createCrystalMaterial, createFilamentMaterial } from './crystal/crystalMaterial';
@@ -57,38 +62,47 @@ function Filament({ start, end, material, radius = FILAMENT_RADIUS }) {
 /** Owns rendering: scene pass + bloom. Runs at priority 1 so R3F skips its own render. */
 export function Bloom({ strength = 0.28, radius = 0.4, threshold = 0.35 }) {
   const { gl, scene, camera } = useThree();
-  const pipeline = useMemo(() => {
-    const p = new THREE.RenderPipeline(gl);
-    const scenePass = pass(scene, camera);
-    const color = scenePass.getTextureNode('output');
-    const glow = bloom(color, strength, radius, threshold);
-    // Keep the canvas transparent: glow contributes its own coverage so it
-    // composites over whatever the page background is (light or dark).
-    p.outputNode = vec4(color.rgb.add(glow.rgb), clamp(color.a.add(luminance(glow.rgb)), 0, 1));
-    return p;
+  const graph = useRef(null);
+  const reportFailure = useGraphicsFailure();
+  useEffect(() => {
+    const owned = createBloomPipeline(gl, scene, camera);
+    graph.current = owned;
+    return () => { graph.current = null; owned.dispose(); };
+  }, [gl, scene, camera]);
+  useEffect(() => {
+    graph.current?.update({ strength, radius, threshold });
   }, [gl, scene, camera, strength, radius, threshold]);
-  useEffect(() => () => pipeline.dispose(), [pipeline]);
-  useFrame(() => pipeline.render(), 1);
+  useFrame(() => {
+    if (!graph.current) return;
+    const started = profileObserver ? performance.now() : 0;
+    try { graph.current.render(); }
+    catch { reportFailure(); }
+    finally { profileObserver?.render({ at: performance.now(), cpuSubmitMs: performance.now() - started }); }
+  }, 1);
   return null;
 }
 
-function CrystalShape({ vertices, edges, faces, spawnPoint, position = [0, -1.5, 0], tilt }) {
+function CrystalShape({ vertices, edges, faces, spawnPoint, position = [0, -1.5, 0], tilt, animationTime }) {
+  const previousTime = useRef(animationTime.value);
   const spinRef = useRef();
   const gl = useThree((s) => s.gl);
   const useWgsl = gl.backend?.isWebGPUBackend === true;
 
-  const envTexture = useMemo(() => createStudioEnvironment(gl).texture, [gl]);
+  const environment = useMemo(() => createStudioEnvironment(gl), [gl]);
+  const envTexture = environment.texture;
   const geometry = useMemo(() => buildSolidGeometry(faces), [faces]);
   const { material } = useMemo(
-    () => createCrystalMaterial({ envTexture, useWgsl }),
-    [envTexture, useWgsl],
+    () => createCrystalMaterial({ envTexture, useWgsl, animationTime }),
+    [envTexture, useWgsl, animationTime],
   );
-  const filament = useMemo(() => createFilamentMaterial({ envTexture }), [envTexture]);
+  const filament = useMemo(() => createFilamentMaterial({ envTexture, animationTime }), [envTexture, animationTime]);
 
   useEffect(() => () => { geometry.dispose(); }, [geometry]);
-  useEffect(() => () => { material.dispose(); filament.dispose(); envTexture.dispose(); }, [material, filament, envTexture]);
+  useEffect(() => () => { material.dispose(); filament.dispose(); environment.dispose(); }, [material, filament, environment]);
 
-  useFrame((_, delta) => {
+  useFrame(() => {
+    const delta = animationDelta(animationTime.value - previousTime.current);
+    previousTime.current = animationTime.value;
     if (spinRef.current) spinRef.current.rotation.y += delta * 0.5;
   });
 
@@ -109,7 +123,7 @@ function CrystalShape({ vertices, edges, faces, spawnPoint, position = [0, -1.5,
               </mesh>
             ))}
           </group>
-          <FloatingBubbles color="#ffffff" opacityScale={0.6} spawnPoint={scaledSpawn} />
+          <FloatingBubbles animationTime={animationTime} color="#ffffff" opacityScale={0.6} spawnPoint={scaledSpawn} />
         </group>
       </group>
     </group>
@@ -120,11 +134,18 @@ export async function createRenderer(props) {
   const renderer = new THREE.WebGPURenderer({ ...props, antialias: true, alpha: true });
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.85;
-  await renderer.init();
-  return renderer;
+  try {
+    await renderer.init();
+    return renderer;
+  } catch (error) {
+    await renderer.dispose().catch(() => {});
+    throw error;
+  }
 }
 
-export default function Polyhedron({ vertices, edges, faces, spawnPoint, cameraPosition, fov = 60, position, tilt }) {
+export default function Polyhedron({ vertices, edges, faces, spawnPoint, cameraPosition, fov = 60, position, tilt, active = true }) {
+  const { dpr, lowerDpr } = useRenderDpr();
+  const animationTime = useMemo(() => uniform(0), []);
   // Theme hook kept so the canvas re-renders on theme flips once light mode gets its own treatment.
   useThemeColor();
 
@@ -132,11 +153,14 @@ export default function Polyhedron({ vertices, edges, faces, spawnPoint, cameraP
     <div style={{ width: '100%', height: '100%' }}>
       <Canvas
         gl={createRenderer}
-        dpr={[1, 2]}
+        dpr={dpr}
+        frameloop={active ? 'always' : 'never'}
         camera={{ position: cameraPosition, fov }}
         style={{ background: 'transparent' }}
       >
+        <RenderPolicyController active={active} lowerDpr={lowerDpr} animationTime={animationTime} />
         <CrystalShape
+          animationTime={animationTime}
           vertices={vertices}
           edges={edges}
           faces={faces}
@@ -145,7 +169,7 @@ export default function Polyhedron({ vertices, edges, faces, spawnPoint, cameraP
           tilt={tilt}
         />
         <Bloom />
-        <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
+        <OrbitControls enabled={active} enableZoom={false} enablePan={false} autoRotate={false} />
       </Canvas>
     </div>
   );

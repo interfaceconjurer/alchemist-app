@@ -57,3 +57,38 @@
     opacity: 1;
   }
 }
+
+.symbol-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--text-color, currentColor);
+}
+
+.symbol-fallback svg {
+  width: min(48%, 240px);
+  height: auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.65;
+}
+
+.symbol-fallback-base {
+  fill: currentColor;
+  fill-opacity: 0.05;
+}
+
+.symbolContainer[data-render-state='paused'] canvas {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .symbolContainer, .symbol-transition canvas {
+    animation: none;
+    transition: none;
+  }
+}

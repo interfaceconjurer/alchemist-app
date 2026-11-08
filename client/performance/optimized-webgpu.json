@@ -1,0 +1,299 @@
+{
+  "recordedAt": "2026-11-08T04:28:57.983Z",
+  "geometryMode": "compiled",
+  "settings": {
+    "targetHz": 60,
+    "width": 1440,
+    "height": 1000,
+    "dpr": 2,
+    "maxSeconds": 120,
+    "headless": false
+  },
+  "refresh": {
+    "medianIntervalMs": 8.300000000000011,
+    "estimatedHz": 120.48192771084321
+  },
+  "backend": {
+    "actual": "webgpu",
+    "adapter": {
+      "vendor": "apple",
+      "architecture": "metal-3",
+      "device": "",
+      "description": ""
+    },
+    "renderer": "Google Inc. (Apple) ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Max, Version 27.2 (Build 26B123))",
+    "software": false
+  },
+  "coverage": {
+    "ok": true,
+    "reasons": [],
+    "missingTransitions": [],
+    "missingInteriorTransitions": [],
+    "observedTransitions": [
+      "pyramid->cube",
+      "cube->octahedron",
+      "octahedron->dodecahedron",
+      "dodecahedron->icosahedron",
+      "icosahedron->triacontahedron",
+      "triacontahedron->pyramid"
+    ],
+    "hardwareQualified": true
+  },
+  "budget": {
+    "limits": {
+      "p95Ms": 18.333333333333336,
+      "p99Ms": 33.333333333333336,
+      "missedRefreshRatio": 0.01,
+      "warmLongTasks": 0
+    },
+    "passed": true
+  },
+  "complete": true,
+  "pageMetrics": {
+    "lcpMs": 224,
+    "cls": 0.00014734567901234568
+  },
+  "cold": {
+    "firstSceneUpdateMs": 922.7000000476837,
+    "firstRenderSubmitMs": 959,
+    "introFinishedMs": 4087.2000000476837,
+    "frames": {
+      "targetHz": 60,
+      "budgetMs": 16.666666666666668,
+      "intervalCount": 456,
+      "omittedIntervals": 5640,
+      "activeDurationMs": 3925.9,
+      "p50Ms": 8.300000000000182,
+      "p95Ms": 9.299999999999955,
+      "p99Ms": 9.400000000000091,
+      "maxMs": 91.70000000000005,
+      "meanFps": 116.15171043582363,
+      "lateFrameCount": 2,
+      "lateFrameRatio": 0.0043859649122807015,
+      "estimatedMissedRefreshes": 6,
+      "estimatedMissedRefreshRatio": 0.012987012987012988
+    },
+    "longTasks": {
+      "count": 1,
+      "totalActiveDurationMs": 62,
+      "blockingActiveDurationMs": 12,
+      "maxActiveDurationMs": 62,
+      "p50Ms": 62,
+      "p95Ms": 62,
+      "p99Ms": 62,
+      "maxMs": 62
+    },
+    "interactions": {
+      "eventCount": 0,
+      "interactionCount": 0,
+      "unattributedEventCount": 0,
+      "p50Ms": null,
+      "p95Ms": null,
+      "p99Ms": null,
+      "maxMs": null
+    }
+  },
+  "warm": {
+    "frames": {
+      "targetHz": 60,
+      "budgetMs": 16.666666666666668,
+      "intervalCount": 5639,
+      "omittedIntervals": 457,
+      "activeDurationMs": 46999.1,
+      "p50Ms": 8.300000000001091,
+      "p95Ms": 10,
+      "p99Ms": 10.30000000000291,
+      "maxMs": 16.80000000000109,
+      "meanFps": 119.98102091316643,
+      "lateFrameCount": 0,
+      "lateFrameRatio": 0,
+      "estimatedMissedRefreshes": 0,
+      "estimatedMissedRefreshRatio": 0
+    },
+    "longTasks": {
+      "count": 0,
+      "totalActiveDurationMs": 0,
+      "blockingActiveDurationMs": 0,
+      "maxActiveDurationMs": 0,
+      "p50Ms": null,
+      "p95Ms": null,
+      "p99Ms": null,
+      "maxMs": null
+    },
+    "interactions": {
+      "eventCount": 68,
+      "interactionCount": 4,
+      "unattributedEventCount": 57,
+      "p50Ms": 40,
+      "p95Ms": 46.8,
+      "p99Ms": 47.76,
+      "maxMs": 48
+    }
+  },
+  "observedRefreshCadence": {
+    "frames": {
+      "targetHz": 120,
+      "budgetMs": 8.333333333333334,
+      "intervalCount": 5639,
+      "omittedIntervals": 457,
+      "activeDurationMs": 46999.1,
+      "p50Ms": 8.300000000001091,
+      "p95Ms": 10,
+      "p99Ms": 10.30000000000291,
+      "maxMs": 16.80000000000109,
+      "meanFps": 119.98102091316643,
+      "lateFrameCount": 838,
+      "lateFrameRatio": 0.14860790920375952,
+      "estimatedMissedRefreshes": 1,
+      "estimatedMissedRefreshRatio": 0.0001773049645390071
+    },
+    "longTasks": {
+      "count": 0,
+      "totalActiveDurationMs": 0,
+      "blockingActiveDurationMs": 0,
+      "maxActiveDurationMs": 0,
+      "p50Ms": null,
+      "p95Ms": null,
+      "p99Ms": null,
+      "maxMs": null
+    },
+    "interactions": {
+      "eventCount": 68,
+      "interactionCount": 4,
+      "unattributedEventCount": 57,
+      "p50Ms": 40,
+      "p95Ms": 46.8,
+      "p99Ms": 47.76,
+      "maxMs": 48
+    }
+  },
+  "cpu": {
+    "sceneUpdate": {
+      "count": 5641,
+      "totalMs": 447.0000009536743,
+      "meanMs": 0.07924126944755794,
+      "p50Ms": 0,
+      "p95Ms": 0.3999999761581421,
+      "p99Ms": 0.7000000476837158,
+      "maxMs": 1.100000023841858
+    },
+    "byTransition": {
+      "pyramid->cube": {
+        "count": 337,
+        "totalMs": 29.399999618530273,
+        "meanMs": 0.0872403549511284,
+        "p50Ms": 0.10000002384185791,
+        "p95Ms": 0.20000004768371582,
+        "p99Ms": 0.30000007152557373,
+        "maxMs": 0.6000000238418579
+      },
+      "cube->octahedron": {
+        "count": 337,
+        "totalMs": 34.10000133514404,
+        "meanMs": 0.1011869475820298,
+        "p50Ms": 0.10000002384185791,
+        "p95Ms": 0.20000004768371582,
+        "p99Ms": 0.2999999523162842,
+        "maxMs": 0.3999999761581421
+      },
+      "octahedron->dodecahedron": {
+        "count": 338,
+        "totalMs": 37.699999928474426,
+        "meanMs": 0.11153846132684742,
+        "p50Ms": 0.10000002384185791,
+        "p95Ms": 0.20000004768371582,
+        "p99Ms": 0.3000000274181366,
+        "maxMs": 0.9000000953674316
+      },
+      "dodecahedron->icosahedron": {
+        "count": 337,
+        "totalMs": 76.09999966621399,
+        "meanMs": 0.22581602274840945,
+        "p50Ms": 0.20000004768371582,
+        "p95Ms": 0.3999999761581421,
+        "p99Ms": 0.4000000524520874,
+        "maxMs": 0.5
+      },
+      "icosahedron->triacontahedron": {
+        "count": 337,
+        "totalMs": 190.40000021457672,
+        "meanMs": 0.5649851638414739,
+        "p50Ms": 0.5999999046325684,
+        "p95Ms": 0.8999999761581421,
+        "p99Ms": 1,
+        "maxMs": 1.100000023841858
+      },
+      "triacontahedron->pyramid": {
+        "count": 338,
+        "totalMs": 62.60000026226044,
+        "meanMs": 0.18520710136763444,
+        "p50Ms": 0.19999992847442627,
+        "p95Ms": 0.3999999761581421,
+        "p99Ms": 0.40000009536743164,
+        "maxMs": 0.5
+      }
+    },
+    "renderSubmission": {
+      "count": 5641,
+      "totalMs": 4008.399996638298,
+      "meanMs": 0.7105832293278316,
+      "p50Ms": 0.6999999284744263,
+      "p95Ms": 1.100000023841858,
+      "p99Ms": 1.399999976158142,
+      "maxMs": 3.899999976158142
+    }
+  },
+  "dprValues": [
+    1.5
+  ],
+  "actions": [
+    {
+      "name": "theme",
+      "simulationMs": 15206.999999999995
+    },
+    {
+      "name": "search",
+      "simulationMs": 30181.899999976184
+    },
+    {
+      "name": "orbit",
+      "simulationMs": 40081.89999997617
+    }
+  ],
+  "errors": [],
+  "pausedRanges": [
+    {
+      "startMs": 195.30000007152557,
+      "endMs": 198.90000009536743
+    }
+  ],
+  "gpu": {
+    "devices": [
+      {
+        "vendorId": 4203,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Apple)",
+        "deviceString": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Max, Version 27.2 (Build 26B123))",
+        "driverVendor": "Apple",
+        "driverVersion": "27.2"
+      }
+    ],
+    "featureStatus": {
+      "2d_canvas": "enabled",
+      "direct_rendering_display_compositor": "disabled_off_ok",
+      "gpu_compositing": "enabled",
+      "multiple_raster_threads": "enabled_on",
+      "opengl": "enabled_on",
+      "rasterization": "enabled",
+      "skia_graphite": "enabled_on",
+      "trees_in_viz": "disabled_off",
+      "video_decode": "enabled",
+      "video_encode": "enabled",
+      "webgl": "enabled",
+      "webgpu": "enabled",
+      "webnn": "disabled_off"
+    }
+  },
+  "measurement": "rAF cadence estimates browser delivery opportunities; CPU submission spans are not GPU execution times. Synthetic EventTiming is not field INP. Hardware qualification applies only to this recorded device and viewport.",
+  "reportSchemaVersion": 1
+}

@@ -18,7 +18,7 @@ describe('morph solids', () => {
     for (let i = 0; i < SEQUENCE.length - 1; i++) {
       const A = SEQUENCE[i], B = SEQUENCE[i + 1];
       for (let k = 1; k < 168; k++) {
-        const p = intersectHalfspaces(morphPlanes(A, B, k / 20));
+        const p = intersectHalfspaces(morphPlanes(A, B, k / 168));
         expect(euler(p)).toBe(2);
         expect(p.faces.length).toBeGreaterThanOrEqual(A.planes.length);
       }

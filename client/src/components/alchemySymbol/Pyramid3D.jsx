@@ -9,7 +9,7 @@ function randomBarycentric(a, b, c) {
 }
 
 /** Square pyramid: four triangular sides on a square base (Great Pyramid proportions). */
-export default function Pyramid3D() {
+export default function Pyramid3D({ active = true }) {
   const b = 1.8; // half base width
   const h = 2.3; // apex height above base (≈ 0.64 × base width, like Giza)
   const y0 = -h / 3; // keep the centroid near the origin so it spins in place
@@ -53,5 +53,5 @@ export default function Pyramid3D() {
   }, [vertices]);
 
   // Slight downward camera tilt so the base square reads as a square.
-  return <Polyhedron vertices={vertices} edges={edges} faces={faces} spawnPoint={spawnPoint} cameraPosition={[0, 1.2, 7.5]} position={[0, -0.4, 0]} />;
+  return <Polyhedron active={active} vertices={vertices} edges={edges} faces={faces} spawnPoint={spawnPoint} cameraPosition={[0, 1.2, 7.5]} position={[0, -0.4, 0]} />;
 }

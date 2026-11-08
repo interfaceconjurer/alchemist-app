@@ -9,9 +9,24 @@ import { createCrystalMaterial, createFilamentMaterial } from './crystal/crystal
 import { createStudioEnvironment } from './crystal/environment';
 import { createHaloColorNode } from './crystal/backlight';
 import { clamp, max, uniform, uv } from 'three/tsl';
-import { intersectHalfspaces, morphPlanes } from './morph/halfspace';
+import { intersectHalfspaces } from './morph/halfspace';
+import { decodeMorphTables, createCompiledMorph } from './morph/compiledMorph';
+import morphTablesUrl from './morph/morph-transitions.bin?url';
 import { createPyramidGrow } from './morph/pyramidGrow';
 import { SEQUENCE } from './morph/solids';
+import RenderPolicyController from './RenderPolicyController';
+import { animationDelta } from './renderPolicy';
+import { useRenderDpr } from './useRenderDpr';
+import { profileObserver } from './profileObserver';
+
+// Preparing the fixed sequence is outside the frame loop. The hashed binary
+// keeps thousands of coefficients out of JavaScript parsing and is shared once.
+const tableResponse = await fetch(morphTablesUrl);
+if (!tableResponse.ok) throw new Error('Unable to load crystal morph geometry.');
+const morphTables = decodeMorphTables(await tableResponse.arrayBuffer());
+if (morphTables.length !== SEQUENCE.length) throw new Error('Crystal morph sequence is inconsistent.');
+const morphs = SEQUENCE.map((A, i) => createCompiledMorph(A, SEQUENCE[(i + 1) % SEQUENCE.length], morphTables[i]));
+const restingSolids = SEQUENCE.map(solid => intersectHalfspaces(solid.planes));
 
 const HOLD_MS = 5000; // time resting on each solid
 const MORPH_MS = 2800; // time spent carving one solid into the next
@@ -47,35 +62,38 @@ const THEME = {
   light: { light: 1, halo: 0.34, bubbles: 0.7, bloom: 0.2, darkBubbles: 0.4, darkBubbleOpacity: 1.3 },
 };
 
-function MorphShape({ isDark }) {
+function MorphShape({ isDark, animationTime }) {
+  const previousTime = useRef(animationTime.value);
   const look = isDark ? THEME.dark : THEME.light;
   const gl = useThree((s) => s.gl);
   const useWgsl = gl.backend?.isWebGPUBackend === true;
 
   const spinRef = useRef();
   const growElapsed = useRef(0);
-  const pyramidGrow = useMemo(() => createPyramidGrow(intersectHalfspaces(SEQUENCE[0].planes)), []);
+  const pyramidGrow = useMemo(() => createPyramidGrow(restingSolids[0]), []);
   const meshRef = useRef();
   const edgesRef = useRef();
   const jointsRef = useRef();
   const polyRef = useRef(null);
-  const clock = useRef({ index: 0, elapsed: 0, lastT: -1 });
+  const clock = useRef({ index: 0, elapsed: 0, lastT: -1, cycle: 0 });
+  const profileSimulationMs = useRef(0);
 
-  const envTexture = useMemo(() => createStudioEnvironment(gl).texture, [gl]);
+  const environment = useMemo(() => createStudioEnvironment(gl), [gl]);
+  const envTexture = environment.texture;
   const uLight = useMemo(() => uniform(0), []);
   uLight.value = look.light;
   // Glass onyx: the far inner faces are drawn first, then the near faces are
   // drawn semi-transparent over them, so you see through the stone.
   const uClarity = useMemo(() => uniform(0.5), []);
   const { material } = useMemo(
-    () => createCrystalMaterial({ envTexture, useWgsl, uLight, withEdges: true, transparent: true, uClarity }),
-    [envTexture, useWgsl, uLight, uClarity],
+    () => createCrystalMaterial({ envTexture, useWgsl, uLight, withEdges: true, transparent: true, uClarity, animationTime }),
+    [envTexture, useWgsl, uLight, uClarity, animationTime],
   );
   const { material: innerMaterial } = useMemo(
-    () => createCrystalMaterial({ envTexture, useWgsl, uLight, withEdges: false, side: THREE.BackSide }),
-    [envTexture, useWgsl, uLight],
+    () => createCrystalMaterial({ envTexture, useWgsl, uLight, withEdges: false, side: THREE.BackSide, animationTime }),
+    [envTexture, useWgsl, uLight, animationTime],
   );
-  const filament = useMemo(() => createFilamentMaterial({ envTexture, uLight }), [envTexture, uLight]);
+  const filament = useMemo(() => createFilamentMaterial({ envTexture, uLight, animationTime }), [envTexture, uLight, animationTime]);
   const haloIntro = useMemo(() => uniform(0), []);
   const haloGain = useMemo(() => uniform(THEME.dark.halo), []);
   haloGain.value = look.halo;
@@ -83,7 +101,7 @@ function MorphShape({ isDark }) {
     // Normal blending with alpha = glow brightness, so the card is fully
     // transparent where there's no light and composites over any page background.
     const m = new THREE.MeshBasicNodeMaterial({ transparent: true, depthWrite: false, depthTest: false });
-    const glow = createHaloColorNode(uv(), 1).mul(haloGain);
+    const glow = createHaloColorNode(uv(), 1, animationTime).mul(haloGain);
     // Alpha follows the glow's peak channel; colour is the glow normalised by it.
     // Clamping the divisor well above 0 keeps the faint outer fringe from
     // turning into noisy, over-saturated pixels on a light background.
@@ -91,7 +109,7 @@ function MorphShape({ isDark }) {
     m.colorNode = glow.div(max(strength, 0.02));
     m.opacityNode = strength.mul(haloIntro);
     return m;
-  }, [haloIntro, haloGain]);
+  }, [haloIntro, haloGain, animationTime]);
 
   const geometry = useMemo(() => {
     const g = new THREE.BufferGeometry();
@@ -112,8 +130,8 @@ function MorphShape({ isDark }) {
 
   useEffect(() => () => {
     geometry.dispose(); edgeGeometry.dispose(); jointGeometry.dispose();
-    material.dispose(); innerMaterial.dispose(); filament.dispose(); halo.dispose(); envTexture.dispose();
-  }, [geometry, edgeGeometry, jointGeometry, material, innerMaterial, filament, halo, envTexture]);
+    material.dispose(); innerMaterial.dispose(); filament.dispose(); halo.dispose(); environment.dispose();
+  }, [geometry, edgeGeometry, jointGeometry, material, innerMaterial, filament, halo, environment]);
 
   /** Write a polyhedron into the preallocated mesh + instanced filaments. */
   const writePoly = useCallback((poly) => {
@@ -175,12 +193,23 @@ function MorphShape({ isDark }) {
     jointMesh.instanceMatrix.needsUpdate = true;
   }, [geometry]);
 
+  useEffect(() => { profileObserver?.sequence(SEQUENCE.map(solid => solid.name)); }, []);
+
   // First frame: the pyramid at (almost) zero size; the intro grows it.
   useEffect(() => {
     writePoly(pyramidGrow.at(0, 0));
   }, [writePoly, pyramidGrow]);
 
-  useFrame((_, delta) => {
+  useFrame((state, frameDelta) => {
+    const delta = animationDelta(animationTime.value - previousTime.current);
+    previousTime.current = animationTime.value;
+    const started = profileObserver ? performance.now() : 0;
+    const transitionIndex = clock.current.index;
+    let phase = growElapsed.current < GROW_MS ? 'intro' : clock.current.elapsed + delta * 1000 < HOLD_MS ? 'hold' : 'morph';
+    let progress = 0;
+    let transitionComplete = false;
+    if (profileObserver) profileSimulationMs.current += delta * 1000;
+    try {
     if (spinRef.current) spinRef.current.rotation.y += delta * 0.5;
 
     // Intro: base spreads out flat, then the apex lifts out of it (see BASE_MS/RISE_MS).
@@ -190,7 +219,7 @@ function MorphShape({ isDark }) {
       const ms = growElapsed.current;
       const base = smoothstep01(ms / BASE_MS);
       const rise = smoothstep01((ms - (BASE_MS - RISE_OVERLAP_MS)) / RISE_MS);
-      writePoly(ms >= GROW_MS ? intersectHalfspaces(SEQUENCE[0].planes) : pyramidGrow.at(base, rise));
+      writePoly(ms >= GROW_MS ? restingSolids[0] : pyramidGrow.at(base, rise));
       haloIntro.value = smoothstep01(ms / GROW_MS);
       return;
     }
@@ -202,17 +231,32 @@ function MorphShape({ isDark }) {
     const A = SEQUENCE[c.index];
     const B = SEQUENCE[(c.index + 1) % SEQUENCE.length];
     const t = Math.min(1, (c.elapsed - HOLD_MS) / MORPH_MS);
+    progress = t;
 
     if (t >= 1) {
       c.index = (c.index + 1) % SEQUENCE.length;
+      if (c.index === 0) c.cycle++;
+      transitionComplete = true;
       c.elapsed = 0;
       c.lastT = -1;
-      writePoly(intersectHalfspaces(B.planes));
+      writePoly(restingSolids[c.index]);
       return;
     }
     if (t !== c.lastT) {
       c.lastT = t;
-      writePoly(intersectHalfspaces(morphPlanes(A, B, t)));
+      writePoly(morphs[c.index].at(t));
+    }
+    } finally {
+      profileObserver?.frame({
+        at: performance.now(), delta: frameDelta,
+        simulationMs: profileSimulationMs.current, phase, index: transitionIndex,
+        from: SEQUENCE[transitionIndex].name, to: SEQUENCE[(transitionIndex + 1) % SEQUENCE.length].name,
+        progress, cycle: clock.current.cycle, transitionComplete,
+        cpuMorphMs: performance.now() - started,
+        geometryMode: 'compiled',
+        backend: gl.backend?.isWebGPUBackend === true ? 'webgpu' : 'webgl2',
+        dpr: state.viewport.dpr, shaderTime: animationTime.value,
+      });
     }
   });
 
@@ -244,6 +288,7 @@ function MorphShape({ isDark }) {
         <instancedMesh ref={edgesRef} args={[edgeGeometry, filament, MAX_EDGES]} frustumCulled={false} />
         <instancedMesh ref={jointsRef} args={[jointGeometry, filament, MAX_JOINTS]} frustumCulled={false} />
         <FloatingBubbles
+          animationTime={animationTime}
           color="#ffffff"
           opacityScale={look.bubbles}
           darkRatio={look.darkBubbles}
@@ -256,14 +301,17 @@ function MorphShape({ isDark }) {
 }
 
 /** One persistent canvas; the solid carves itself into the next instead of cross-fading. */
-export default function MorphingSolid() {
+export default function MorphingSolid({ active = true }) {
   const { isDark } = useThemeColor();
+  const { dpr, lowerDpr } = useRenderDpr();
+  const animationTime = useMemo(() => uniform(0), []);
   return (
     <div style={{ width: '100%', height: '100%' }}>
-      <Canvas gl={createRenderer} dpr={[1, 2]} camera={{ position: [0, 1.2, 7.5], fov: 60 }} style={{ background: 'transparent' }}>
-        <MorphShape isDark={isDark} />
+      <Canvas gl={createRenderer} dpr={dpr} frameloop={active ? 'always' : 'never'} camera={{ position: [0, 1.2, 7.5], fov: 60 }} style={{ background: 'transparent' }}>
+        <RenderPolicyController active={active} lowerDpr={lowerDpr} animationTime={animationTime} />
+        <MorphShape isDark={isDark} animationTime={animationTime} />
         <Bloom strength={isDark ? THEME.dark.bloom : THEME.light.bloom} />
-        <OrbitControls enableZoom={false} enablePan={false} autoRotate={false} />
+        <OrbitControls enabled={active} enableZoom={false} enablePan={false} autoRotate={false} />
       </Canvas>
     </div>
   );

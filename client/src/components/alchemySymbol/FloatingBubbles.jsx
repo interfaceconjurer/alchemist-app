@@ -1,6 +1,7 @@
 import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
+import { animationDelta } from './renderPolicy';
 
 function discTexture(fill) {
   const canvas = document.createElement('canvas');
@@ -26,10 +27,12 @@ function discTexture(fill) {
  */
 export default function FloatingBubbles({
   color, spawnPoint, count = 15, opacityScale = 1,
-  darkRatio = 0, darkColor = '#0b0c0f', darkOpacityScale = 1.4,
+  darkRatio = 0, darkColor = '#0b0c0f', darkOpacityScale = 1.4, animationTime,
 }) {
   const particlesRef = useRef([]);
   const groupRef = useRef();
+  const previousTime = useRef(animationTime?.value ?? 0);
+  useEffect(() => { previousTime.current = animationTime?.value ?? 0; }, [animationTime]);
 
   const bubbleTexture = useMemo(
     () => discTexture(color === '#ffffff' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)'),
@@ -80,7 +83,11 @@ export default function FloatingBubbles({
 
   useEffect(() => () => { bubbleTexture.dispose(); darkTexture.dispose(); }, [bubbleTexture, darkTexture]);
 
-  useFrame((_, delta) => {
+  useFrame((_, frameDelta) => {
+    const delta = animationTime
+      ? animationDelta(animationTime.value - previousTime.current)
+      : animationDelta(frameDelta);
+    if (animationTime) previousTime.current = animationTime.value;
     particlesRef.current.forEach((sprite) => {
       sprite.userData.life += delta;
       const { life, maxLife } = sprite.userData;

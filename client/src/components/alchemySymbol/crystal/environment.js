@@ -26,11 +26,13 @@ export function createStudioEnvironment(renderer) {
   panel(0.25, 5, '#ffffff', 0.9, [2.5, 0, -7]); // back kicker
 
   const pmrem = new THREE.PMREMGenerator(renderer);
-  const target = pmrem.fromScene(scene, 0.02);
-  pmrem.dispose();
-  scene.traverse((o) => {
-    o.geometry?.dispose();
-    o.material?.dispose();
-  });
-  return target;
+  try {
+    return pmrem.fromScene(scene, 0.02);
+  } finally {
+    pmrem.dispose();
+    scene.traverse((o) => {
+      o.geometry?.dispose();
+      o.material?.dispose();
+    });
+  }
 }

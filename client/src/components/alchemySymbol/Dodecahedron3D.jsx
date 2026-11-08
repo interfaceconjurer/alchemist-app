@@ -8,7 +8,7 @@ function randomBarycentric(a, b, c) {
   return a.clone().multiplyScalar(1 - u - v).add(b.clone().multiplyScalar(u)).add(c.clone().multiplyScalar(v));
 }
 
-export default function Dodecahedron3D() {
+export default function Dodecahedron3D({ active = true }) {
   const s = 1.2;
   const phi = (1 + Math.sqrt(5)) / 2;
   const invPhi = 1 / phi;
@@ -85,5 +85,5 @@ export default function Dodecahedron3D() {
     );
   }, [faces]);
 
-  return <Polyhedron vertices={vertices} edges={edges} faces={faces} spawnPoint={spawnPoint} cameraPosition={[0, 4, 7]} />;
+  return <Polyhedron active={active} vertices={vertices} edges={edges} faces={faces} spawnPoint={spawnPoint} cameraPosition={[0, 4, 7]} />;
 }
