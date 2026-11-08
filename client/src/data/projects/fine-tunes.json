@@ -18,6 +18,8 @@
       {
         "type": "diagram",
         "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/fine_tunes_logo_dark.svg",
+        "width": 648,
+        "height": 264,
         "sources": {
           "light": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/fine_tunes_logo_light.svg",
           "dark": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/fine_tunes_logo_dark.svg"
@@ -29,6 +31,8 @@
       {
         "type": "diagram",
         "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Pipeline%20%E2%80%94%20Dark.svg",
+        "width": 900,
+        "height": 269,
         "sources": {
           "light": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Pipeline%20%E2%80%94%20Light.svg",
           "dark": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Pipeline%20%E2%80%94%20Dark.svg"
@@ -47,6 +51,8 @@
       {
         "type": "diagram",
         "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/LoRA%20Scale%20Guide%20%E2%80%94%20Dark.svg",
+        "width": 800,
+        "height": 305,
         "sources": {
           "light": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/LoRA%20Scale%20Guide%20%E2%80%94%20Light.svg",
           "dark": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/LoRA%20Scale%20Guide%20%E2%80%94%20Dark.svg"
@@ -58,6 +64,8 @@
       {
         "type": "diagram",
         "src": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Costs%20%E2%80%94%20Dark.svg",
+        "width": 900,
+        "height": 541,
         "sources": {
           "light": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Costs%20%E2%80%94%20Light.svg",
           "dark": "https://raw.githubusercontent.com/interfaceconjurer/fine-tunes/main/docs/diagrams/Costs%20%E2%80%94%20Dark.svg"

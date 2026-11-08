@@ -2,7 +2,7 @@
 export const LEFT_PANEL_MIN_WIDTH = 280;
 export const LEFT_PANEL_DEFAULT_WIDTH = 380;
 
-export const getLeftPanelMaxWidth = () => Math.floor(window.innerWidth / 2);
+export const getLeftPanelMaxWidth = () => Math.max(LEFT_PANEL_MIN_WIDTH, Math.floor(window.innerWidth / 2));
 
 // Initial state structure
 export const getInitialState = () => ({
@@ -71,3 +71,27 @@ export const getDefaultSplitViewState = () => ({
   activePaneId: 'left',
   splitterPosition: 50
 });
+
+// Used at the persistence boundary and after pane membership changes.
+export function normalizeSplitView(value, openTabIds) {
+  if (!value || value.enabled !== true) return getDefaultSplitViewState();
+  const validIds = new Set(openTabIds);
+  const normalizeIds = (ids) => [...new Set(Array.isArray(ids) ? ids : [])].filter(id => validIds.has(id));
+  const leftPaneTabIds = normalizeIds(value.leftPaneTabIds);
+  const leftIds = new Set(leftPaneTabIds);
+  const rightPaneTabIds = normalizeIds(value.rightPaneTabIds).filter(id => !leftIds.has(id));
+  if (!leftPaneTabIds.length || !rightPaneTabIds.length) return getDefaultSplitViewState();
+  const assigned = new Set([...leftPaneTabIds, ...rightPaneTabIds]);
+  leftPaneTabIds.push(...openTabIds.filter(id => !assigned.has(id)));
+  return {
+    enabled: true,
+    leftPaneTabIds,
+    rightPaneTabIds,
+    leftActiveTabId: leftPaneTabIds.includes(value.leftActiveTabId) ? value.leftActiveTabId : leftPaneTabIds[0],
+    rightActiveTabId: rightPaneTabIds.includes(value.rightActiveTabId) ? value.rightActiveTabId : rightPaneTabIds[0],
+    leftPanePreviewTabId: leftPaneTabIds.includes(value.leftPanePreviewTabId) ? value.leftPanePreviewTabId : null,
+    rightPanePreviewTabId: rightPaneTabIds.includes(value.rightPanePreviewTabId) ? value.rightPanePreviewTabId : null,
+    activePaneId: value.activePaneId === 'right' ? 'right' : 'left',
+    splitterPosition: Number.isFinite(value.splitterPosition) ? Math.max(20, Math.min(80, value.splitterPosition)) : 50,
+  };
+}

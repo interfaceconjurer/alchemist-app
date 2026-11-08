@@ -129,7 +129,13 @@
 }
 
 .work-content-artifact--diagram .work-content-image-placeholder {
-  aspect-ratio: auto;
+  aspect-ratio: 16 / 10;
+}
+
+.work-content-artifact--diagram img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 /* Code artifacts — full width */

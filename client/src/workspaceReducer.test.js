@@ -187,6 +187,16 @@ describe('workspaceReducer', () => {
   });
 
   describe('MOVE_TAB_TO_PANE', () => {
+    it('repairs source active membership when its active tab moves to the other pane', () => {
+      let state = splitState(['a', 'c'], ['b']);
+      state = workspaceReducer(state, { type: 'PANE_TAB_CLICK', tabId: 'a', paneId: 'left' });
+      state = workspaceReducer(state, { type: 'MOVE_TAB_TO_PANE', targetPane: 'right', tabId: 'a' });
+      expect(state.splitView.leftPaneTabIds).toEqual(['c']);
+      expect(state.splitView.leftActiveTabId).toBe('c');
+      expect(state.splitView.rightActiveTabId).toBe('a');
+      expect(state.activeTabId).toBe('a');
+    });
+
     it('moves tab between panes', () => {
       let state = splitState(['a', 'c'], ['b']);
       state = workspaceReducer(state, { type: 'MOVE_TAB_TO_PANE', targetPane: 'right', tabId: 'c' });
@@ -288,5 +298,40 @@ describe('workspaceReducer', () => {
       expect(state.animatedTabs.has('a')).toBe(true);
       expect(state.fadingTabs.has('a')).toBe(false);
     });
+  });
+});
+
+
+describe('mobile persistence ordering', () => {
+  for (const detectionFirst of [true, false]) {
+    it(`keeps the active tab and collapses desktop panes when detection resolves ${detectionFirst ? 'before' : 'after'} restore`, () => {
+      const payload = { ...splitState(['a', 'b'], ['c']), activeTabId: 'b', animatedTabs: new Set(['a', 'b', 'c']) };
+      let state = getInitialState();
+      if (detectionFirst) state = workspaceReducer(state, { type: 'SET_MOBILE', isMobile: true });
+      state = workspaceReducer(state, { type: 'LOAD_PERSISTED', payload });
+      if (!detectionFirst) state = workspaceReducer(state, { type: 'SET_MOBILE', isMobile: true });
+      expect(state.isMobile).toBe(true);
+      expect(state.openTabs.map(tab => tab.id)).toEqual(['b']);
+      expect(state.activeTabId).toBe('b');
+      expect(state.splitView).toEqual(getDefaultSplitViewState());
+      expect(state.previewTabId).toBeNull();
+      expect([...state.animatedTabs]).toEqual(['b']);
+    });
+  }
+
+  it('chooses an available tab when a stale active ID is restored on mobile', () => {
+    const state = workspaceReducer({ ...getInitialState(), isMobile: true }, {
+      type: 'LOAD_PERSISTED', payload: { ...stateWithTabs('a', 'b'), activeTabId: 'missing' },
+    });
+    expect(state.openTabs.map(tab => tab.id)).toEqual(['b']);
+    expect(state.activeTabId).toBe('b');
+  });
+
+  it('does not restore stale device mode over the current desktop layout', () => {
+    const payload = { ...splitState(['a'], ['b']), isMobile: true };
+    const state = workspaceReducer(getInitialState(), { type: 'LOAD_PERSISTED', payload });
+    expect(state.isMobile).toBe(false);
+    expect(state.openTabs).toHaveLength(2);
+    expect(state.splitView.enabled).toBe(true);
   });
 });

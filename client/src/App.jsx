@@ -13,7 +13,7 @@ import CommandPalette from "./components/commandPalette/CommandPalette";
 import TabBar from "./components/app/TabBar";
 import TabContent from "./components/app/TabContent";
 import DropZones from "./components/app/DropZones";
-import { LEFT_PANEL_MIN_WIDTH, LEFT_PANEL_DEFAULT_WIDTH, getLeftPanelMaxWidth, getInitialState } from "./utils/stateHelpers";
+import { LEFT_PANEL_MIN_WIDTH, LEFT_PANEL_DEFAULT_WIDTH, getLeftPanelMaxWidth, getInitialState, normalizeSplitView } from "./utils/stateHelpers";
 import { workspaceReducer } from "./workspaceReducer";
 import { useTabManager } from "./hooks/useTabManager";
 import { useDragDrop } from "./hooks/useDragDrop";
@@ -49,7 +49,9 @@ function App() {
   const { debouncedSave, flush } = useMemo(() => createDebouncedSave(500), []);
 
   useEffect(() => {
+    let cancelled = false;
     loadState().then((persisted) => {
+      if (cancelled) return;
       const openTabs = resolveWorkItemsByIds(persisted.openTabIds);
       const validIds = new Set(openTabs.map((t) => t.id));
       const activeTabId = validIds.has(persisted.activeTabId)
@@ -62,31 +64,14 @@ function App() {
       const previewTabId = validIds.has(persisted.previewTabId) ? persisted.previewTabId : null;
       const animatedTabs = new Set(openTabs.map((t) => t.id));
 
-      let splitView = {
-        enabled: false, leftPaneTabIds: [], rightPaneTabIds: [],
-        leftActiveTabId: null, rightActiveTabId: null,
-        leftPanePreviewTabId: null, rightPanePreviewTabId: null,
-        activePaneId: 'left', splitterPosition: 50
-      };
+      const splitView = normalizeSplitView(persisted.splitView, [...validIds]);
+      const restoredActiveId = splitView.enabled
+        ? splitView[splitView.activePaneId === 'left' ? 'leftActiveTabId' : 'rightActiveTabId']
+        : activeTabId;
 
-      if (persisted.splitView?.enabled) {
-        const leftPaneTabIds = (persisted.splitView.leftPaneTabIds || []).filter(id => validIds.has(id));
-        const rightPaneTabIds = (persisted.splitView.rightPaneTabIds || []).filter(id => validIds.has(id));
-        if (leftPaneTabIds.length > 0 && rightPaneTabIds.length > 0) {
-          splitView = {
-            enabled: true, leftPaneTabIds, rightPaneTabIds,
-            leftActiveTabId: validIds.has(persisted.splitView.leftActiveTabId) ? persisted.splitView.leftActiveTabId : leftPaneTabIds[0],
-            rightActiveTabId: validIds.has(persisted.splitView.rightActiveTabId) ? persisted.splitView.rightActiveTabId : rightPaneTabIds[0],
-            leftPanePreviewTabId: validIds.has(persisted.splitView.leftPanePreviewTabId) ? persisted.splitView.leftPanePreviewTabId : null,
-            rightPanePreviewTabId: validIds.has(persisted.splitView.rightPanePreviewTabId) ? persisted.splitView.rightPanePreviewTabId : null,
-            activePaneId: persisted.splitView.activePaneId || 'left',
-            splitterPosition: persisted.splitView.splitterPosition || 50
-          };
-        }
-      }
-
-      dispatch({ type: 'LOAD_PERSISTED', payload: { openTabs, activeTabId, previewTabId, leftPanelWidth, stateLoaded: true, animatedTabs, splitView } });
+      dispatch({ type: 'LOAD_PERSISTED', payload: { openTabs, activeTabId: restoredActiveId, previewTabId, leftPanelWidth, stateLoaded: true, animatedTabs, splitView } });
     });
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
@@ -100,23 +85,25 @@ function App() {
     });
   }, [state.openTabs, state.activeTabId, state.previewTabId, state.leftPanelWidth, state.splitView, state.stateLoaded, debouncedSave]);
 
+  const { handleResizeMove, handleResizeEnd, handleWindowResize } = resize;
+  const { handleGlobalKeyDown } = keyboard;
   useEffect(() => {
     const onBeforeUnload = () => flush();
-    document.addEventListener("mousemove", resize.handleResizeMove);
-    document.addEventListener("mouseup", resize.handleResizeEnd);
-    window.addEventListener("resize", resize.handleWindowResize);
+    document.addEventListener("mousemove", handleResizeMove);
+    document.addEventListener("mouseup", handleResizeEnd);
+    window.addEventListener("resize", handleWindowResize);
     window.addEventListener("beforeunload", onBeforeUnload);
-    document.addEventListener("keydown", keyboard.handleGlobalKeyDown);
+    document.addEventListener("keydown", handleGlobalKeyDown);
 
     return () => {
-      document.removeEventListener("mousemove", resize.handleResizeMove);
-      document.removeEventListener("mouseup", resize.handleResizeEnd);
-      window.removeEventListener("resize", resize.handleWindowResize);
+      document.removeEventListener("mousemove", handleResizeMove);
+      document.removeEventListener("mouseup", handleResizeEnd);
+      window.removeEventListener("resize", handleWindowResize);
       window.removeEventListener("beforeunload", onBeforeUnload);
-      document.removeEventListener("keydown", keyboard.handleGlobalKeyDown);
-      keyboard.cleanup();
+      document.removeEventListener("keydown", handleGlobalKeyDown);
+      flush();
     };
-  }, [resize, keyboard, flush]);
+  }, [handleResizeMove, handleResizeEnd, handleWindowResize, handleGlobalKeyDown, flush]);
 
   const renderTabs = (tabs, paneId = null) => {
     const isInactivePane = state.splitView.enabled && paneId && paneId !== state.splitView.activePaneId;
@@ -148,14 +135,13 @@ function App() {
     }
     return (
       <TabContent
-        tabs={tabs} activeTabId={activeTabId} animatedTabs={state.animatedTabs} fadingTabs={state.fadingTabs}
-        onStartTabFade={tabActions.startTabFade} onMarkAnimationComplete={tabActions.markAnimationComplete}
+        tabs={tabs} activeTabId={activeTabId}
       />
     );
   };
 
-  const leftPaneTabs = state.splitView.enabled ? state.openTabs.filter(t => state.splitView.leftPaneTabIds.includes(t.id)) : [];
-  const rightPaneTabs = state.splitView.enabled ? state.openTabs.filter(t => state.splitView.rightPaneTabIds.includes(t.id)) : [];
+  const leftPaneTabs = useMemo(() => state.splitView.enabled ? state.openTabs.filter(t => state.splitView.leftPaneTabIds.includes(t.id)) : [], [state.openTabs, state.splitView.enabled, state.splitView.leftPaneTabIds]);
+  const rightPaneTabs = useMemo(() => state.splitView.enabled ? state.openTabs.filter(t => state.splitView.rightPaneTabIds.includes(t.id)) : [], [state.openTabs, state.splitView.enabled, state.splitView.rightPaneTabIds]);
 
   return (
     <ThemeProvider>
@@ -196,7 +182,7 @@ function App() {
                 </p>
               </header>
               <nav className="nav">
-                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="http://www.linkedin.com/in/jordan-l-wright-91b17321">
+                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/jordan-l-wright-91b17321">
                   <Icon title="Out-Bound Link" icon={icons.linkedin} assistiveText="Out-Bound Link" /><span>LinkedIn</span>
                 </a>
                 <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://github.com/interfaceconjurer/resume">

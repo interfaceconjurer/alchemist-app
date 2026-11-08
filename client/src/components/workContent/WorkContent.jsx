@@ -8,12 +8,14 @@ function ArtifactRenderer({ artifact, index }) {
 
   if (type === 'diagram') {
     const src = artifact.sources?.[theme] || artifact.src;
+    const width = Number.isFinite(artifact.width) && artifact.width > 0 ? artifact.width : 16;
+    const height = Number.isFinite(artifact.height) && artifact.height > 0 ? artifact.height : 10;
     return (
       <div className="work-content-artifact work-content-artifact--diagram">
         {artifact.label && <h4 className="work-content-artifact-label">{artifact.label}</h4>}
         {artifact.description && <p className="work-content-artifact-description">{artifact.description}</p>}
-        <div className="work-content-image-placeholder">
-          <img src={src} alt={artifact.alt} loading="lazy" />
+        <div className="work-content-image-placeholder" style={{ aspectRatio: `${width} / ${height}` }}>
+          <img src={src} alt={artifact.alt} width={width} height={height} loading="lazy" decoding="async" />
         </div>
       </div>
     );

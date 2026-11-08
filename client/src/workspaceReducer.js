@@ -1,4 +1,4 @@
-import { getDefaultSplitViewState, getDefaultDragThreshold } from './utils/stateHelpers';
+import { getDefaultSplitViewState, getDefaultDragThreshold, normalizeSplitView } from './utils/stateHelpers';
 
 function paneKeys(paneId) {
   return {
@@ -169,6 +169,7 @@ function initiateSplit(state, dropZone, draggedTabId) {
 }
 
 function moveTabToPane(state, targetPane, tabId) {
+  if (!state.splitView.enabled || !['left', 'right'].includes(targetPane) || !state.openTabs.some(tab => tab.id === tabId)) return state;
   const { leftPaneTabIds, rightPaneTabIds, leftPanePreviewTabId, rightPanePreviewTabId } = state.splitView;
   const newLeftTabs = leftPaneTabIds.filter(id => id !== tabId);
   const newRightTabs = rightPaneTabIds.filter(id => id !== tabId);
@@ -190,30 +191,38 @@ function moveTabToPane(state, targetPane, tabId) {
 
   return {
     ...state,
-    splitView: { ...state.splitView, leftPaneTabIds: newLeftTabs, rightPaneTabIds: newRightTabs, leftActiveTabId: newLeftActiveTabId, rightActiveTabId: newRightActiveTabId, leftPanePreviewTabId: newLeftPreviewTabId, rightPanePreviewTabId: newRightPreviewTabId, activePaneId: targetPane },
+    splitView: normalizeSplitView({ ...state.splitView, leftPaneTabIds: newLeftTabs, rightPaneTabIds: newRightTabs, leftActiveTabId: newLeftActiveTabId, rightActiveTabId: newRightActiveTabId, leftPanePreviewTabId: newLeftPreviewTabId, rightPanePreviewTabId: newRightPreviewTabId, activePaneId: targetPane }, state.openTabs.map(tab => tab.id)),
     activeTabId: tabId
+  };
+}
+
+// Apply the same invariant whether device detection or persistence resolves first.
+function normalizeMobileWorkspace(state) {
+  const active = state.openTabs.find(tab => tab.id === state.activeTabId) ?? state.openTabs.at(-1) ?? null;
+  const ids = new Set(active ? [active.id] : []);
+  return {
+    ...state,
+    openTabs: active ? [active] : [],
+    activeTabId: active?.id ?? null,
+    previewTabId: null,
+    splitView: getDefaultSplitViewState(),
+    animatedTabs: new Set([...state.animatedTabs].filter(id => ids.has(id))),
+    fadingTabs: new Set([...state.fadingTabs].filter(id => ids.has(id))),
   };
 }
 
 export function workspaceReducer(state, action) {
   switch (action.type) {
     case 'SET_MOBILE': {
-      const newState = { ...state, isMobile: action.isMobile };
-      if (action.isMobile) {
-        if (newState.splitView.enabled) {
-          newState.splitView = getDefaultSplitViewState();
-        }
-        if (newState.openTabs.length > 1 && newState.activeTabId) {
-          const activeTab = newState.openTabs.find(t => t.id === newState.activeTabId);
-          newState.openTabs = activeTab ? [activeTab] : [];
-          newState.previewTabId = null;
-        }
-      }
-      return newState;
+      const next = { ...state, isMobile: action.isMobile };
+      return next.isMobile ? normalizeMobileWorkspace(next) : next;
     }
 
-    case 'LOAD_PERSISTED':
-      return { ...state, ...action.payload };
+    case 'LOAD_PERSISTED': {
+      // Device mode comes from matchMedia, never from a saved desktop session.
+      const next = { ...state, ...action.payload, isMobile: state.isMobile };
+      return next.isMobile ? normalizeMobileWorkspace(next) : next;
+    }
 
     case 'OPEN_PREVIEW':
       return openPreview(state, action.item);

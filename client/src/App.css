@@ -838,3 +838,13 @@ a:active {
     max-width: none;
   }
 }
+
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-content,
+  .stage-empty-icon-shimmer-rect,
+  .stage-drag-ghost {
+    animation: none;
+    transition: none;
+  }
+}
