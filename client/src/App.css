@@ -852,9 +852,8 @@ a:active {
   }
 }
 
-/* Dark mode: let the deep-space backdrop show through the shell. The panel
-   keeps a faint tint so it still reads as a surface. */
-[data-theme="dark"] .main--stage-hidden .left-panel {
+/* Let the space backdrop show through the shell in both themes. */
+.main--stage-hidden .left-panel {
   background-color: transparent;
   box-shadow: none;
 }

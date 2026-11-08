@@ -19,10 +19,10 @@ function withTheme(theme) {
 }
 
 describe('SpaceBackground', () => {
-  it('renders nothing in light mode', () => {
+  it('renders the inverse (light) variant in light mode', () => {
     withTheme('light');
     const { container } = render(<ThemeProvider><SpaceBackground /></ThemeProvider>);
-    expect(container.querySelector('.space')).toBeNull();
+    expect(container.querySelector('.space')).toHaveClass('space--light');
   });
 
   it('generates its layers off the critical path in dark mode, as decorative content', async () => {

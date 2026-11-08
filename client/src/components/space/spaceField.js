@@ -31,24 +31,34 @@ export const NEBULA_PALETTE = [
   [255, 61, 139], // rose    #ff3d8b
 ];
 
-// Star colour temperatures: mostly white, some warm and some cool.
-const STAR_TINTS = [
-  [255, 255, 255], [255, 255, 255], [255, 255, 255],
-  [255, 236, 214], [255, 214, 180], // warm
-  [214, 228, 255], [190, 210, 255], // cool
-];
+// Star colour temperatures. Dark mode: light stars, mostly white with some
+// warm and cool. Light mode is the inverse: ink-dark stars on the grey page,
+// keeping a hint of warm (umber) and cool (slate-blue) temperature.
+const STAR_TINTS = {
+  dark: [
+    [255, 255, 255], [255, 255, 255], [255, 255, 255],
+    [255, 236, 214], [255, 214, 180], // warm
+    [214, 228, 255], [190, 210, 255], // cool
+  ],
+  light: [
+    [34, 36, 42], [34, 36, 42], [34, 36, 42],
+    [58, 44, 34], [66, 46, 34], // warm
+    [30, 38, 58], [26, 34, 62], // cool
+  ],
+};
 
 /**
  * Stars as plain data (testable without a canvas). Sizes in CSS pixels.
  * Magnitudes follow a steep power law: most stars are barely visible.
  */
-export function generateStars({ width, height, density, seed, sizeRange, brightness }) {
+export function generateStars({ width, height, density, seed, sizeRange, brightness, mode = 'dark' }) {
   const rand = mulberry32(seed);
   const count = Math.round((width * height) / 1e4 * density);
   const stars = [];
   for (let i = 0; i < count; i++) {
     const m = Math.pow(rand(), 3.2); // 0..1, heavily skewed toward dim
-    const tint = STAR_TINTS[Math.floor(rand() * STAR_TINTS.length)];
+    const tints = STAR_TINTS[mode];
+    const tint = tints[Math.floor(rand() * tints.length)];
     stars.push({
       x: rand() * width,
       y: rand() * height,
@@ -85,13 +95,17 @@ function drawStars(ctx, stars) {
  * "filaments" so it reads as gas clouds rather than random spots. Dust lanes
  * are subtracted with destination-out so the clouds have dark structure.
  */
-function drawNebula(ctx, { width, height, seed, intensity }) {
+function drawNebula(ctx, { width, height, seed, intensity, mode = 'dark' }) {
   const rand = mulberry32(seed);
   const diag = Math.hypot(width, height);
-  ctx.globalCompositeOperation = 'lighter';
+  // Dark: clouds of light that add up. Light: translucent ink that the page
+  // multiplies with (see .space--light in space.css), so it tints and darkens.
+  ctx.globalCompositeOperation = mode === 'dark' ? 'lighter' : 'source-over';
   const filaments = 4;
   for (let f = 0; f < filaments; f++) {
-    const color = NEBULA_PALETTE[f % NEBULA_PALETTE.length];
+    const base = NEBULA_PALETTE[f % NEBULA_PALETTE.length];
+    // Light mode: desaturate toward a slate ink so the wash reads as tinted shadow.
+    const color = mode === 'dark' ? base : base.map((c) => Math.round(c * 0.45 + 70 * 0.55));
     // A filament is a gently curving path across part of the sky.
     let x = rand() * width, y = rand() * height;
     let angle = rand() * Math.PI * 2;
@@ -147,16 +161,25 @@ function dither(ctx, width, height, seed, amount = 1.6) {
 }
 
 export const LAYERS = {
-  far: { density: 16, sizeRange: [0.3, 0.8], brightness: 0.42, seed: 1201 },
-  near: { density: 1.4, sizeRange: [0.5, 1.3], brightness: 0.7, seed: 7741 },
-  nebula: { seed: 3307, intensity: 0.62 },
+  dark: {
+    far: { density: 16, sizeRange: [0.3, 0.8], brightness: 0.42, seed: 1201 },
+    near: { density: 1.4, sizeRange: [0.5, 1.3], brightness: 0.7, seed: 7741 },
+    nebula: { seed: 3307, intensity: 0.62 },
+  },
+  // Dark specks read stronger on grey than light ones on black, so they're fainter.
+  light: {
+    far: { density: 14, sizeRange: [0.3, 0.75], brightness: 0.36, seed: 1201 },
+    near: { density: 1.2, sizeRange: [0.5, 1.2], brightness: 0.58, seed: 7741 },
+    nebula: { seed: 3307, intensity: 0.55 },
+  },
 };
 
 /**
  * Render one layer into a canvas sized for the given CSS box and DPR.
  * Layers are oversized by `bleed` on each side so CSS drift never reveals an edge.
  */
-export function renderLayer(kind, { width, height, dpr, bleed, createCanvas }) {
+export function renderLayer(kind, { width, height, dpr, bleed, createCanvas, mode = 'dark' }) {
+  const layers = LAYERS[mode];
   const w = Math.ceil((width + bleed * 2) * dpr);
   const h = Math.ceil((height + bleed * 2) * dpr);
   const canvas = createCanvas(w, h);
@@ -170,7 +193,7 @@ export function renderLayer(kind, { width, height, dpr, bleed, createCanvas }) {
     const small = createCanvas(Math.ceil(box.width * scale), Math.ceil(box.height * scale));
     const sctx = small.getContext('2d');
     sctx.scale(scale, scale);
-    drawNebula(sctx, { ...box, ...LAYERS.nebula });
+    drawNebula(sctx, { ...box, ...layers.nebula, mode });
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     if ('filter' in ctx) ctx.filter = `blur(${Math.round(4 / scale)}px)`;
@@ -178,9 +201,9 @@ export function renderLayer(kind, { width, height, dpr, bleed, createCanvas }) {
     if ('filter' in ctx) ctx.filter = 'none';
     // Dither at output resolution so the noise is sub-pixel, not a visible grid.
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    dither(ctx, canvas.width, canvas.height, LAYERS.nebula.seed + 1, 1.1);
+    dither(ctx, canvas.width, canvas.height, layers.nebula.seed + 1, 1.1);
   } else {
-    drawStars(ctx, generateStars({ ...box, ...LAYERS[kind] }));
+    drawStars(ctx, generateStars({ ...box, ...layers[kind], mode }));
   }
   return canvas;
 }

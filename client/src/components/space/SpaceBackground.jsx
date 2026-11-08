@@ -24,19 +24,21 @@ function toBlobUrl(canvas) {
 }
 
 /**
- * Fixed, full-window deep-space layer behind the app (dark mode only).
- * Generated once per viewport size; animated purely with CSS so it costs
- * nothing per frame on the main thread or the symbol's GPU budget.
+ * Fixed, full-window deep-space layer behind the app. Dark mode: light stars
+ * and glowing nebula on black. Light mode: the inverse — ink-dark stars and a
+ * faint ink-wash nebula on the grey page.
+ * Generated once per viewport size and theme; animated purely with CSS so it
+ * costs nothing per frame on the main thread or the symbol's GPU budget.
  */
 export default function SpaceBackground() {
-  const { isDark } = useTheme();
+  const { theme } = useTheme();
+  const mode = theme === 'dark' ? 'dark' : 'light';
   const [urls, setUrls] = useState(null);
   const [paused, setPaused] = useState(() => document.visibilityState === 'hidden');
   const sizeKey = useRef('');
 
-  // Generate (and regenerate on meaningful resize) only while dark mode is on.
+  // Generate for the current theme; regenerate on theme change or meaningful resize.
   useEffect(() => {
-    if (!isDark) return undefined;
     let cancelled = false;
     let created = [];
     let timer;
@@ -58,7 +60,7 @@ export default function SpaceBackground() {
           // of one long task, so input and the symbol's startup stay responsive.
           await nextIdle();
           if (cancelled) break;
-          const canvas = renderLayer(kind, { width, height, dpr, bleed: BLEED, createCanvas: canvasFactory });
+          const canvas = renderLayer(kind, { width, height, dpr, bleed: BLEED, createCanvas: canvasFactory, mode });
           next[kind] = await toBlobUrl(canvas);
           if (cancelled) break;
         }
@@ -83,7 +85,7 @@ export default function SpaceBackground() {
       sizeKey.current = '';
       setUrls(null);
     };
-  }, [isDark]);
+  }, [mode]);
 
   // Pause CSS motion when the tab is hidden (reduced motion is handled in CSS).
   useEffect(() => {
@@ -92,9 +94,8 @@ export default function SpaceBackground() {
     return () => document.removeEventListener('visibilitychange', onVisibility);
   }, []);
 
-  if (!isDark) return null;
   return (
-    <div className={`space${urls ? ' space--ready' : ''}${paused ? ' space--paused' : ''}`} aria-hidden="true">
+    <div className={`space space--${mode}${urls ? ' space--ready' : ''}${paused ? ' space--paused' : ''}`} aria-hidden="true">
       {urls && KINDS.map((kind) => (
         <div key={kind} className={`space-layer space-layer--${kind}`} style={{ backgroundImage: `url(${urls[kind]})` }} />
       ))}

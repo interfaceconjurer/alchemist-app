@@ -1,4 +1,4 @@
-/* Deep-space backdrop (dark mode). Fixed behind the whole app.
+/* Deep-space backdrop. Fixed behind the whole app; dark and light variants.
    All motion is transform/opacity so it stays on the compositor. */
 
 .space {
@@ -50,6 +50,19 @@
   background:
     radial-gradient(ellipse 34% 26% at 50% 66%, rgba(10, 10, 10, 0.78) 0%, rgba(10, 10, 10, 0) 100%),
     radial-gradient(ellipse 120% 90% at 50% 45%, rgba(10, 10, 10, 0) 55%, rgba(10, 10, 10, 0.65) 100%);
+}
+
+/* Light mode: the inverse. The nebula is translucent ink, multiplied with the
+   grey page so it tints and darkens rather than glowing. The vignette fades to
+   the page colour, keeping the area behind the name and links clean grey. */
+.space--light .space-layer--nebula {
+  mix-blend-mode: multiply;
+}
+
+.space--light .space-vignette {
+  background:
+    radial-gradient(ellipse 34% 26% at 50% 66%, rgba(198, 199, 202, 0.85) 0%, rgba(198, 199, 202, 0) 100%),
+    radial-gradient(ellipse 120% 90% at 50% 45%, rgba(198, 199, 202, 0) 55%, rgba(198, 199, 202, 0.55) 100%);
 }
 
 .space--paused .space-layer {
