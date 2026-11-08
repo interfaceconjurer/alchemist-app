@@ -1,6 +1,5 @@
 import React, { useReducer, useEffect, useRef, useMemo } from "react";
 import "./App.css";
-import Resume from "./resume/Jordan_L_Wright.pdf";
 import Icon from "./components/icon/view";
 import { icons } from "./components/iconList/iconList";
 import { workSections, getSectionForItem } from "./components/workList/workList";
@@ -193,14 +192,14 @@ function App() {
                 <AlchemySymbol />
                 <h1 className="App-title">Jordan L. Wright</h1>
                 <p className="App-intro">
-                  Digit Alchemist |<span className="App-intro-subtitle"> Designer &amp; Engineer</span>
+                  AI Native Designer &amp; Engineer
                 </p>
               </header>
               <nav className="nav">
                 <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="http://www.linkedin.com/in/jordan-l-wright-91b17321">
                   <Icon title="Out-Bound Link" icon={icons.linkedin} assistiveText="Out-Bound Link" /><span>LinkedIn</span>
                 </a>
-                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href={Resume}>
+                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://github.com/interfaceconjurer/resume">
                   <Icon title="Out-Bound Link" icon={icons.resume} assistiveText="Out-Bound Link" /><span>Resume</span>
                 </a>
                 <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://github.com/interfaceconjurer">
