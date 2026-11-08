@@ -24,6 +24,11 @@ import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useSwipeBack } from "./hooks/useSwipeBack";
 
+// Temporarily hide the stage so the left panel fills the window. Flip to true to restore.
+const SHOW_STAGE = false;
+// Temporarily hide the "My Work" list in the left panel. Flip to true to restore.
+const SHOW_WORK_LIST = false;
+
 function App() {
   const [state, dispatch] = useReducer(workspaceReducer, undefined, getInitialState);
   const stateRef = useRef(state);
@@ -180,9 +185,9 @@ function App() {
           </button>
           <ThemeToggle />
         </div>
-        <main className="main">
-          <section className="left-panel" style={isMobile ? undefined : { width: state.leftPanelWidth }}>
-            {!isMobile && <div className="left-panel-resize-handle" onMouseDown={resize.handleResizeStart} aria-label="Resize left panel" />}
+        <main className={`main${SHOW_STAGE ? '' : ' main--stage-hidden'}`}>
+          <section className="left-panel" style={isMobile || !SHOW_STAGE ? undefined : { width: state.leftPanelWidth }}>
+            {!isMobile && SHOW_STAGE && <div className="left-panel-resize-handle" onMouseDown={resize.handleResizeStart} aria-label="Resize left panel" />}
             <section className="left-panel-top">
               <header className="App-header">
                 <AlchemySymbol />
@@ -203,6 +208,7 @@ function App() {
                 </a>
               </nav>
             </section>
+            {SHOW_WORK_LIST && (
             <section className="work-list">
               <h2 className="work-list-title">My Work</h2>
               {workSections.map((section) => (
@@ -227,6 +233,7 @@ function App() {
                 </div>
               ))}
             </section>
+            )}
           </section>
           <section className={`stage${isMobile && !state.activeTabId ? ' stage--hidden' : ''}`}>
             <div className="stage-editor">

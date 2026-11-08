@@ -120,6 +120,15 @@ body {
   );
 }
 
+.main--stage-hidden .left-panel {
+  width: 100%;
+  flex: 1;
+}
+
+.main--stage-hidden .stage {
+  display: none;
+}
+
 .stage {
   flex: 1;
   display: flex;
