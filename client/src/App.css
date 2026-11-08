@@ -123,6 +123,17 @@ body {
 .main--stage-hidden .left-panel {
   width: 100%;
   flex: 1;
+  /* The symbol canvas sits flush under the top bar; its halo otherwise gets
+     cut off at the canvas edge, leaving a visible strip of padding above it. */
+  padding-top: 0;
+}
+
+/* Same for the sides: let the symbol canvas run edge to edge (cancelling the
+   panel's 1rem side padding) so the halo is never clipped by a visible edge. */
+.main--stage-hidden .symbolContainer {
+  width: calc(100% + 2rem);
+  margin-left: -1rem;
+  margin-right: -1rem;
 }
 
 .main--stage-hidden .stage {
@@ -413,6 +424,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .App-title {
+  position: relative; /* sits over the bottom of the symbol canvas (see .symbolContainer margin) */
   font-size: 1.5em;
   text-align: left;
   margin: 0;
@@ -813,7 +825,8 @@ a:active {
 
 
   .symbolContainer {
-    height: 200px;
+    height: 400px;
+    margin-bottom: -48px;
   }
 }
 
