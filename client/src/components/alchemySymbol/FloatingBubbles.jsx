@@ -2,24 +2,49 @@ import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-export default function FloatingBubbles({ color, spawnPoint, count = 15 }) {
+function discTexture(fill) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 64;
+  canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, 64, 64);
+  ctx.beginPath();
+  ctx.arc(32, 32, 24, 0, Math.PI * 2);
+  ctx.fillStyle = fill;
+  ctx.fill();
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
+}
+
+/**
+ * `darkRatio`: fraction of bubbles drawn as dark onyx motes instead of light
+ * ones. Each bubble re-rolls light/dark every time it respawns, so the mix
+ * drifts rather than the same bubbles always being dark.
+ * `darkOpacityScale`: dark motes read much stronger than light ones on a dark
+ * background's glow, so they get their own opacity.
+ */
+export default function FloatingBubbles({
+  color, spawnPoint, count = 15, opacityScale = 1,
+  darkRatio = 0, darkColor = '#0b0c0f', darkOpacityScale = 1.4,
+}) {
   const particlesRef = useRef([]);
   const groupRef = useRef();
 
-  const bubbleTexture = useMemo(() => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 64;
-    canvas.height = 64;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, 64, 64);
-    ctx.beginPath();
-    ctx.arc(32, 32, 24, 0, Math.PI * 2);
-    ctx.fillStyle = color === '#ffffff' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)';
-    ctx.fill();
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.needsUpdate = true;
-    return texture;
-  }, [color]);
+  const bubbleTexture = useMemo(
+    () => discTexture(color === '#ffffff' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 1)'),
+    [color],
+  );
+  const darkTexture = useMemo(() => discTexture(darkColor), [darkColor]);
+
+  const roll = (sprite) => {
+    const dark = Math.random() < darkRatio;
+    sprite.userData.dark = dark;
+    sprite.material.map = dark ? darkTexture : bubbleTexture;
+    sprite.material.needsUpdate = true;
+    // Dark motes are a touch smaller and denser-looking.
+    sprite.userData.size = (dark ? 0.09 : 0.12) + Math.random() * (dark ? 0.06 : 0.08);
+  };
 
   useEffect(() => {
     const particles = [];
@@ -32,14 +57,13 @@ export default function FloatingBubbles({ color, spawnPoint, count = 15 }) {
       );
       const startPos = spawnPoint();
       sprite.position.copy(startPos);
-      const size = 0.12 + Math.random() * 0.08;
-      sprite.scale.set(size, size, 1);
       sprite.userData = {
         life: Math.random() * 4,
         maxLife: 3 + Math.random() * 2,
-        size,
         startPos: startPos.clone(),
       };
+      roll(sprite);
+      sprite.scale.set(sprite.userData.size, sprite.userData.size, 1);
       particles.push(sprite);
       if (groupRef.current) groupRef.current.add(sprite);
     }
@@ -50,7 +74,11 @@ export default function FloatingBubbles({ color, spawnPoint, count = 15 }) {
         s.material.dispose();
       });
     };
-  }, [bubbleTexture, count, spawnPoint]);
+    // roll() closes over darkRatio/textures; re-create sprites when they change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bubbleTexture, darkTexture, darkRatio, count, spawnPoint]);
+
+  useEffect(() => () => { bubbleTexture.dispose(); darkTexture.dispose(); }, [bubbleTexture, darkTexture]);
 
   useFrame((_, delta) => {
     particlesRef.current.forEach((sprite) => {
@@ -63,7 +91,7 @@ export default function FloatingBubbles({ color, spawnPoint, count = 15 }) {
         const newStart = spawnPoint();
         sprite.position.copy(newStart);
         sprite.userData.startPos.copy(newStart);
-        sprite.userData.size = 0.12 + Math.random() * 0.08;
+        roll(sprite);
         return;
       }
 
@@ -75,7 +103,8 @@ export default function FloatingBubbles({ color, spawnPoint, count = 15 }) {
       if (progress < 0.1) opacity = progress * 10;
       else if (progress < 0.6) opacity = 1;
       else opacity = (1 - progress) * 2.5;
-      sprite.material.opacity = Math.max(0, opacity * 0.4);
+      const scale = sprite.userData.dark ? darkOpacityScale : opacityScale;
+      sprite.material.opacity = Math.max(0, opacity * 0.4 * scale);
 
       const s = sprite.userData.size * (1 + progress * 0.3);
       sprite.scale.set(s, s, 1);
