@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import './view.css';
 
-const Tetrahedron3D = lazy(() => import('./Tetrahedron3D'));
+const Pyramid3D = lazy(() => import('./Pyramid3D'));
 const Cube3D = lazy(() => import('./Cube3D'));
 const Octahedron3D = lazy(() => import('./Octahedron3D'));
 const Dodecahedron3D = lazy(() => import('./Dodecahedron3D'));
 const Icosahedron3D = lazy(() => import('./Icosahedron3D'));
 
-const COMPONENTS = [Tetrahedron3D, Cube3D, Octahedron3D, Dodecahedron3D, Icosahedron3D];
+const COMPONENTS = [Pyramid3D, Cube3D, Octahedron3D, Dodecahedron3D, Icosahedron3D];
 
 const HOLD_DURATION = 5000; // How long to display each shape
 const SHRINK_DURATION = 1600; // Shrink-out time (ms) — matches CSS
