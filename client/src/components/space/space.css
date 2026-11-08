@@ -1,0 +1,86 @@
+/* Deep-space backdrop (dark mode). Fixed behind the whole app.
+   All motion is transform/opacity so it stays on the compositor. */
+
+.space {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+
+.space--ready {
+  opacity: 1;
+}
+
+.space-layer {
+  position: absolute;
+  /* Matches BLEED in SpaceBackground.jsx. */
+  inset: -48px;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  will-change: transform, opacity;
+}
+
+/* Nebula breathes on the same 11/13/17 s family as the crystal backlights.
+   Opacity only: the clouds themselves never move enough to notice. */
+.space-layer--nebula {
+  opacity: 0.85;
+  animation: space-breathe 13s ease-in-out infinite alternate;
+}
+
+/* Two star layers drift at different rates for a faint sense of depth. */
+.space-layer--far {
+  animation: space-drift-far 180s ease-in-out infinite alternate;
+}
+
+.space-layer--near {
+  animation:
+    space-drift-near 120s ease-in-out infinite alternate,
+    space-twinkle 7s ease-in-out infinite alternate;
+}
+
+/* Darkens the centre column behind the name/links and the outer edges, so text
+   contrast holds and the sky feels deep rather than flat. */
+.space-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 34% 26% at 50% 66%, rgba(10, 10, 10, 0.78) 0%, rgba(10, 10, 10, 0) 100%),
+    radial-gradient(ellipse 120% 90% at 50% 45%, rgba(10, 10, 10, 0) 55%, rgba(10, 10, 10, 0.65) 100%);
+}
+
+.space--paused .space-layer {
+  animation-play-state: paused;
+}
+
+@keyframes space-breathe {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+@keyframes space-drift-far {
+  0% { transform: translate3d(-14px, -8px, 0); }
+  100% { transform: translate3d(14px, 8px, 0); }
+}
+
+@keyframes space-drift-near {
+  0% { transform: translate3d(22px, -12px, 0); }
+  100% { transform: translate3d(-22px, 12px, 0); }
+}
+
+@keyframes space-twinkle {
+  0% { opacity: 0.82; }
+  100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .space-layer {
+    animation: none;
+  }
+  .space {
+    transition: none;
+  }
+}

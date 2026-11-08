@@ -5,6 +5,7 @@ import { icons } from "./components/iconList/iconList";
 import { workSections, getSectionForItem } from "./components/workList/workList";
 import AlchemySymbol from "./components/alchemySymbol/mediator";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import SpaceBackground from "./components/space/SpaceBackground";
 import ThemeToggle from "./components/ThemeToggle/ThemeToggle";
 import { loadState, createDebouncedSave } from "./workspacePersistence";
 import { resolveWorkItemsByIds } from "./resolveWorkItems";
@@ -145,6 +146,7 @@ function App() {
 
   return (
     <ThemeProvider>
+      <SpaceBackground />
       <div className="App">
         <CommandPalette
           isOpen={state.commandPaletteOpen}

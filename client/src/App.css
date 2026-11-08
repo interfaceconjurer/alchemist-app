@@ -32,6 +32,8 @@ body {
 }
 
 .App {
+  position: relative; /* stacks above the fixed .space backdrop */
+  z-index: 1;
   color: var(--text-color);
   display: flex;
   flex-direction: column;
@@ -848,4 +850,11 @@ a:active {
     animation: none;
     transition: none;
   }
+}
+
+/* Dark mode: let the deep-space backdrop show through the shell. The panel
+   keeps a faint tint so it still reads as a surface. */
+[data-theme="dark"] .main--stage-hidden .left-panel {
+  background-color: transparent;
+  box-shadow: none;
 }
