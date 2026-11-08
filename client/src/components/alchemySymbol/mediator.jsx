@@ -22,6 +22,11 @@ const HOLD_DURATION = 5000; // How long to display each shape
 const SHRINK_DURATION = 1600; // Shrink-out time (ms) — matches CSS
 const GROW_DURATION = 1600; // Grow-in time (ms) — matches CSS
 
+/** Same box as the canvas, intentionally blank; keeps layout stable during startup. */
+function SymbolPlaceholder({ reason }) {
+  return <div className="symbol-placeholder" data-symbol-pending={reason} aria-hidden="true" />;
+}
+
 // Phases: 'showing' -> 'shrinking' -> 'growing' -> 'showing'
 function AlchemySymbol() {
   const ref = useRef(null);
@@ -31,9 +36,12 @@ function AlchemySymbol() {
   return (
     <article className="symbolContainer" ref={ref} data-render-state={renderState}>
       <section className="symbol" style={{ opacity: 1 }}>
-        {reducedMotion ? <StaticSymbol reason="reduced-motion" /> : !started ? <StaticSymbol reason="paused" /> : (
+        {/* The outline fallback is for reduced motion and real failures only. While
+            waiting to start or for the lazy chunk, render an empty placeholder so a
+            normal load doesn't flash the outline before the crystal grows in. */}
+        {reducedMotion ? <StaticSymbol reason="reduced-motion" /> : !started ? <SymbolPlaceholder reason="paused" /> : (
           <GraphicsBoundary>
-            <Suspense fallback={<StaticSymbol reason="loading" />}>
+            <Suspense fallback={<SymbolPlaceholder reason="loading" />}>
               {TRANSITION === 'morph' ? (
                 <div className="symbol-transition symbol-visible"><MorphingSolid active={active} /></div>
               ) : <FadeSequence active={active} />}
