@@ -27,6 +27,6 @@ jobs:
       - run: npm test
       - run: npm test --prefix client -- --run
       - run: npm run test:profile --prefix client
-      - run: npx --prefix client playwright install --with-deps chromium
-      - run: npm run test:e2e:resilience --prefix client
+      - run: npx --prefix client playwright install --with-deps chromium webkit
+      - run: npm run test:e2e:compatibility --prefix client
       - run: npm run check:bundle --prefix client

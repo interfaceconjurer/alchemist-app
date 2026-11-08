@@ -28,7 +28,8 @@
     "test:profile": "node --test scripts/performance-metrics.test.mjs",
     "generate:morph": "node src/components/alchemySymbol/morph/generateMorphTables.mjs",
     "check:morph": "node src/components/alchemySymbol/morph/generateMorphTables.mjs --check",
-    "bench:morph": "node src/components/alchemySymbol/morph/benchmarkMorphs.mjs"
+    "bench:morph": "node src/components/alchemySymbol/morph/benchmarkMorphs.mjs",
+    "test:e2e:compatibility": "playwright test --config playwright.compatibility.config.js"
   },
   "engines": {
     "node": ">=24.15.0 <25",

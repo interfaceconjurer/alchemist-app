@@ -33,3 +33,10 @@ The reference and optimized Apple M3 Max captures plus the paired CPU benchmark 
 The fixed transition sequence uses lossless Float64 coefficient tables generated ahead of rendering. The binary is fetched once through the existing lazy graphics boundary, decoded into bounded typed tables, compressed by the server, and included in runtime payload limits alongside JavaScript. Scene and shader effects share a pausable simulation clock so hidden time does not skip their animation phases.
 
 When changing solids or morph equations, run `npm run generate:morph --prefix client`, review the generated artifact, then run client tests. `npm run check:morph --prefix client` and every production build reject stale tables. `npm run bench:morph --prefix client` compares reference and compiled geometry costs across all six transitions; equivalence tests cover continuous positions, topology, and winding. `npm run test:profile --prefix client` verifies the statistics and evidence qualification rules without needing a GPU.
+
+
+## Browser and mobile compatibility
+
+`npm run test:e2e --prefix client` (also `test:e2e:compatibility`) builds production output and runs desktop Chromium and WebKit plus Android Chrome, iPhone, and iPad device emulation. Install matching engines with `npx --prefix client playwright install chromium webkit`. CI installs their required system dependencies and runs the same matrix. The earlier hidden-workspace flow specs are retained for feature restoration; the default suite exercises the current public shell without changing its visibility flags.
+
+The compatibility matrix verifies default graphics startup, forced fallback, missing chunks/geometry, storage recovery, reduced motion, GPU resource stability, pause/resume, touch search, portrait/landscape bounds, keyboard recovery, persisted theme actions, reachable navigation, and responsive breakpoint changes. WebKit emulation is engine coverage, not a run of branded Safari on a physical iPhone. Actual phone GPU timing, browser chrome/keyboard behavior, sustained thermal performance, and a deployed staging smoke test remain separate release evidence.
