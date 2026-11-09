@@ -103,14 +103,17 @@ try {
       await page.getByPlaceholder('Search work items and actions...').press('Escape');
       actions.push({ name: 'search', simulationMs });
     }
-    if (simulationMs > 40_000 && !actions.some(action => action.name === 'orbit')) {
+    // Touch: a press-and-drag on the crystal sends it dormant (motion and light
+    // ease out) and it wakes after being left alone. This exercises the fade
+    // both ways; the simulation clock slows while dormant, so coverage waits.
+    if (simulationMs > 40_000 && !actions.some(action => action.name === 'touch')) {
       const box = await page.locator('.symbolContainer canvas').boundingBox();
       if (box) {
         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
         await page.mouse.down();
         await page.mouse.move(box.x + box.width / 2 + 100, box.y + box.height / 2 + 30, { steps: 12 });
         await page.mouse.up();
-        actions.push({ name: 'orbit', simulationMs });
+        actions.push({ name: 'touch', simulationMs });
       }
     }
     if (state.last?.cycle >= 1) { complete = true; break; }

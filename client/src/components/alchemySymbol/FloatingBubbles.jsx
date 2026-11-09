@@ -28,6 +28,8 @@ function discTexture(fill) {
 export default function FloatingBubbles({
   color, spawnPoint, count = 15, opacityScale = 1,
   darkRatio = 0, darkColor = '#0b0c0f', darkOpacityScale = 1.4, animationTime,
+  // Optional ref (0..1): fades every bubble together (dormancy).
+  visibility,
 }) {
   const particlesRef = useRef([]);
   const groupRef = useRef();
@@ -111,7 +113,7 @@ export default function FloatingBubbles({
       else if (progress < 0.6) opacity = 1;
       else opacity = (1 - progress) * 2.5;
       const scale = sprite.userData.dark ? darkOpacityScale : opacityScale;
-      sprite.material.opacity = Math.max(0, opacity * 0.4 * scale);
+      sprite.material.opacity = Math.max(0, opacity * 0.4 * scale * (visibility ? visibility.current : 1));
 
       const s = sprite.userData.size * (1 + progress * 0.3);
       sprite.scale.set(s, s, 1);

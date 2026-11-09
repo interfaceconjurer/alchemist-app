@@ -60,7 +60,8 @@ function Filament({ start, end, material, radius = FILAMENT_RADIUS }) {
 }
 
 /** Owns rendering: scene pass + bloom. Runs at priority 1 so R3F skips its own render. */
-export function Bloom({ strength = 0.28, radius = 0.4, threshold = 0.35 }) {
+/** `gain` (optional ref, 0..1) scales strength live without rebuilding the pipeline. */
+export function Bloom({ strength = 0.28, radius = 0.4, threshold = 0.35, gain }) {
   const { gl, scene, camera } = useThree();
   const graph = useRef(null);
   const reportFailure = useGraphicsFailure();
@@ -74,6 +75,7 @@ export function Bloom({ strength = 0.28, radius = 0.4, threshold = 0.35 }) {
   }, [gl, scene, camera, strength, radius, threshold]);
   useFrame(() => {
     if (!graph.current) return;
+    if (gain) graph.current.glow.strength.value = strength * gain.current;
     const started = profileObserver ? performance.now() : 0;
     try { graph.current.render(); }
     catch { reportFailure(); }

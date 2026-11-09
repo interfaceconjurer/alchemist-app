@@ -149,6 +149,8 @@ function bumpedNormal(n, height, strength) {
 export function createCrystalMaterial({
   envTexture, useWgsl = true, uLight = uniform(0), withEdges = false,
   side = THREE.FrontSide, transparent = false, uClarity = uniform(0.55), animationTime = time,
+  // 0..1: scales the backlight, banding glow and rim (dormancy dims them).
+  uVitality = uniform(1),
 }) {
   const uDispersion = uniform(0.22); // red→violet IOR spread (exaggerated vs real glass, but restrained)
   const uBandGain = uniform(0.4);
@@ -277,7 +279,10 @@ export function createCrystalMaterial({
   const prismLuma = dot(prismLight, vec3(0.2126, 0.7152, 0.0722));
   const softPrism = mix(vec3(prismLuma), prismLight, uBandSaturation);
 
-  const lit = softPrism.add(veinLight).add(fractureLight).add(scratchLight).add(backlit).add(backlitCracks).add(rim);
+  // Dormant: the inner light (backlight, glowing bands, rim) fades out; the stone
+  // keeps only its surface reflections, so it reads as still, unlit onyx.
+  const innerLight = veinLight.add(backlit).add(backlitCracks).add(rim).mul(uVitality);
+  const lit = softPrism.mul(mix(0.55, 1, uVitality)).add(fractureLight).add(scratchLight).add(innerLight);
   // Light mode: a smoky-grey body, with the lighting layered on top at reduced
   // strength so highlights stay soft against the grey page.
   // Keep the full lighting (highlights, prism, backlight) so the facets read the
@@ -290,7 +295,7 @@ export function createCrystalMaterial({
     material.emissiveNode = mix(lit.mul(0.55), vec3(...LIGHT_BODY).mul(0.55).add(lit.mul(0.45)), uLight);
   }
 
-  return { material, uniforms: { uDispersion, uBandGain, uBandSaturation, uEnvGain, uVeinGlow, uBacklight, uLight, uOnyxBands, uFracture, uScratches, uBump, uClarity } };
+  return { material, uniforms: { uDispersion, uBandGain, uBandSaturation, uEnvGain, uVeinGlow, uBacklight, uLight, uOnyxBands, uFracture, uScratches, uBump, uClarity, uVitality } };
 }
 
 /**
@@ -298,7 +303,7 @@ export function createCrystalMaterial({
  * Mostly black; it only shows where a glancing angle catches a reflection
  * (Fresnel × environment), with a faint spectral tint at the very rim.
  */
-export function createFilamentMaterial({ envTexture, intensity = 1, uLight = uniform(0), animationTime = time } = {}) {
+export function createFilamentMaterial({ envTexture, intensity = 1, uLight = uniform(0), animationTime = time, uVitality = uniform(1) } = {}) {
   const material = new THREE.MeshBasicNodeMaterial();
   const viewDir = normalize(positionWorld.sub(cameraPosition));
   const n = normalWorld;
@@ -309,7 +314,7 @@ export function createFilamentMaterial({ envTexture, intensity = 1, uLight = uni
   const hue = fract(positionWorld.y.mul(0.1).add(positionWorld.x.mul(0.04)).add(animationTime.mul(0.03)));
   const tint = mix(vec3(0.8, 0.82, 0.88), spectrumRgb(hue), 0.15);
   const base = vec3(0.035, 0.038, 0.045); // dark glass body of the edge
-  const caught = reflected.mul(tint).mul(0.55).add(backlightMix(0.35, animationTime)).mul(grazing);
+  const caught = reflected.mul(tint).mul(0.55).add(backlightMix(0.35, animationTime).mul(uVitality)).mul(grazing);
   // Light mode: edges are a slightly darker grey than the body, so facets read
   // as bevels without drawing a dark outline around the solid.
   const lightBase = vec3(...LIGHT_BODY).mul(0.72);

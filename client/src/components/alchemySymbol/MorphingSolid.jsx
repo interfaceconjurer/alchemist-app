@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three/webgpu';
 import FloatingBubbles from './FloatingBubbles';
 import { useThemeColor } from './useThemeColor';
@@ -18,6 +17,7 @@ import RenderPolicyController from './RenderPolicyController';
 import { animationDelta } from './renderPolicy';
 import { useRenderDpr } from './useRenderDpr';
 import { profileObserver } from './profileObserver';
+import { createDormancy } from './dormancy';
 
 // Preparing the fixed sequence is outside the frame loop. The hashed binary
 // keeps thousands of coefficients out of JavaScript parsing and is shared once.
@@ -62,7 +62,7 @@ const THEME = {
   light: { light: 1, halo: 0.34, bubbles: 0.7, bloom: 0.2, darkBubbles: 0.4, darkBubbleOpacity: 1.3 },
 };
 
-function MorphShape({ isDark, animationTime }) {
+function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility }) {
   const previousTime = useRef(animationTime.value);
   const look = isDark ? THEME.dark : THEME.light;
   const gl = useThree((s) => s.gl);
@@ -86,14 +86,14 @@ function MorphShape({ isDark, animationTime }) {
   // drawn semi-transparent over them, so you see through the stone.
   const uClarity = useMemo(() => uniform(0.5), []);
   const { material } = useMemo(
-    () => createCrystalMaterial({ envTexture, useWgsl, uLight, withEdges: true, transparent: true, uClarity, animationTime }),
-    [envTexture, useWgsl, uLight, uClarity, animationTime],
+    () => createCrystalMaterial({ envTexture, useWgsl, uLight, withEdges: true, transparent: true, uClarity, animationTime, uVitality }),
+    [envTexture, useWgsl, uLight, uClarity, animationTime, uVitality],
   );
   const { material: innerMaterial } = useMemo(
-    () => createCrystalMaterial({ envTexture, useWgsl, uLight, withEdges: false, side: THREE.BackSide, animationTime }),
-    [envTexture, useWgsl, uLight, animationTime],
+    () => createCrystalMaterial({ envTexture, useWgsl, uLight, withEdges: false, side: THREE.BackSide, animationTime, uVitality }),
+    [envTexture, useWgsl, uLight, animationTime, uVitality],
   );
-  const filament = useMemo(() => createFilamentMaterial({ envTexture, uLight, animationTime }), [envTexture, uLight, animationTime]);
+  const filament = useMemo(() => createFilamentMaterial({ envTexture, uLight, animationTime, uVitality }), [envTexture, uLight, animationTime, uVitality]);
   const haloIntro = useMemo(() => uniform(0), []);
   const haloGain = useMemo(() => uniform(THEME.dark.halo), []);
   haloGain.value = look.halo;
@@ -107,9 +107,9 @@ function MorphShape({ isDark, animationTime }) {
     // turning into noisy, over-saturated pixels on a light background.
     const strength = clamp(max(glow.r, max(glow.g, glow.b)), 0, 1);
     m.colorNode = glow.div(max(strength, 0.02));
-    m.opacityNode = strength.mul(haloIntro);
+    m.opacityNode = strength.mul(haloIntro).mul(uVitality);
     return m;
-  }, [haloIntro, haloGain, animationTime]);
+  }, [haloIntro, haloGain, animationTime, uVitality]);
 
   const geometry = useMemo(() => {
     const g = new THREE.BufferGeometry();
@@ -294,10 +294,30 @@ function MorphShape({ isDark, animationTime }) {
           darkRatio={look.darkBubbles}
           darkOpacityScale={look.darkBubbleOpacity}
           spawnPoint={spawnPoint}
+          visibility={bubbleVisibility}
         />
       </group>
     </group>
   );
+}
+
+/**
+ * Steps dormancy every frame using wall-clock time (not the animation clock,
+ * which dormancy itself slows), and writes the results into the shared
+ * uniforms/refs. Runs before the policy controller so the clock rate is current.
+ */
+function DormancyController({ dormancy, timeScale, uVitality, bubbleVisibility, setBloomGain, onState }) {
+  const last = useRef(null);
+  useFrame((_, frameDelta) => {
+    const s = dormancy.step(frameDelta);
+    timeScale.current = s.vitality;
+    uVitality.value = s.light;
+    bubbleVisibility.current = s.light;
+    setBloomGain(s.light);
+    const key = s.dormant ? 'dormant' : s.awake ? 'awake' : dormancy.engaged || s.vitality < 1 ? 'changing' : 'awake';
+    if (key !== last.current) { last.current = key; onState(key); }
+  }, -200);
+  return null;
 }
 
 /** One persistent canvas; the solid carves itself into the next instead of cross-fading. */
@@ -305,13 +325,69 @@ export default function MorphingSolid({ active = true }) {
   const { isDark } = useThemeColor();
   const { dpr, lowerDpr } = useRenderDpr();
   const animationTime = useMemo(() => uniform(0), []);
+
+  // Dormancy: pressing on the crystal stills it and dims its light until the
+  // user lets go and leaves it alone. Replaces drag-to-orbit.
+  const dormancy = useMemo(() => createDormancy(), []);
+  const timeScale = useRef(1);
+  const uVitality = useMemo(() => uniform(1), []);
+  const bubbleVisibility = useRef(1);
+  const bloomGain = useRef(1);
+  // 'starting' until the first rendered frame, then awake / changing / dormant.
+  const [dormantState, setDormantState] = React.useState('starting');
+  const [pressed, setPressed] = React.useState(false);
+  const setBloomGain = useCallback((g) => { bloomGain.current = g; }, []);
+
+  // Pointer handling on the canvas element. Pointer capture keeps a drag that
+  // wanders off the canvas still counted as "held"; release/cancel/leave start
+  // the quiet period before it wakes.
+  const engage = useCallback(() => { dormancy.engage(); setPressed(true); }, [dormancy]);
+  const release = useCallback(() => { if (!dormancy.engaged) return; dormancy.release(); setPressed(false); }, [dormancy]);
+  const onPointerDown = useCallback((e) => {
+    engage();
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  }, [engage]);
+  const onPointerEnd = useCallback((e) => {
+    if (!dormancy.engaged) return;
+    release();
+    e.currentTarget.releasePointerCapture?.(e.pointerId);
+  }, [dormancy, release]);
+  // Keyboard: Space/Enter toggles a held state, so it's operable without a pointer.
+  const onKeyDown = useCallback((e) => {
+    if (e.key !== ' ' && e.key !== 'Enter') return;
+    e.preventDefault();
+    if (dormancy.engaged) release(); else engage();
+  }, [dormancy, engage, release]);
+
+  const bloom = isDark ? THEME.dark.bloom : THEME.light.bloom;
   return (
-    <div style={{ width: '100%', height: '100%' }}>
+    <div
+      className="crystal-surface"
+      data-dormancy={dormantState}
+      role="button"
+      tabIndex={0}
+      aria-pressed={pressed}
+      aria-label={dormantState === 'dormant' || pressed ? 'Crystal symbol, dormant. It wakes when left alone.' : 'Crystal symbol. Press to still it.'}
+      style={{ width: '100%', height: '100%', touchAction: 'pan-y' }}
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerEnd}
+      onPointerCancel={onPointerEnd}
+      onLostPointerCapture={onPointerEnd}
+      onKeyDown={onKeyDown}
+      onBlur={release}
+    >
       <Canvas gl={createRenderer} dpr={dpr} frameloop={active ? 'always' : 'never'} camera={{ position: [0, 1.2, 7.5], fov: 60 }} style={{ background: 'transparent' }}>
-        <RenderPolicyController active={active} lowerDpr={lowerDpr} animationTime={animationTime} />
-        <MorphShape isDark={isDark} animationTime={animationTime} />
-        <Bloom strength={isDark ? THEME.dark.bloom : THEME.light.bloom} />
-        <OrbitControls enabled={active} enableZoom={false} enablePan={false} autoRotate={false} />
+        <DormancyController
+          dormancy={dormancy}
+          timeScale={timeScale}
+          uVitality={uVitality}
+          bubbleVisibility={bubbleVisibility}
+          setBloomGain={setBloomGain}
+          onState={setDormantState}
+        />
+        <RenderPolicyController active={active} lowerDpr={lowerDpr} animationTime={animationTime} timeScale={timeScale} />
+        <MorphShape isDark={isDark} animationTime={animationTime} uVitality={uVitality} bubbleVisibility={bubbleVisibility} />
+        <Bloom strength={bloom} gain={bloomGain} />
       </Canvas>
     </div>
   );
