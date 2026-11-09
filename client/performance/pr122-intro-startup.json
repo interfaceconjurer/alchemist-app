@@ -167,7 +167,22 @@
   "limitations": [
     "This change shortens presentation timing; it does not claim faster asset loading or renderer initialization.",
     "First scene update/render submission do not establish pixel presentation. Visual snapshots are separate from timing-only runs.",
-    "Desktop GPU/compiler caches are not controlled between comparison runs. Phone measurements for the changed intro remain pending.",
+    "Desktop GPU/compiler caches are not controlled between comparison runs. The physical-phone follow-up is one observed completion time and smoothness report, rather than a controlled latency distribution.",
     "The existing blank placeholder stays in use until the real scene loads; reduced-motion and actual failure retain their intentional static fallback."
-  ]
+  ],
+  "updatedAt": "2026-11-09T18:31:56.663886+00:00",
+  "phoneFollowup": {
+    "confirmedOn": "2026-11-09",
+    "kind": "user-supplied physical iPhone measurement and visual confirmation",
+    "device": "iPhone 18 Pro",
+    "browser": "Safari",
+    "candidate": "07bacf0c",
+    "candidateBadgeConfirmed": true,
+    "introCompleteMs": 2230,
+    "reportedSmooth": true,
+    "baselineIntroCompleteMs": 4050,
+    "elapsedReductionMs": 1820,
+    "elapsedReductionPercent": 44.9,
+    "qualification": "Two user observations of the rounded intro-completion HUD, not a controlled latency distribution or first-visible-pixel measurement."
+  }
 }

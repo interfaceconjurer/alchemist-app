@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-11-09T18:10:24.279092+00:00",
+  "recordedAt": "2026-11-09T18:34:02.509611+00:00",
   "kind": "gpu-resource-test-synchronization",
   "sourceApplicationCommit": "07bacf0cf6c4563bc6bcce48556be110781934f0",
   "productionCodeChanged": false,
@@ -25,7 +25,8 @@
     "Wait for two completed opt-in scene/bloom submission callbacks before the resource baseline.",
     "After each confirmed DOM theme change, wait for two further scene submissions, then enforce the original baseline plus two texture and framebuffer bounds.",
     "Use the same initialized-scene baseline and post-resize submissions in the retired-target check.",
-    "Retain existing 30-second startup and five-second per-change wait deadlines, zero retries, and resource limits."
+    "Retain existing 30-second startup and five-second per-change wait deadlines, zero retries, and resource limits.",
+    "Batch theme, consecutive completed submissions, resource counts and live fallback presence in one browser observation; retain six theme flips, every resource bound, shell verification and all existing deadlines."
   ],
   "localChecks": {
     "command": "COMPATIBILITY_TEST_PORT=5215 npm run test:e2e:compatibility -- runtime-resilience.spec.js --grep 'theme changes do not grow|repeated canvas resizes' --repeat-each=3",
@@ -65,9 +66,190 @@
         "actualExitCode": 1,
         "failedAtFirstThemeChange": true
       }
-    ]
+    ],
+    "finalLiveCountCases": {
+      "passed": 8,
+      "failed": 0,
+      "skipped": 0,
+      "durationSeconds": 45.3
+    },
+    "repeatedBatchedCases": {
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "durationMinutes": 2.1
+    },
+    "finalProbes": {
+      "caseBudgetMs": 45000,
+      "probes": [
+        {
+          "mode": "textures",
+          "status": "failed",
+          "durationMs": 1848,
+          "stats": {
+            "startTime": "2026-11-09T18:31:51.924Z",
+            "duration": 2948.696,
+            "expected": 0,
+            "skipped": 0,
+            "unexpected": 1,
+            "flaky": 0
+          },
+          "assertion": "Error: expect(received).toBeLessThanOrEqual(expected)\n\nExpected: <= 19\nReceived:    20"
+        },
+        {
+          "mode": "framebuffers",
+          "status": "failed",
+          "durationMs": 1788,
+          "stats": {
+            "startTime": "2026-11-09T18:32:07.504Z",
+            "duration": 2830.3379999999997,
+            "expected": 0,
+            "skipped": 0,
+            "unexpected": 1,
+            "flaky": 0
+          },
+          "assertion": "Error: expect(received).toBeLessThanOrEqual(expected)\n\nExpected: <= 57\nReceived:    58"
+        },
+        {
+          "mode": "none",
+          "status": "passed",
+          "durationMs": 12613,
+          "stats": {
+            "startTime": "2026-11-09T18:32:23.779Z",
+            "duration": 13405.956,
+            "expected": 1,
+            "skipped": 0,
+            "unexpected": 0,
+            "flaky": 0
+          },
+          "stress-renderer": {
+            "renderer": "Google Inc. (Google) ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver-5.0.0)",
+            "cpuRate": 4,
+            "featureStatus": {
+              "2d_canvas": "enabled",
+              "direct_rendering_display_compositor": "disabled_off_ok",
+              "gpu_compositing": "enabled",
+              "multiple_raster_threads": "enabled_on",
+              "opengl": "enabled_on",
+              "rasterization": "enabled",
+              "skia_graphite": "enabled_on",
+              "trees_in_viz": "disabled_off",
+              "video_decode": "enabled",
+              "video_encode": "enabled",
+              "webgl": "enabled",
+              "webgpu": "unavailable_software",
+              "webnn": "disabled_off"
+            }
+          },
+          "theme-resources": [
+            {
+              "theme": "light",
+              "themeSubmissions": 4,
+              "textures": 17,
+              "framebuffers": 55,
+              "initialized": true,
+              "unavailable": false
+            },
+            {
+              "theme": "dark",
+              "themeSubmissions": 2,
+              "textures": 17,
+              "framebuffers": 55,
+              "initialized": true,
+              "unavailable": false
+            },
+            {
+              "theme": "light",
+              "themeSubmissions": 3,
+              "textures": 17,
+              "framebuffers": 55,
+              "initialized": true,
+              "unavailable": false
+            },
+            {
+              "theme": "dark",
+              "themeSubmissions": 3,
+              "textures": 17,
+              "framebuffers": 55,
+              "initialized": true,
+              "unavailable": false
+            },
+            {
+              "theme": "light",
+              "themeSubmissions": 2,
+              "textures": 17,
+              "framebuffers": 55,
+              "initialized": true,
+              "unavailable": false
+            },
+            {
+              "theme": "dark",
+              "themeSubmissions": 2,
+              "textures": 17,
+              "framebuffers": 55,
+              "initialized": true,
+              "unavailable": false
+            },
+            {
+              "theme": "light",
+              "themeSubmissions": 2,
+              "textures": 17,
+              "framebuffers": 55,
+              "initialized": true,
+              "unavailable": false
+            }
+          ]
+        }
+      ]
+    }
   },
   "limitations": [
-    "Local mobile projects use browser emulation; physical iPhone confirmation of the shorter introduction remains pending."
-  ]
+    "Local mobile projects use browser emulation; physical iPhone startup confirmation is recorded separately in pr122-intro-startup.json."
+  ],
+  "hostedSynchronizationFailure": {
+    "sourceTestCommit": "7e4872aaf747994fcb8fa2021bd7533ac34ad12d",
+    "run": "https://github.com/interfaceconjurer/alchemist-app/actions/runs/42671898688",
+    "passed": 123,
+    "failed": 1,
+    "project": "android-chromium",
+    "totalTestLimitMs": 45000,
+    "diagnosis": "All six per-theme resource bounds and shell checks succeeded, but separate browser observations commonly consumed 0.5 to 0.7 seconds each under software rendering. Cumulative orchestration exceeded the total test budget; no resource assertion or individual render wait failed.",
+    "traceResourceSamples": [
+      {
+        "theme": "light",
+        "textures": 17,
+        "framebuffers": 55
+      },
+      {
+        "theme": "dark",
+        "textures": 17,
+        "framebuffers": 55
+      },
+      {
+        "theme": "light",
+        "textures": 17,
+        "framebuffers": 55
+      },
+      {
+        "theme": "dark",
+        "textures": 17,
+        "framebuffers": 55
+      },
+      {
+        "theme": "light",
+        "textures": 17,
+        "framebuffers": 55
+      },
+      {
+        "theme": "dark",
+        "textures": 17,
+        "framebuffers": 55
+      },
+      {
+        "theme": "light",
+        "textures": 17,
+        "framebuffers": 55
+      }
+    ]
+  }
 }

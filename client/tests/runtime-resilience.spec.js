@@ -42,11 +42,37 @@ async function outstandingResources(page) {
 async function trackSceneSubmissions(page) {
   await page.addInitScript(() => {
     window.__sceneSubmissions = 0;
+    window.__sceneResources = null;
     window.__ALCHEMY_PROFILE__ = {
       frame() {}, visibility() {}, sequence() {},
-      render() { window.__sceneSubmissions++; },
+      render() {
+        window.__sceneSubmissions++;
+        const previous = window.__sceneResources;
+        const theme = document.documentElement.getAttribute('data-theme');
+        window.__sceneResources = {
+          theme,
+          themeSubmissions: previous?.theme === theme ? previous.themeSubmissions + 1 : 1,
+        };
+      },
     };
   });
+}
+
+async function sceneResources(page, { theme, timeout = 5000 } = {}) {
+  let sample;
+  // Read the theme, full-scene readiness and resource counts together. Separate
+  // browser round trips are expensive while CI is software-rendering the scene.
+  await expect.poll(async () => {
+    sample = await page.evaluate(() => ({
+      ...window.__sceneResources,
+      textures: window.__gpuResources.createTexture - window.__gpuResources.deleteTexture,
+      framebuffers: window.__gpuResources.createFramebuffer - window.__gpuResources.deleteFramebuffer,
+      initialized: (window.__sceneResources?.themeSubmissions ?? 0) >= 2,
+      unavailable: !!document.querySelector('[data-symbol-fallback="unavailable"]'),
+    }));
+    return sample;
+  }, { timeout }).toMatchObject({ initialized: true, unavailable: false, ...(theme ? { theme } : {}) });
+  return sample;
 }
 
 async function waitForSceneSubmissions(page, previous = 0, timeout = 5000) {
@@ -135,18 +161,14 @@ test('theme changes do not grow outstanding GPU resources', async ({ page }, tes
   await page.addInitScript(() => Object.defineProperty(window, 'devicePixelRatio', { value: 0.75 }));
   await page.goto('/');
   await expect(page.locator('.symbolContainer')).toHaveAttribute('data-render-state', 'active');
-  await waitForSceneSubmissions(page, 0, 30_000);
-  const baseline = await outstandingResources(page);
-  const samples = [{ theme: await page.locator('html').getAttribute('data-theme'), ...baseline }];
+  const baseline = await sceneResources(page, { timeout: 30_000 });
+  const samples = [baseline];
+  let theme = baseline.theme;
   for (let i = 0; i < 6; i++) {
-    const previousTheme = await page.locator('html').getAttribute('data-theme');
     await page.getByRole('button', { name: /Switch to .* mode/ }).click();
-    const theme = previousTheme === 'dark' ? 'light' : 'dark';
-    await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-    const previous = await page.evaluate(() => window.__sceneSubmissions);
-    await waitForSceneSubmissions(page, previous);
-    const after = await outstandingResources(page);
-    samples.push({ theme, ...after });
+    theme = theme === 'dark' ? 'light' : 'dark';
+    const after = await sceneResources(page, { theme });
+    samples.push(after);
     // Allow small backend bookkeeping changes, but reject the former 13 leaked
     // textures and framebuffers per theme switch, including intermediate themes.
     expect(after.textures).toBeLessThanOrEqual(baseline.textures + 2);
