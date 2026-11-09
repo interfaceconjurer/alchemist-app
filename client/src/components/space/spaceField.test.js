@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { generateStars, LAYERS, mulberry32 } from './spaceField';
+import { generateStars, LAYERS, mulberry32, renderLayer } from './spaceField';
 
 const box = { width: 1440 + 96, height: 900 + 96 };
 
 describe('space field', () => {
+  it('reports missing worker 2D support so the caller can select a fallback', () => {
+    expect(() => renderLayer('near', {
+      width: 100, height: 100, dpr: 1, bleed: 48,
+      createCanvas: () => ({ getContext: () => null }),
+    })).toThrow('2D canvas unavailable');
+  });
+
   it('is deterministic: the same seed draws the same sky on every load', () => {
     const a = generateStars({ ...box, ...LAYERS.dark.far });
     const b = generateStars({ ...box, ...LAYERS.dark.far });

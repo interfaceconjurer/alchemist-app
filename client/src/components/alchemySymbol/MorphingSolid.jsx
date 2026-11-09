@@ -17,7 +17,9 @@ import RenderPolicyController from './RenderPolicyController';
 import { animationDelta } from './renderPolicy';
 import { useRenderDpr } from './useRenderDpr';
 import { profileObserver } from './profileObserver';
-import { createDormancy } from './dormancy';
+import { createDormancy, dormancyPhase } from './dormancy';
+import DormancyController from './DormancyController';
+import { useDormancyInteraction } from './useDormancyInteraction';
 
 // Preparing the fixed sequence is outside the frame loop. The hashed binary
 // keeps thousands of coefficients out of JavaScript parsing and is shared once.
@@ -62,7 +64,7 @@ const THEME = {
   light: { light: 1, halo: 0.34, bubbles: 0.7, bloom: 0.2, darkBubbles: 0.4, darkBubbleOpacity: 1.3 },
 };
 
-function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility }) {
+function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dormancy, timeScale }) {
   const previousTime = useRef(animationTime.value);
   const look = isDark ? THEME.dark : THEME.light;
   const gl = useThree((s) => s.gl);
@@ -256,6 +258,8 @@ function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility }) {
         geometryMode: 'compiled',
         backend: gl.backend?.isWebGPUBackend === true ? 'webgpu' : 'webgl2',
         dpr: state.viewport.dpr, shaderTime: animationTime.value,
+        vitality: timeScale.current, light: uVitality.value,
+        dormancy: dormancyPhase(dormancy.state), engaged: dormancy.engaged,
       });
     }
   });
@@ -301,25 +305,6 @@ function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility }) {
   );
 }
 
-/**
- * Steps dormancy every frame using wall-clock time (not the animation clock,
- * which dormancy itself slows), and writes the results into the shared
- * uniforms/refs. Runs before the policy controller so the clock rate is current.
- */
-function DormancyController({ dormancy, timeScale, uVitality, bubbleVisibility, setBloomGain, onState }) {
-  const last = useRef(null);
-  useFrame((_, frameDelta) => {
-    const s = dormancy.step(frameDelta);
-    timeScale.current = s.vitality;
-    uVitality.value = s.light;
-    bubbleVisibility.current = s.light;
-    setBloomGain(s.light);
-    const key = s.dormant ? 'dormant' : s.awake ? 'awake' : dormancy.engaged || s.vitality < 1 ? 'changing' : 'awake';
-    if (key !== last.current) { last.current = key; onState(key); }
-  }, -200);
-  return null;
-}
-
 /** One persistent canvas; the solid carves itself into the next instead of cross-fading. */
 export default function MorphingSolid({ active = true }) {
   const { isDark } = useThemeColor();
@@ -335,29 +320,8 @@ export default function MorphingSolid({ active = true }) {
   const bloomGain = useRef(1);
   // 'starting' until the first rendered frame, then awake / changing / dormant.
   const [dormantState, setDormantState] = React.useState('starting');
-  const [pressed, setPressed] = React.useState(false);
+  const { pressed, handlers } = useDormancyInteraction(dormancy);
   const setBloomGain = useCallback((g) => { bloomGain.current = g; }, []);
-
-  // Pointer handling on the canvas element. Pointer capture keeps a drag that
-  // wanders off the canvas still counted as "held"; release/cancel/leave start
-  // the quiet period before it wakes.
-  const engage = useCallback(() => { dormancy.engage(); setPressed(true); }, [dormancy]);
-  const release = useCallback(() => { if (!dormancy.engaged) return; dormancy.release(); setPressed(false); }, [dormancy]);
-  const onPointerDown = useCallback((e) => {
-    engage();
-    e.currentTarget.setPointerCapture?.(e.pointerId);
-  }, [engage]);
-  const onPointerEnd = useCallback((e) => {
-    if (!dormancy.engaged) return;
-    release();
-    e.currentTarget.releasePointerCapture?.(e.pointerId);
-  }, [dormancy, release]);
-  // Keyboard: Space/Enter toggles a held state, so it's operable without a pointer.
-  const onKeyDown = useCallback((e) => {
-    if (e.key !== ' ' && e.key !== 'Enter') return;
-    e.preventDefault();
-    if (dormancy.engaged) release(); else engage();
-  }, [dormancy, engage, release]);
 
   const bloom = isDark ? THEME.dark.bloom : THEME.light.bloom;
   return (
@@ -369,15 +333,11 @@ export default function MorphingSolid({ active = true }) {
       aria-pressed={pressed}
       aria-label={dormantState === 'dormant' || pressed ? 'Crystal symbol, dormant. It wakes when left alone.' : 'Crystal symbol. Press to still it.'}
       style={{ width: '100%', height: '100%', touchAction: 'pan-y' }}
-      onPointerDown={onPointerDown}
-      onPointerUp={onPointerEnd}
-      onPointerCancel={onPointerEnd}
-      onLostPointerCapture={onPointerEnd}
-      onKeyDown={onKeyDown}
-      onBlur={release}
+      {...handlers}
     >
       <Canvas gl={createRenderer} dpr={dpr} frameloop={active ? 'always' : 'never'} camera={{ position: [0, 1.2, 7.5], fov: 60 }} style={{ background: 'transparent' }}>
         <DormancyController
+          active={active}
           dormancy={dormancy}
           timeScale={timeScale}
           uVitality={uVitality}
@@ -386,7 +346,7 @@ export default function MorphingSolid({ active = true }) {
           onState={setDormantState}
         />
         <RenderPolicyController active={active} lowerDpr={lowerDpr} animationTime={animationTime} timeScale={timeScale} />
-        <MorphShape isDark={isDark} animationTime={animationTime} uVitality={uVitality} bubbleVisibility={bubbleVisibility} />
+        <MorphShape isDark={isDark} animationTime={animationTime} uVitality={uVitality} bubbleVisibility={bubbleVisibility} dormancy={dormancy} timeScale={timeScale} />
         <Bloom strength={bloom} gain={bloomGain} />
       </Canvas>
     </div>

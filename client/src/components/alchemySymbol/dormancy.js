@@ -23,6 +23,8 @@ export const DORMANCY = Object.freeze({
 
 const ease = (x) => { const t = Math.min(1, Math.max(0, x)); return t * t * (3 - 2 * t); };
 
+export const dormancyPhase = (state) => state.dormant ? 'dormant' : state.awake ? 'awake' : 'changing';
+
 export function createDormancy(config = DORMANCY) {
   let level = 1; // linear progress 1 (awake) … 0 (dormant), eased on read
   let engaged = false; // pointer currently down on / held over the crystal

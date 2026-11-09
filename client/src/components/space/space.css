@@ -69,6 +69,21 @@
   animation-play-state: paused;
 }
 
+/* Static, inexpensive sky when worker canvas support is unavailable. */
+.space--fallback { --space-star: 255, 255, 255; }
+.space--fallback.space--light { --space-star: 34, 36, 42; }
+.space--fallback .space-layer { animation: none; will-change: auto; }
+.space--fallback .space-layer--nebula {
+  background-image: radial-gradient(ellipse at 25% 30%, rgba(109, 77, 255, 0.09), transparent 60%), radial-gradient(ellipse at 70% 65%, rgba(25, 195, 255, 0.06), transparent 55%);
+}
+.space--fallback .space-layer--far,
+.space--fallback .space-layer--near {
+  background-image: radial-gradient(circle at 20% 25%, rgba(var(--space-star), 0.3) 0.5px, transparent 1px), radial-gradient(circle at 80% 70%, rgba(var(--space-star), 0.2) 0.5px, transparent 1px);
+  background-size: 137px 193px;
+  background-repeat: repeat;
+}
+.space--fallback .space-layer--near { background-size: 307px 283px; }
+
 @keyframes space-breathe {
   0% { opacity: 0.6; }
   100% { opacity: 1; }

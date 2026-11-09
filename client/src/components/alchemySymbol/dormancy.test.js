@@ -54,12 +54,12 @@ describe('crystal dormancy', () => {
     }
   });
 
-  it('ignores invalid or huge frame deltas (e.g. after a backgrounded tab)', () => {
+  it('ignores invalid deltas and bounds unusually long active frames', () => {
     const d = createDormancy();
     d.engage();
     d.step(NaN); d.step(-1);
     expect(d.state.awake).toBe(true);
-    d.step(30); // clamped to 0.1s, not 30s
+    d.step(30); // Resumed frames are separately skipped by DormancyController.
     expect(d.state.vitality).toBeGreaterThan(0.8);
   });
 });

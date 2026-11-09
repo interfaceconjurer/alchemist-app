@@ -60,7 +60,7 @@ try {
     requestAnimationFrame(frame);
   })), 10_000, 'Display calibration');
   await page.addInitScript(() => {
-    const capture = window.__animationCapture = { frames: [], submits: [], timestampsMs: [], longTasks: [], events: [], visibility: [], sequence: [], overflowed: false, lcp: null, cls: 0 };
+    const capture = window.__animationCapture = { frames: [], submits: [], timestampsMs: [], longTasks: [], events: [], visibility: [], sequence: [], cspViolations: [], overflowed: false, lcp: null, cls: 0 };
     const push = (key, value, max = 30_000) => { if (capture[key].length < max) capture[key].push(value); else capture.overflowed = true; };
     window.__ALCHEMY_PROFILE__ = {
       frame: value => push('frames', value), render: value => push('submits', value),
@@ -68,6 +68,7 @@ try {
     };
     function frame(at) { push('timestampsMs', at); requestAnimationFrame(frame); }
     requestAnimationFrame(frame);
+    document.addEventListener('securitypolicyviolation', event => push('cspViolations', { directive: event.effectiveDirective, blockedURI: event.blockedURI }, 100));
     const observe = (type, receive, extra = {}) => {
       if (!PerformanceObserver.supportedEntryTypes.includes(type)) return;
       new PerformanceObserver(list => list.getEntries().forEach(receive)).observe({ type, buffered: true, ...extra });
@@ -87,6 +88,23 @@ try {
     return { vendor: info.vendor, architecture: info.architecture, device: info.device, description: info.description };
   }), 10_000, 'GPU adapter discovery');
   const actions = [];
+  const verifyBackdrop = async () => {
+    await page.locator('.space[data-space-renderer="worker"].space--ready').waitFor();
+    return withTimeout(page.locator('.space-layer').evaluateAll(async layers => {
+      if (layers.length !== 3) throw new Error(`Expected three backdrop layers, got ${layers.length}.`);
+      return Promise.all(layers.map(async layer => {
+        const source = layer.style.backgroundImage.match(/^url\(["']?(blob:[^"')]+)["']?\)$/)?.[1];
+        if (!source) throw new Error('Backdrop layer is not a generated blob image.');
+        const image = new Image();
+        image.src = source;
+        await image.decode();
+        if (!image.naturalWidth || !image.naturalHeight || image.naturalWidth * image.naturalHeight > 2_000_000) throw new Error('Backdrop image has missing or excessive pixels.');
+        return { width: image.naturalWidth, height: image.naturalHeight };
+      }));
+    }), 10_000, 'Backdrop image decoding');
+  };
+  try { actions.push({ name: 'initial-backdrop', layers: await verifyBackdrop() }); }
+  catch (error) { errors.push(`Initial backdrop: ${error.message}`); }
   const deadline = Date.now() + settings.maxSeconds * 1000;
   let complete = false;
   while (Date.now() < deadline) {
@@ -94,8 +112,12 @@ try {
     if (state.failed || state.overflowed || errors.length) break;
     const simulationMs = state.last?.simulationMs ?? 0;
     if (simulationMs > 15_000 && !actions.some(action => action.name === 'theme')) {
+      const previousImage = await page.locator('.space-layer').first().evaluate(layer => layer.style.backgroundImage);
       await page.getByRole('button', { name: /Switch to .* mode/ }).click();
-      actions.push({ name: 'theme', simulationMs });
+      try {
+        await page.waitForFunction(previous => document.querySelector('.space-layer')?.style.backgroundImage !== previous, previousImage);
+        actions.push({ name: 'theme', simulationMs, layers: await verifyBackdrop() });
+      } catch (error) { errors.push(`Theme backdrop: ${error.message}`); break; }
     }
     if (simulationMs > 30_000 && !actions.some(action => action.name === 'search')) {
       await page.getByRole('button', { name: 'Search', exact: true }).click();
@@ -103,18 +125,34 @@ try {
       await page.getByPlaceholder('Search work items and actions...').press('Escape');
       actions.push({ name: 'search', simulationMs });
     }
-    // Touch: a press-and-drag on the crystal sends it dormant (motion and light
-    // ease out) and it wakes after being left alone. This exercises the fade
-    // both ways; the simulation clock slows while dormant, so coverage waits.
+    // Verify actual simulation/shader clocks and light, while rendering keeps
+    // producing samples. A changed DOM label alone cannot prove dormancy.
     if (simulationMs > 40_000 && !actions.some(action => action.name === 'touch')) {
       const box = await page.locator('.symbolContainer canvas').boundingBox();
       if (box) {
         await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
         await page.mouse.down();
-        await page.mouse.move(box.x + box.width / 2 + 100, box.y + box.height / 2 + 30, { steps: 12 });
-        await page.mouse.up();
-        actions.push({ name: 'touch', simulationMs });
-      }
+        try {
+          await page.waitForFunction(() => {
+            const frame = window.__animationCapture.frames.at(-1);
+            return frame?.dormancy === 'dormant' && frame.engaged && frame.vitality === 0;
+          });
+          const held = await page.evaluate(() => window.__animationCapture.frames.at(-1));
+          await page.waitForTimeout(300);
+          const still = await page.evaluate(() => window.__animationCapture.frames.at(-1));
+          if (still.at - held.at < 250 || still.simulationMs !== held.simulationMs || still.shaderTime !== held.shaderTime || still.vitality !== 0 || !still.engaged || still.dormancy !== 'dormant' || !Number.isFinite(still.light) || Math.abs(still.light - 0.12) > 0.001) {
+            throw new Error('Held crystal did not freeze both clocks and dim its light.');
+          }
+          await page.mouse.up();
+          await page.waitForFunction(previous => {
+            const frame = window.__animationCapture.frames.at(-1);
+            return frame?.dormancy === 'awake' && !frame.engaged && frame.light > 0.99 && frame.simulationMs > previous.simulationMs && frame.shaderTime > previous.shaderTime;
+          }, { simulationMs: still.simulationMs, shaderTime: still.shaderTime });
+          const awake = await page.evaluate(() => window.__animationCapture.frames.at(-1));
+          actions.push({ name: 'touch', simulationMs, held: { simulationMs: held.simulationMs, shaderTime: held.shaderTime, light: held.light }, frozenForMs: still.at - held.at, awake: { simulationMs: awake.simulationMs, shaderTime: awake.shaderTime, light: awake.light } });
+        } catch (error) { errors.push(`Dormancy: ${error.message}`); break; }
+        finally { await page.mouse.up(); }
+      } else { errors.push('No crystal canvas was available for the touch action.'); break; }
     }
     if (state.last?.cycle >= 1) { complete = true; break; }
     await new Promise(resolveWait => setTimeout(resolveWait, 250));
@@ -122,6 +160,8 @@ try {
   // Let buffered observers publish entries from the final frame/interaction.
   await page.waitForTimeout(100);
   const capture = await page.evaluate(() => window.__animationCapture);
+  errors.push(...capture.cspViolations.map(violation => `CSP ${violation.directive}: ${violation.blockedURI}`));
+  if (!actions.some(action => action.name === 'theme') || !actions.some(action => action.name === 'touch')) errors.push('Required theme and verified dormancy interactions were not completed.');
   const first = capture.frames[0];
   const end = capture.frames.at(-1)?.at ?? 0;
   const warmStart = capture.frames.find(frame => frame.phase !== 'intro')?.at ?? end;

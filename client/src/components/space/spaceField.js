@@ -5,8 +5,8 @@
  *  - zero new payload (no images; this module is a few KB) against the tight
  *    runtime bundle budget,
  *  - CSP-clean (no new hosts; output is a blob: URL, already allowed),
- *  - no per-frame GPU work competing with the symbol's adaptive-DPR budget;
- *    motion is compositor-driven CSS transforms/opacity.
+ *  - rasterization/encoding run in a worker; CSS transforms/opacity provide
+ *    motion. The bounded compositor textures still consume GPU resources.
  *
  * Layers (each its own transparent canvas so CSS can drift them at different
  * rates for parallax): far stars, near stars, nebula.
@@ -180,10 +180,11 @@ export const LAYERS = {
  */
 export function renderLayer(kind, { width, height, dpr, bleed, createCanvas, mode = 'dark' }) {
   const layers = LAYERS[mode];
-  const w = Math.ceil((width + bleed * 2) * dpr);
-  const h = Math.ceil((height + bleed * 2) * dpr);
+  const w = Math.max(1, Math.floor((width + bleed * 2) * dpr));
+  const h = Math.max(1, Math.floor((height + bleed * 2) * dpr));
   const canvas = createCanvas(w, h);
   const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('2D canvas unavailable');
   ctx.scale(dpr, dpr);
   const box = { width: width + bleed * 2, height: height + bleed * 2 };
   if (kind === 'nebula') {
@@ -192,12 +193,15 @@ export function renderLayer(kind, { width, height, dpr, bleed, createCanvas, mod
     const scale = 0.25;
     const small = createCanvas(Math.ceil(box.width * scale), Math.ceil(box.height * scale));
     const sctx = small.getContext('2d');
+    if (!sctx) throw new Error('2D canvas unavailable');
     sctx.scale(scale, scale);
     drawNebula(sctx, { ...box, ...layers.nebula, mode });
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
     if ('filter' in ctx) ctx.filter = `blur(${Math.round(4 / scale)}px)`;
     ctx.drawImage(small, 0, 0, box.width, box.height);
+    small.width = 0;
+    small.height = 0;
     if ('filter' in ctx) ctx.filter = 'none';
     // Dither at output resolution so the noise is sub-pixel, not a visible grid.
     ctx.setTransform(1, 0, 0, 1, 0, 0);
