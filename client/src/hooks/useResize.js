@@ -1,10 +1,15 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useMemo, useEffect } from 'react';
 import { LEFT_PANEL_MIN_WIDTH, getLeftPanelMaxWidth } from '../utils/stateHelpers';
+import { createFrameBatch } from '../utils/frameBatch';
 
 export function useResize(stateRef, dispatch) {
   const isResizingRef = useRef(false);
   const startXRef = useRef(0);
   const startWidthRef = useRef(0);
+  const pendingWidth = useMemo(() => createFrameBatch((width) => {
+    if (width !== stateRef.current.leftPanelWidth) dispatch({ type: 'SET_LEFT_PANEL_WIDTH', width });
+  }), [stateRef, dispatch]);
+  useEffect(() => () => pendingWidth.cancel(), [pendingWidth]);
 
   const handleResizeStart = useCallback((e) => {
     e.preventDefault();
@@ -17,12 +22,13 @@ export function useResize(stateRef, dispatch) {
     if (!isResizingRef.current) return;
     const diff = e.clientX - startXRef.current;
     const width = Math.min(Math.max(startWidthRef.current + diff, LEFT_PANEL_MIN_WIDTH), getLeftPanelMaxWidth());
-    dispatch({ type: 'SET_LEFT_PANEL_WIDTH', width });
-  }, [dispatch]);
+    pendingWidth.schedule(width);
+  }, [pendingWidth]);
 
   const handleResizeEnd = useCallback(() => {
+    pendingWidth.flush();
     isResizingRef.current = false;
-  }, []);
+  }, [pendingWidth]);
 
   const handleWindowResize = useCallback(() => {
     const maxWidth = getLeftPanelMaxWidth();

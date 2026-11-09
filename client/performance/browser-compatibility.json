@@ -1,0 +1,72 @@
+{
+  "recordedAt": "2026-11-08T10:54:10.294Z",
+  "kind": "functional-browser-compatibility",
+  "environment": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "node": "v24.16.0",
+    "engines": {
+      "chromium": "158.0.8127.18",
+      "webkit": "27.2"
+    }
+  },
+  "command": "npm run test:e2e:compatibility --prefix client",
+  "tests": {
+    "passed": 70,
+    "failed": 0,
+    "skipped": 0
+  },
+  "projects": [
+    {
+      "name": "chromium-desktop",
+      "engine": "chromium",
+      "runtimeCases": 13,
+      "touchCases": 0
+    },
+    {
+      "name": "webkit-desktop",
+      "engine": "webkit",
+      "runtimeCases": 13,
+      "touchCases": 0
+    },
+    {
+      "name": "android-chromium",
+      "engine": "chromium",
+      "emulation": "Pixel 7",
+      "runtimeCases": 13,
+      "touchCases": 6
+    },
+    {
+      "name": "ios-webkit",
+      "engine": "webkit",
+      "emulation": "iPhone 13",
+      "runtimeCases": 13,
+      "touchCases": 6
+    },
+    {
+      "name": "ipad-webkit",
+      "engine": "webkit",
+      "emulation": "iPad Mini",
+      "runtimeCases": 0,
+      "touchCases": 6
+    }
+  ],
+  "coverage": [
+    "default backend animation",
+    "GPU and chunk failure recovery",
+    "storage recovery",
+    "reduced motion",
+    "resource lifecycle",
+    "paused simulation clocks",
+    "portrait and landscape bounds",
+    "touch search and dismissal",
+    "keyboard recovery",
+    "persisted theme actions",
+    "reachable navigation",
+    "responsive breakpoints"
+  ],
+  "limitations": [
+    "WebKit engine/device emulation is not branded Safari on physical iOS.",
+    "Physical phone GPU timing, native keyboard/browser chrome behavior, sustained thermals, and deployed staging remain unverified."
+  ]
+}

@@ -1,0 +1,98 @@
+{
+  "recordedAt": "2026-11-09T16:04:06.537544+00:00",
+  "kind": "functional-browser-compatibility",
+  "source": {
+    "baseCommit": "8be4a3950ef216d948e5f005e4b45b38f7b0185f",
+    "state": "Local PR 122 follow-up changes accompanying this evidence",
+    "productionBuildSha256": "89e070d2ad7ebc1b454f6aa13249ecb4a418328f02e699d743ce40faea46b2cd"
+  },
+  "environment": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "node": "v24.16.0",
+    "engines": {
+      "chromium": "158.0.8127.18",
+      "webkit": "27.2"
+    }
+  },
+  "command": "npm run test:e2e:compatibility --prefix client",
+  "tests": {
+    "passed": 124,
+    "failed": 0,
+    "skipped": 0
+  },
+  "projects": [
+    {
+      "name": "chromium-desktop",
+      "engine": "chromium",
+      "runtimeCases": 13,
+      "mobileCases": 0,
+      "dormancyCases": 5,
+      "backdropCases": 5
+    },
+    {
+      "name": "webkit-desktop",
+      "engine": "webkit",
+      "runtimeCases": 13,
+      "mobileCases": 0,
+      "dormancyCases": 5,
+      "backdropCases": 5
+    },
+    {
+      "name": "android-chromium",
+      "engine": "chromium",
+      "emulation": "Pixel 7",
+      "runtimeCases": 13,
+      "mobileCases": 6,
+      "dormancyCases": 7,
+      "backdropCases": 5
+    },
+    {
+      "name": "ios-webkit",
+      "engine": "webkit",
+      "emulation": "iPhone 13",
+      "runtimeCases": 13,
+      "mobileCases": 6,
+      "dormancyCases": 6,
+      "backdropCases": 5
+    },
+    {
+      "name": "ipad-webkit",
+      "engine": "webkit",
+      "emulation": "iPad Mini",
+      "runtimeCases": 0,
+      "mobileCases": 6,
+      "dormancyCases": 6,
+      "backdropCases": 5
+    }
+  ],
+  "supportingChecks": {
+    "clientUnitTests": 169,
+    "clientUnitFiles": 24,
+    "serverTests": 10,
+    "profileStatisticsTests": 18,
+    "serverProductionAuditVulnerabilities": 0,
+    "clientAuditVulnerabilities": 0
+  },
+  "bundleBytes": {
+    "entryGzip": 93494,
+    "runtimeGzip": 578772,
+    "runtimeRaw": 2024873,
+    "stylesheetRaw": 25489
+  },
+  "coverage": [
+    "Existing graphics fallback, chunk/geometry failure, storage, GPU ownership, pause/resume and public shell checks",
+    "Three decoded worker PNGs in both themes, inverse stars, 2M pixels per layer, theme/resize races",
+    "Explicit Worker failure produces static CSS gradients with working navigation",
+    "Reduced-motion and hidden backdrop animation clocks",
+    "Held crystal freezes shader/simulation clocks and dims light; wake restores motion/light",
+    "Keyboard, pointer cancellation, window focus loss, touch policy, native Android Chromium CDP vertical swipe",
+    "Portrait/landscape navigation, search, theme persistence, responsive breakpoints"
+  ],
+  "limitations": [
+    "Desktop device emulation is not physical Android Chrome or iOS Safari hardware.",
+    "Window focus loss is delivered as a lifecycle event; automated headless tab switching does not certify native OS focus behavior.",
+    "Only the separate Apple M3 Max hardware capture qualifies frame timing for its recorded viewport.",
+    "Physical phone GPU timing, keyboard/browser chrome, sustained thermals and deployed Heroku smoke remain unverified; deployment is deferred."
+  ]
+}

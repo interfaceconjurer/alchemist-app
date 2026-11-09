@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback, useId } from "react";
 import { workSections } from "../workList/workList";
 import { useTheme } from "../../contexts/ThemeContext";
 import "./CommandPalette.css";
@@ -32,6 +32,7 @@ function CommandPalette({ isOpen, onClose, onSelectItem, onAction, openTabIds })
   const [query, setQuery] = useState("");
   const [highlightIndex, setHighlightIndex] = useState(0);
   const inputRef = useRef(null);
+  const listId = useId();
   const listRef = useRef(null);
   const itemRefs = useRef([]);
   const { toggleTheme } = useTheme();
@@ -57,13 +58,18 @@ function CommandPalette({ isOpen, onClose, onSelectItem, onAction, openTabIds })
     return [...ACTIONS, ...allWorkItems].filter(match);
   }, [query, allWorkItems]);
 
-  // Reset on open
+  // Keep keyboard focus in the modal and return it to the prior control.
   useEffect(() => {
-    if (isOpen) {
-      setQuery("");
-      setHighlightIndex(0);
-      setTimeout(() => inputRef.current?.focus(), 0);
-    }
+    if (!isOpen) return;
+    const previousFocus = document.activeElement;
+    setQuery("");
+    setHighlightIndex(0);
+    inputRef.current?.focus({ preventScroll: true });
+    return () => {
+      if (previousFocus instanceof HTMLElement && previousFocus.isConnected) {
+        previousFocus.focus({ preventScroll: true });
+      }
+    };
   }, [isOpen]);
 
   // Reset highlight when filtered list changes
@@ -75,7 +81,7 @@ function CommandPalette({ isOpen, onClose, onSelectItem, onAction, openTabIds })
   useEffect(() => {
     const el = itemRefs.current[highlightIndex];
     if (el) el.scrollIntoView({ block: "nearest" });
-  }, [highlightIndex]);
+  }, [highlightIndex, filtered.length, isOpen]);
 
   const select = useCallback(
     (entry) => {
@@ -95,11 +101,17 @@ function CommandPalette({ isOpen, onClose, onSelectItem, onAction, openTabIds })
 
   const handleKeyDown = useCallback(
     (e) => {
-      if (e.key === "ArrowDown") {
+      if (e.key === "Tab") {
+        // The combobox is the dialog's only tab stop; options use arrow keys.
         e.preventDefault();
+        inputRef.current?.focus({ preventScroll: true });
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (!filtered.length) return;
         setHighlightIndex((i) => (i + 1) % filtered.length);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
+        if (!filtered.length) return;
         setHighlightIndex((i) => (i - 1 + filtered.length) % filtered.length);
       } else if (e.key === "Enter") {
         e.preventDefault();
@@ -116,11 +128,17 @@ function CommandPalette({ isOpen, onClose, onSelectItem, onAction, openTabIds })
 
   return (
     <div className="command-palette-overlay" onClick={onClose}>
-      <div className="command-palette" onClick={(e) => e.stopPropagation()}>
+      <div className="command-palette" role="dialog" aria-modal="true" aria-label="Search work and actions" onClick={(e) => e.stopPropagation()}>
         <input
           ref={inputRef}
           className="command-palette-input"
           type="text"
+          role="combobox"
+          aria-label="Search work items and actions"
+          aria-autocomplete="list"
+          aria-expanded="true"
+          aria-controls={listId}
+          aria-activedescendant={filtered[highlightIndex] ? `${listId}-option-${highlightIndex}` : undefined}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -128,7 +146,7 @@ function CommandPalette({ isOpen, onClose, onSelectItem, onAction, openTabIds })
           spellCheck={false}
           autoComplete="off"
         />
-        <div className="command-palette-list" ref={listRef}>
+        <div className="command-palette-list" ref={listRef} id={listId} role="listbox" aria-label="Search results">
           {filtered.length === 0 && (
             <div className="command-palette-empty">No results found</div>
           )}
@@ -139,13 +157,16 @@ function CommandPalette({ isOpen, onClose, onSelectItem, onAction, openTabIds })
             return (
               <div
                 key={entry.id}
+                id={`${listId}-option-${i}`}
+                role="option"
+                aria-selected={isHighlighted}
                 ref={(el) => (itemRefs.current[i] = el)}
                 className={`command-palette-item ${isHighlighted ? "command-palette-item--highlighted" : ""} ${isAction ? "command-palette-item--action" : ""}`}
                 onClick={() => select(entry)}
                 onMouseEnter={() => setHighlightIndex(i)}
               >
                 <div className="command-palette-item-left">
-                  {isAction && <span className="command-palette-action-prefix">&gt;</span>}
+                  {isAction && <span className="command-palette-action-prefix" aria-hidden="true">&gt;</span>}
                   <span className="command-palette-item-label">{entry.label}</span>
                   {!isAction && (
                     <span className="command-palette-item-section">{entry.sectionLabel}</span>

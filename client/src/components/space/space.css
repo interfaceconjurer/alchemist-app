@@ -1,0 +1,114 @@
+/* Deep-space backdrop. Fixed behind the whole app; dark and light variants.
+   All motion is transform/opacity so it stays on the compositor. */
+
+.space {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+}
+
+.space--ready {
+  opacity: 1;
+}
+
+.space-layer {
+  position: absolute;
+  /* Matches BLEED in SpaceBackground.jsx. */
+  inset: -48px;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  will-change: transform, opacity;
+}
+
+/* Nebula breathes on the same 11/13/17 s family as the crystal backlights.
+   Opacity only: the clouds themselves never move enough to notice. */
+.space-layer--nebula {
+  opacity: 0.85;
+  animation: space-breathe 13s ease-in-out infinite alternate;
+}
+
+/* Two star layers drift at different rates for a faint sense of depth. */
+.space-layer--far {
+  animation: space-drift-far 180s ease-in-out infinite alternate;
+}
+
+.space-layer--near {
+  animation:
+    space-drift-near 120s ease-in-out infinite alternate,
+    space-twinkle 7s ease-in-out infinite alternate;
+}
+
+/* Darkens the centre column behind the name/links and the outer edges, so text
+   contrast holds and the sky feels deep rather than flat. */
+.space-vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 34% 26% at 50% 66%, rgba(10, 10, 10, 0.78) 0%, rgba(10, 10, 10, 0) 100%),
+    radial-gradient(ellipse 120% 90% at 50% 45%, rgba(10, 10, 10, 0) 55%, rgba(10, 10, 10, 0.65) 100%);
+}
+
+/* Light mode: the inverse. The nebula is translucent ink, multiplied with the
+   grey page so it tints and darkens rather than glowing. The vignette fades to
+   the page colour, keeping the area behind the name and links clean grey. */
+.space--light .space-layer--nebula {
+  mix-blend-mode: multiply;
+}
+
+.space--light .space-vignette {
+  background:
+    radial-gradient(ellipse 34% 26% at 50% 66%, rgba(198, 199, 202, 0.85) 0%, rgba(198, 199, 202, 0) 100%),
+    radial-gradient(ellipse 120% 90% at 50% 45%, rgba(198, 199, 202, 0) 55%, rgba(198, 199, 202, 0.55) 100%);
+}
+
+.space--paused .space-layer {
+  animation-play-state: paused;
+}
+
+/* Static, inexpensive sky when worker canvas support is unavailable. */
+.space--fallback { --space-star: 255, 255, 255; }
+.space--fallback.space--light { --space-star: 34, 36, 42; }
+.space--fallback .space-layer { animation: none; will-change: auto; }
+.space--fallback .space-layer--nebula {
+  background-image: radial-gradient(ellipse at 25% 30%, rgba(109, 77, 255, 0.09), transparent 60%), radial-gradient(ellipse at 70% 65%, rgba(25, 195, 255, 0.06), transparent 55%);
+}
+.space--fallback .space-layer--far,
+.space--fallback .space-layer--near {
+  background-image: radial-gradient(circle at 20% 25%, rgba(var(--space-star), 0.3) 0.5px, transparent 1px), radial-gradient(circle at 80% 70%, rgba(var(--space-star), 0.2) 0.5px, transparent 1px);
+  background-size: 137px 193px;
+  background-repeat: repeat;
+}
+.space--fallback .space-layer--near { background-size: 307px 283px; }
+
+@keyframes space-breathe {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+@keyframes space-drift-far {
+  0% { transform: translate3d(-14px, -8px, 0); }
+  100% { transform: translate3d(14px, 8px, 0); }
+}
+
+@keyframes space-drift-near {
+  0% { transform: translate3d(22px, -12px, 0); }
+  100% { transform: translate3d(-22px, 12px, 0); }
+}
+
+@keyframes space-twinkle {
+  0% { opacity: 0.82; }
+  100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .space-layer {
+    animation: none;
+  }
+  .space {
+    transition: none;
+  }
+}

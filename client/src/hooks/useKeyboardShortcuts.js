@@ -1,9 +1,16 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useEffect } from 'react';
 import { DOUBLE_CLICK_DELAY } from '../utils/stateHelpers';
 
 export function useKeyboardShortcuts(stateRef, dispatch, tabActions) {
   const clickTimerRef = useRef(null);
   const clickedItemIdRef = useRef(null);
+  const { openWorkItemAsPreview, openWorkItemAsPersistent, closeAllTabs, closeActiveTab } = tabActions;
+  const cleanup = useCallback(() => {
+    if (clickTimerRef.current !== null) clearTimeout(clickTimerRef.current);
+    clickTimerRef.current = null;
+    clickedItemIdRef.current = null;
+  }, []);
+  useEffect(() => cleanup, [cleanup]);
 
   const handleWorkItemClick = useCallback((item) => {
     if (clickTimerRef.current && clickedItemIdRef.current !== item.id) {
@@ -16,18 +23,14 @@ export function useKeyboardShortcuts(stateRef, dispatch, tabActions) {
     clickTimerRef.current = setTimeout(() => {
       clickTimerRef.current = null;
       clickedItemIdRef.current = null;
-      tabActions.openWorkItemAsPreview(item);
+      openWorkItemAsPreview(item);
     }, DOUBLE_CLICK_DELAY);
-  }, [tabActions]);
+  }, [openWorkItemAsPreview]);
 
   const handleWorkItemDoubleClick = useCallback((item) => {
-    if (clickTimerRef.current) {
-      clearTimeout(clickTimerRef.current);
-      clickTimerRef.current = null;
-      clickedItemIdRef.current = null;
-    }
-    tabActions.openWorkItemAsPersistent(item);
-  }, [tabActions]);
+    cleanup();
+    openWorkItemAsPersistent(item);
+  }, [cleanup, openWorkItemAsPersistent]);
 
   const handleTabDoubleClick = useCallback((tabId) => {
     dispatch({ type: 'TAB_DOUBLE_CLICK', tabId });
@@ -38,8 +41,8 @@ export function useKeyboardShortcuts(stateRef, dispatch, tabActions) {
   }, [dispatch]);
 
   const handlePaletteAction = useCallback((actionId) => {
-    if (actionId === 'action:close-all') tabActions.closeAllTabs();
-  }, [tabActions]);
+    if (actionId === 'action:close-all') closeAllTabs();
+  }, [closeAllTabs]);
 
   const handleGlobalKeyDown = useCallback((e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
@@ -50,13 +53,9 @@ export function useKeyboardShortcuts(stateRef, dispatch, tabActions) {
     if (stateRef.current.commandPaletteOpen) return;
     if (e.ctrlKey && e.key === 'q') {
       e.preventDefault();
-      tabActions.closeActiveTab();
+      closeActiveTab();
     }
-  }, [stateRef, toggleCommandPalette, tabActions]);
-
-  const cleanup = useCallback(() => {
-    if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
-  }, []);
+  }, [stateRef, toggleCommandPalette, closeActiveTab]);
 
   return { handleWorkItemClick, handleWorkItemDoubleClick, handleTabDoubleClick, toggleCommandPalette, handlePaletteAction, handleGlobalKeyDown, cleanup };
 }

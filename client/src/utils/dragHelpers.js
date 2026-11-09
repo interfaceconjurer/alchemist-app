@@ -35,8 +35,9 @@ export const createGhostElement = (sourceElement, clientX, clientY, { preserveSt
   ghost.style.position = 'fixed';
   ghost.style.pointerEvents = 'none';
   ghost.style.zIndex = '1000';
-  ghost.style.left = `${clientX}px`;
-  ghost.style.top = `${clientY}px`;
+  ghost.style.left = '0';
+  ghost.style.top = '0';
+  ghost.style.translate = `${clientX}px ${clientY}px`;
   if (preserveStyle) {
     const rect = sourceElement.getBoundingClientRect();
     ghost.style.width = `${rect.width}px`;
@@ -53,8 +54,7 @@ export const createGhostElement = (sourceElement, clientX, clientY, { preserveSt
 
 export const updateGhostPosition = (ghostElement, clientX, clientY) => {
   if (!ghostElement) return;
-  ghostElement.style.left = `${clientX}px`;
-  ghostElement.style.top = `${clientY}px`;
+  ghostElement.style.translate = `${clientX}px ${clientY}px`;
 };
 
 export const detectSidebarDropZone = (clientX, stageRect, splitView, tabCount) => {

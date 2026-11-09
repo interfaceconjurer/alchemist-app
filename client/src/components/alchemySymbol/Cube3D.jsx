@@ -2,7 +2,7 @@ import React, { useMemo, useCallback } from 'react';
 import * as THREE from 'three';
 import Polyhedron from './Polyhedron';
 
-export default function Cube3D() {
+export default function Cube3D({ active = true }) {
   const s = 1.5;
   const vertices = useMemo(() => [
     [-s, -s, -s], [ s, -s, -s], [ s,  s, -s], [-s,  s, -s],
@@ -43,5 +43,5 @@ export default function Cube3D() {
     return a.clone().lerp(b, u).lerp(d.clone().lerp(c, u), v);
   }, [vertices]);
 
-  return <Polyhedron vertices={vertices} edges={edges} faces={faces} spawnPoint={spawnPoint} cameraPosition={[0, 2, 9]} />;
+  return <Polyhedron active={active} vertices={vertices} edges={edges} faces={faces} spawnPoint={spawnPoint} cameraPosition={[0, 2, 9]} />;
 }

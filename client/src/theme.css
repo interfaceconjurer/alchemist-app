@@ -1,20 +1,21 @@
 /* Theme Variables */
 :root {
-  /* Light theme (default) */
-  --bg-color: #ffffff;
-  --text-color: #747474;
-  --text-color-dark: #494545;
-  --heading-color: #494545;
+  /* Light theme (default): a mid grey rather than white, so the dark glass
+     symbol and its coloured backlight both read without a separate panel. */
+  --bg-color: #c6c7ca;
+  --text-color: #2f3034; /* 7.9:1 on --bg-color; 4.9:1 at the intro line's 0.8 opacity */
+  --text-color-dark: #2a2b2f; /* 8.4:1 */
+  --heading-color: #232428; /* 9.2:1 */
   --border-color: #979797;
-  --border-color-light: #e0e0e0;
+  --border-color-light: #a9abaf; /* hairlines on the #c6c7ca page (was #e0e0e0, which read as white) */
   --focus-shadow: rgba(139, 0, 255, 0.5);
   --accent-color: rgba(139, 0, 255, 0.5);
-  --button-bg: #fff;
+  --button-bg: #d4d5d8;
 
   /* Scrollbar - transparent track, white thumb in light mode */
   --scrollbar-track: transparent;
-  --scrollbar-thumb: #ffffff;
-  --scrollbar-thumb-hover: #e0e0e0;
+  --scrollbar-thumb: rgba(0, 0, 0, 0.18);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.28);
 
   /* 3D component colors - purple in light mode */
   --wireframe-color: #8b00ff;
@@ -23,7 +24,7 @@
   --fill-opacity-seed: 0.12;
 
   /* UI surface / component overrides (light) */
-  --top-bar-bg: rgba(0, 0, 0, 0.04);
+  --top-bar-bg: rgba(0, 0, 0, 0.09);
   --top-bar-search-hover-bg: rgba(0, 0, 0, 0.06);
   --left-panel-bg: rgba(0, 0, 0, 0.04);
   --left-panel-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
@@ -35,9 +36,9 @@
   --stage-empty-text-color: rgba(0, 0, 0, 0.35);
   --stage-empty-kbd-bg: rgba(0, 0, 0, 0.07);
   --stage-empty-kbd-color: rgba(0, 0, 0, 0.4);
-  --out-bound-link-bg: rgba(0, 0, 0, 0.06);
-  --out-bound-link-border: rgba(0, 0, 0, 0.08);
-  --out-bound-link-hover-bg: rgba(0, 0, 0, 0.16);
+  --out-bound-link-bg: rgba(255, 255, 255, 0.22);
+  --out-bound-link-border: rgba(0, 0, 0, 0.1);
+  --out-bound-link-hover-bg: rgba(255, 255, 255, 0.42);
   --work-list-section-border-left-color: rgba(0, 0, 0, 0.08);
   --work-item-bg: rgba(0, 0, 0, 0.06);
   --work-item-border: rgba(0, 0, 0, 0.08);

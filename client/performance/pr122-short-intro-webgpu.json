@@ -1,0 +1,345 @@
+{
+  "recordedAt": "2026-11-09T17:44:59.869Z",
+  "geometryMode": "compiled",
+  "settings": {
+    "targetHz": 60,
+    "width": 1440,
+    "height": 1000,
+    "dpr": 2,
+    "maxSeconds": 120,
+    "headless": false
+  },
+  "refresh": {
+    "medianIntervalMs": 8.300000000000011,
+    "estimatedHz": 120.48192771084321
+  },
+  "backend": {
+    "actual": "webgpu",
+    "adapter": {
+      "vendor": "apple",
+      "architecture": "metal-3",
+      "device": "",
+      "description": ""
+    },
+    "renderer": "Google Inc. (Apple) ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Max, Version 27.2 (Build 26B123))",
+    "software": false
+  },
+  "coverage": {
+    "ok": true,
+    "reasons": [],
+    "missingTransitions": [],
+    "missingInteriorTransitions": [],
+    "observedTransitions": [
+      "pyramid->cube",
+      "cube->octahedron",
+      "octahedron->dodecahedron",
+      "dodecahedron->icosahedron",
+      "icosahedron->triacontahedron",
+      "triacontahedron->pyramid"
+    ],
+    "hardwareQualified": true
+  },
+  "budget": {
+    "limits": {
+      "p95Ms": 18.333333333333336,
+      "p99Ms": 33.333333333333336,
+      "missedRefreshRatio": 0.01,
+      "warmLongTasks": 0
+    },
+    "passed": true
+  },
+  "complete": true,
+  "pageMetrics": {
+    "lcpMs": 168,
+    "cls": 0.00014734567901234568
+  },
+  "cold": {
+    "firstSceneUpdateMs": 863,
+    "firstRenderSubmitMs": 899.6000000238419,
+    "introFinishedMs": 2278.3000000715256,
+    "frames": {
+      "targetHz": 60,
+      "budgetMs": 16.666666666666668,
+      "intervalCount": 247,
+      "omittedIntervals": 6007,
+      "activeDurationMs": 2175,
+      "p50Ms": 8.300000000000011,
+      "p95Ms": 9.299999999999955,
+      "p99Ms": 16.286000000000016,
+      "maxMs": 82.70000000000005,
+      "meanFps": 113.5632183908046,
+      "lateFrameCount": 2,
+      "lateFrameRatio": 0.008097165991902834,
+      "estimatedMissedRefreshes": 5,
+      "estimatedMissedRefreshRatio": 0.01984126984126984
+    },
+    "longTasks": {
+      "count": 1,
+      "totalActiveDurationMs": 52,
+      "blockingActiveDurationMs": 2,
+      "maxActiveDurationMs": 52,
+      "p50Ms": 52,
+      "p95Ms": 52,
+      "p99Ms": 52,
+      "maxMs": 52
+    },
+    "interactions": {
+      "eventCount": 0,
+      "interactionCount": 0,
+      "unattributedEventCount": 0,
+      "p50Ms": null,
+      "p95Ms": null,
+      "p99Ms": null,
+      "maxMs": null
+    }
+  },
+  "warm": {
+    "frames": {
+      "targetHz": 60,
+      "budgetMs": 16.666666666666668,
+      "intervalCount": 6006,
+      "omittedIntervals": 248,
+      "activeDurationMs": 50083.9,
+      "p50Ms": 8.30000000000291,
+      "p95Ms": 9.19999999999709,
+      "p99Ms": 9.300000000001091,
+      "maxMs": 41.19999999999891,
+      "meanFps": 119.91877629337971,
+      "lateFrameCount": 1,
+      "lateFrameRatio": 0.0001665001665001665,
+      "estimatedMissedRefreshes": 1,
+      "estimatedMissedRefreshRatio": 0.000166472448809722
+    },
+    "longTasks": {
+      "count": 0,
+      "totalActiveDurationMs": 0,
+      "blockingActiveDurationMs": 0,
+      "maxActiveDurationMs": 0,
+      "p50Ms": null,
+      "p95Ms": null,
+      "p99Ms": null,
+      "maxMs": null
+    },
+    "interactions": {
+      "eventCount": 86,
+      "interactionCount": 4,
+      "unattributedEventCount": 75,
+      "p50Ms": 44,
+      "p95Ms": 68.39999999999999,
+      "p99Ms": 71.28,
+      "maxMs": 72
+    }
+  },
+  "observedRefreshCadence": {
+    "frames": {
+      "targetHz": 120,
+      "budgetMs": 8.333333333333334,
+      "intervalCount": 6006,
+      "omittedIntervals": 248,
+      "activeDurationMs": 50083.9,
+      "p50Ms": 8.30000000000291,
+      "p95Ms": 9.19999999999709,
+      "p99Ms": 9.300000000001091,
+      "maxMs": 41.19999999999891,
+      "meanFps": 119.91877629337971,
+      "lateFrameCount": 338,
+      "lateFrameRatio": 0.05627705627705628,
+      "estimatedMissedRefreshes": 4,
+      "estimatedMissedRefreshRatio": 0.0006655574043261231
+    },
+    "longTasks": {
+      "count": 0,
+      "totalActiveDurationMs": 0,
+      "blockingActiveDurationMs": 0,
+      "maxActiveDurationMs": 0,
+      "p50Ms": null,
+      "p95Ms": null,
+      "p99Ms": null,
+      "maxMs": null
+    },
+    "interactions": {
+      "eventCount": 86,
+      "interactionCount": 4,
+      "unattributedEventCount": 75,
+      "p50Ms": 44,
+      "p95Ms": 68.39999999999999,
+      "p99Ms": 71.28,
+      "maxMs": 72
+    }
+  },
+  "cpu": {
+    "sceneUpdate": {
+      "count": 6008,
+      "totalMs": 476.69999742507935,
+      "meanMs": 0.07934420729445395,
+      "p50Ms": 0,
+      "p95Ms": 0.3999999761581421,
+      "p99Ms": 0.8000000631809234,
+      "maxMs": 2.1999999284744263
+    },
+    "byTransition": {
+      "pyramid->cube": {
+        "count": 337,
+        "totalMs": 29.49999976158142,
+        "meanMs": 0.08753709128065704,
+        "p50Ms": 0.10000002384185791,
+        "p95Ms": 0.20000004768371582,
+        "p99Ms": 0.3280000019073459,
+        "maxMs": 0.7999999523162842
+      },
+      "cube->octahedron": {
+        "count": 332,
+        "totalMs": 50.19999933242798,
+        "meanMs": 0.15120481726634932,
+        "p50Ms": 0.10000002384185791,
+        "p95Ms": 0.30000007152557373,
+        "p99Ms": 0.3999999761581421,
+        "maxMs": 0.5
+      },
+      "octahedron->dodecahedron": {
+        "count": 337,
+        "totalMs": 40.4000004529953,
+        "meanMs": 0.1198813069821819,
+        "p50Ms": 0.10000002384185791,
+        "p95Ms": 0.20000004768371582,
+        "p99Ms": 0.2999999523162842,
+        "maxMs": 0.30000007152557373
+      },
+      "dodecahedron->icosahedron": {
+        "count": 338,
+        "totalMs": 73.40000021457672,
+        "meanMs": 0.21715976394845185,
+        "p50Ms": 0.20000004768371582,
+        "p95Ms": 0.3999999940395355,
+        "p99Ms": 0.5,
+        "maxMs": 0.6000000238418579
+      },
+      "icosahedron->triacontahedron": {
+        "count": 353,
+        "totalMs": 190.4999989271164,
+        "meanMs": 0.5396600536178935,
+        "p50Ms": 0.5,
+        "p95Ms": 1.100000023841858,
+        "p99Ms": 1.347999963760378,
+        "maxMs": 2.1999999284744263
+      },
+      "triacontahedron->pyramid": {
+        "count": 337,
+        "totalMs": 70.99999916553497,
+        "meanMs": 0.210682490105445,
+        "p50Ms": 0.20000004768371582,
+        "p95Ms": 0.4,
+        "p99Ms": 0.5640000152587877,
+        "maxMs": 2.0999999046325684
+      }
+    },
+    "renderSubmission": {
+      "count": 6008,
+      "totalMs": 4529.1999979019165,
+      "meanMs": 0.753861517626817,
+      "p50Ms": 0.6999999284744263,
+      "p95Ms": 1.399999976158142,
+      "p99Ms": 1.7999999523162842,
+      "maxMs": 7
+    }
+  },
+  "dprValues": [
+    1.5
+  ],
+  "actions": [
+    {
+      "name": "initial-backdrop",
+      "layers": [
+        {
+          "width": 1674,
+          "height": 1194
+        },
+        {
+          "width": 1674,
+          "height": 1194
+        },
+        {
+          "width": 1674,
+          "height": 1194
+        }
+      ]
+    },
+    {
+      "name": "theme",
+      "simulationMs": 15074.100000023842,
+      "layers": [
+        {
+          "width": 1674,
+          "height": 1194
+        },
+        {
+          "width": 1674,
+          "height": 1194
+        },
+        {
+          "width": 1674,
+          "height": 1194
+        }
+      ]
+    },
+    {
+      "name": "search",
+      "simulationMs": 30132.300000071547
+    },
+    {
+      "name": "touch",
+      "simulationMs": 40015.49999999998,
+      "held": {
+        "simulationMs": 40478.623037799014,
+        "shaderTime": 40.47862303779942,
+        "light": 0.12
+      },
+      "frozenForMs": 300.3000000715256,
+      "awake": {
+        "simulationMs": 41690.81274835568,
+        "shaderTime": 41.690812748356144,
+        "light": 1
+      }
+    }
+  ],
+  "errors": [],
+  "pausedRanges": [
+    {
+      "startMs": 138.30000007152557,
+      "endMs": 143.60000002384186
+    }
+  ],
+  "gpu": {
+    "devices": [
+      {
+        "vendorId": 4203,
+        "deviceId": 0,
+        "vendorString": "Google Inc. (Apple)",
+        "deviceString": "ANGLE (Apple, ANGLE Metal Renderer: Apple M3 Max, Version 27.2 (Build 26B123))",
+        "driverVendor": "Apple",
+        "driverVersion": "27.2"
+      }
+    ],
+    "featureStatus": {
+      "2d_canvas": "enabled",
+      "direct_rendering_display_compositor": "disabled_off_ok",
+      "gpu_compositing": "enabled",
+      "multiple_raster_threads": "enabled_on",
+      "opengl": "enabled_on",
+      "rasterization": "enabled",
+      "skia_graphite": "enabled_on",
+      "trees_in_viz": "disabled_off",
+      "video_decode": "enabled",
+      "video_encode": "enabled",
+      "webgl": "enabled",
+      "webgpu": "enabled",
+      "webnn": "disabled_off"
+    }
+  },
+  "measurement": "rAF cadence estimates browser delivery opportunities; CPU submission spans are not GPU execution times. Synthetic EventTiming is not field INP. Hardware qualification applies only to this recorded device and viewport.",
+  "source": {
+    "baseCommit": "4231739319723a86394eefecba8e35e74084fc2b",
+    "state": "First-load intro shortened; shaders, render quality and loading placeholder unchanged",
+    "productionBuildSha256": "dcf98a5bb238f94c1223217d26cd67a69f70774440539747d4c4dc8a4bd4635e"
+  }
+}

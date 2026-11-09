@@ -8,7 +8,7 @@ function randomBarycentric(a, b, c) {
   return a.clone().multiplyScalar(1 - u - v).add(b.clone().multiplyScalar(u)).add(c.clone().multiplyScalar(v));
 }
 
-export default function Icosahedron3D() {
+export default function Icosahedron3D({ active = true }) {
   const s = 1.4;
   const phi = (1 + Math.sqrt(5)) / 2;
 
@@ -86,5 +86,5 @@ export default function Icosahedron3D() {
     );
   }, [faces]);
 
-  return <Polyhedron vertices={vertices} edges={edges} faces={faces} spawnPoint={spawnPoint} cameraPosition={[0, 2, 7]} fov={80} position={[0, -2, 0]} />;
+  return <Polyhedron active={active} vertices={vertices} edges={edges} faces={faces} spawnPoint={spawnPoint} cameraPosition={[0, 2, 7]} fov={80} position={[0, -2, 0]} />;
 }

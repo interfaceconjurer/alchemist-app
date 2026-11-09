@@ -8,7 +8,7 @@ function randomBarycentric(a, b, c) {
   return a.clone().multiplyScalar(1 - u - v).add(b.clone().multiplyScalar(u)).add(c.clone().multiplyScalar(v));
 }
 
-export default function Octahedron3D() {
+export default function Octahedron3D({ active = true }) {
   const s = 2;
   const vertices = useMemo(() => [
     [0,  s, 0], [ s, 0, 0], [0, 0, s],
@@ -51,5 +51,5 @@ export default function Octahedron3D() {
     );
   }, [vertices]);
 
-  return <Polyhedron vertices={vertices} edges={edges} faces={faces} spawnPoint={spawnPoint} cameraPosition={[0, -1.5, 7]} fov={70} />;
+  return <Polyhedron active={active} vertices={vertices} edges={edges} faces={faces} spawnPoint={spawnPoint} cameraPosition={[0, -1.5, 7]} fov={70} />;
 }

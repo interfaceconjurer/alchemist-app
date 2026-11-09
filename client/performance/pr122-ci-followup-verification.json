@@ -1,0 +1,65 @@
+{
+  "recordedAt": "2026-11-09T16:39:26.545324+00:00",
+  "kind": "local-ci-followup-verification",
+  "source": {
+    "baseCommit": "f640cf5e10a6ffcdacb93e0c5f044d73b3492958",
+    "state": "CI follow-up: active-time wake fix and acknowledged native touch regression",
+    "productionBuildSha256": "871b0d1bb933406794048cbbe7c306e11f0cbfd7f94710898ebe65f0de3fc71d"
+  },
+  "environment": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "node": "v24.16.0",
+    "engines": {
+      "chromium": "158.0.8127.18",
+      "webkit": "27.2"
+    }
+  },
+  "clientUnit": {
+    "passed": 177,
+    "files": 24,
+    "command": "npm test --prefix client -- --run"
+  },
+  "affectedBrowserCases": {
+    "passed": 29,
+    "failed": 0,
+    "skipped": 0,
+    "command": "COMPATIBILITY_TEST_PORT=5215 npm run test:e2e:compatibility --prefix client -- crystal-dormancy.spec.js",
+    "projects": {
+      "chromium-desktop": 5,
+      "webkit-desktop": 5,
+      "android-chromium": 7,
+      "ios-webkit": 6,
+      "ipad-webkit": 6
+    }
+  },
+  "bundleBytes": {
+    "entryGzip": 93495,
+    "runtimeGzip": 578779,
+    "runtimeRaw": 2024893,
+    "stylesheetRaw": 25489
+  },
+  "motivation": {
+    "priorCommit": "f640cf5e10a6ffcdacb93e0c5f044d73b3492958",
+    "priorFailedRun": "https://github.com/interfaceconjurer/alchemist-app/actions/runs/42652244550",
+    "priorResult": {
+      "passed": 118,
+      "failed": 6
+    },
+    "findings": [
+      "Five wake assertions exceeded their unchanged deadline because active deltas above 100ms were discarded.",
+      "One native Android swipe returned without panel scrolling; explicit acknowledged native touch events now prove hit target, cancellation and scrolling."
+    ]
+  },
+  "coverage": [
+    "Full finite active elapsed time, quiet/wake boundary splitting, low-FPS and timestep-consistency regressions",
+    "Existing hidden and first-resumed-frame exclusions remain tested",
+    "Actual simulation/shader clock freeze, light dimming, keyboard, pointer cancellation, focus loss and touch recovery",
+    "Native touch press/move/end requires actual canvas hit, pointer cancellation and more than 20px of native scrolling"
+  ],
+  "limitations": [
+    "The 29 local affected cases are a subset of the full 124-case hosted matrix. GitHub Actions evaluates that complete matrix on each pushed follow-up.",
+    "Local device emulation is not physical iPhone or Android testing. Manual physical-phone feedback remains separate.",
+    "The separate hardware capture qualifies only the recorded Apple M3 Max and viewport; rAF is not proof of presentation or GPU execution time."
+  ]
+}

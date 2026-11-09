@@ -1,20 +1,59 @@
-import React, { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, useRef, lazy, memo, Suspense } from 'react';
 import './view.css';
+import { GraphicsBoundary, StaticSymbol } from './GraphicsBoundary';
+import { useSymbolVisibility } from './useSymbolVisibility';
+import { profileObserver } from './profileObserver';
 
-const Tetrahedron3D = lazy(() => import('./Tetrahedron3D'));
+const Pyramid3D = lazy(() => import('./Pyramid3D'));
 const Cube3D = lazy(() => import('./Cube3D'));
 const Octahedron3D = lazy(() => import('./Octahedron3D'));
 const Dodecahedron3D = lazy(() => import('./Dodecahedron3D'));
 const Icosahedron3D = lazy(() => import('./Icosahedron3D'));
 
-const COMPONENTS = [Tetrahedron3D, Cube3D, Octahedron3D, Dodecahedron3D, Icosahedron3D];
+const MorphingSolid = lazy(() => import('./MorphingSolid'));
+
+const COMPONENTS = [Pyramid3D, Cube3D, Octahedron3D, Dodecahedron3D, Icosahedron3D];
+
+// 'morph': one solid that carves itself into the next (faces grow 5→6→8→12→20).
+// 'fade':  the original cross-fade between separate canvases.
+const TRANSITION = 'morph';
 
 const HOLD_DURATION = 5000; // How long to display each shape
 const SHRINK_DURATION = 1600; // Shrink-out time (ms) — matches CSS
 const GROW_DURATION = 1600; // Grow-in time (ms) — matches CSS
 
+/** Same box as the canvas, intentionally blank; keeps layout stable during startup. */
+function SymbolPlaceholder({ reason }) {
+  return <div className="symbol-placeholder" data-symbol-pending={reason} aria-hidden="true" />;
+}
+
 // Phases: 'showing' -> 'shrinking' -> 'growing' -> 'showing'
 function AlchemySymbol() {
+  const ref = useRef(null);
+  const { active, reducedMotion, started } = useSymbolVisibility(ref);
+  useEffect(() => { profileObserver?.visibility({ at: performance.now(), active }); }, [active]);
+  const renderState = reducedMotion ? 'reduced-motion' : active ? 'active' : 'paused';
+  return (
+    <article className="symbolContainer" ref={ref} data-render-state={renderState}>
+      <section className="symbol" style={{ opacity: 1 }}>
+        {/* The outline fallback is for reduced motion and real failures only. While
+            waiting to start or for the lazy chunk, render an empty placeholder so a
+            normal load doesn't flash the outline before the crystal grows in. */}
+        {reducedMotion ? <StaticSymbol reason="reduced-motion" /> : !started ? <SymbolPlaceholder reason="paused" /> : (
+          <GraphicsBoundary>
+            <Suspense fallback={<SymbolPlaceholder reason="loading" />}>
+              {TRANSITION === 'morph' ? (
+                <div className="symbol-transition symbol-visible"><MorphingSolid active={active} /></div>
+              ) : <FadeSequence active={active} />}
+            </Suspense>
+          </GraphicsBoundary>
+        )}
+      </section>
+    </article>
+  );
+}
+
+function FadeSequence({ active }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [phase, setPhase] = useState('growing');
 
@@ -23,6 +62,7 @@ function AlchemySymbol() {
   }, []);
 
   useEffect(() => {
+    if (!active) return;
     if (phase === 'showing') {
       const timer = setTimeout(advanceShape, HOLD_DURATION);
       return () => clearTimeout(timer);
@@ -42,7 +82,7 @@ function AlchemySymbol() {
       }, GROW_DURATION);
       return () => clearTimeout(timer);
     }
-  }, [phase, advanceShape]);
+  }, [phase, advanceShape, active]);
 
   const ActiveComponent = COMPONENTS[activeIndex];
 
@@ -52,16 +92,10 @@ function AlchemySymbol() {
   else wrapperClass += ' symbol-visible';
 
   return (
-    <article className="symbolContainer">
-      <section className="symbol" style={{ opacity: 1 }}>
-        <div className={wrapperClass}>
-          <Suspense fallback={null}>
-            <ActiveComponent />
-          </Suspense>
-        </div>
-      </section>
-    </article>
+    <div className={wrapperClass}>
+      <ActiveComponent active={active} />
+    </div>
   );
 }
 
-export default AlchemySymbol;
+export default memo(AlchemySymbol);

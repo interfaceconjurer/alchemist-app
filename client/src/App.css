@@ -32,10 +32,13 @@ body {
 }
 
 .App {
+  position: relative; /* stacks above the fixed .space backdrop */
+  z-index: 1;
   color: var(--text-color);
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
 }
 
 .top-bar {
@@ -118,6 +121,26 @@ body {
     var(--resize-handle-accent-active) 50%,
     var(--transparent) 100%
   );
+}
+
+.main--stage-hidden .left-panel {
+  width: 100%;
+  flex: 1;
+  /* The symbol canvas sits flush under the top bar; its halo otherwise gets
+     cut off at the canvas edge, leaving a visible strip of padding above it. */
+  padding-top: 0;
+}
+
+/* Same for the sides: let the symbol canvas run edge to edge (cancelling the
+   panel's 1rem side padding) so the halo is never clipped by a visible edge. */
+.main--stage-hidden .symbolContainer {
+  width: calc(100% + 2rem);
+  margin-left: -1rem;
+  margin-right: -1rem;
+}
+
+.main--stage-hidden .stage {
+  display: none;
 }
 
 .stage {
@@ -404,6 +427,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .App-title {
+  position: relative; /* sits over the bottom of the symbol canvas (see .symbolContainer margin) */
   font-size: 1.5em;
   text-align: left;
   margin: 0;
@@ -804,7 +828,8 @@ a:active {
 
 
   .symbolContainer {
-    height: 200px;
+    height: 400px;
+    margin-bottom: -48px;
   }
 }
 
@@ -815,4 +840,20 @@ a:active {
     right: 1rem;
     max-width: none;
   }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .stage-content,
+  .stage-empty-icon-shimmer-rect,
+  .stage-drag-ghost {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* Let the space backdrop show through the shell in both themes. */
+.main--stage-hidden .left-panel {
+  background-color: transparent;
+  box-shadow: none;
 }
