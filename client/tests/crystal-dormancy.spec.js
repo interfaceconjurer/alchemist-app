@@ -154,14 +154,46 @@ test('native vertical touch panning scrolls the page and releases the crystal @t
   await waitForCrystal(page);
   const panel = page.locator('.left-panel');
   expect(await panel.evaluate(element => element.scrollHeight - element.clientHeight)).toBeGreaterThan(20);
-  const { x, y } = await center(page);
+  const point = await page.locator('.crystal-surface canvas').evaluate(canvas => {
+    const rect = canvas.getBoundingClientRect();
+    const panelRect = canvas.closest('.left-panel').getBoundingClientRect();
+    const top = Math.max(rect.top, panelRect.top, 0);
+    const bottom = Math.min(rect.bottom, panelRect.bottom, innerHeight);
+    const x = rect.left + rect.width / 2;
+    const y = top + (bottom - top) * 0.65;
+    window.__crystalTouchPan = { started: false, cancelled: false };
+    const target = canvas.closest('.crystal-surface');
+    target.addEventListener('pointerdown', event => {
+      window.__crystalTouchPan.started = event.pointerType === 'touch' && event.target === canvas;
+    });
+    target.addEventListener('pointercancel', event => {
+      if (event.pointerType === 'touch') window.__crystalTouchPan.cancelled = true;
+    });
+    return { x, y, hitsCanvas: document.elementFromPoint(x, y) === canvas, visibleHeight: bottom - top };
+  });
+  expect(point.hitsCanvas).toBe(true);
+  expect(point.visibleHeight).toBeGreaterThan(200);
   const session = await page.context().newCDPSession(page);
+  let touching = false;
   try {
-    await session.send('Input.synthesizeScrollGesture', { x, y, yDistance: -160, speed: 600, gestureSourceType: 'touch' });
+    await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: point.x, y: point.y, id: 1, radiusX: 5, radiusY: 5, force: 1 }] });
+    touching = true;
+    await expect.poll(() => page.evaluate(() => window.__crystalTouchPan.started)).toBe(true);
+    await expect(surface(page)).toHaveAttribute('aria-pressed', 'true');
+    // Acknowledge the real press, then give touch handlers and the compositor
+    // a rendered frame between native input updates on slow software renderers.
+    for (let step = 1; step <= 10; step++) {
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(resolve)));
+      await session.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: point.x, y: point.y - step * 16, id: 1, radiusX: 5, radiusY: 5, force: 1 }] });
+    }
+    await expect.poll(() => page.evaluate(() => window.__crystalTouchPan.cancelled)).toBe(true);
     await expect.poll(() => panel.evaluate(element => element.scrollTop)).toBeGreaterThan(20);
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    touching = false;
     await expect(surface(page)).toHaveAttribute('aria-pressed', 'false');
     await expect(surface(page)).toHaveAttribute('data-dormancy', 'awake', { timeout: 8000 });
   } finally {
+    if (touching) await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     await session.detach();
   }
 });

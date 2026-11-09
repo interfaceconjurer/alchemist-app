@@ -36,13 +36,18 @@ export function createDormancy(config = DORMANCY) {
     /** Pointer released or left the crystal. Wake begins after the quiet period. */
     release() { engaged = false; quiet = 0; },
     get engaged() { return engaged; },
-    /** Advance by real (wall-clock) seconds; returns the current state. */
+    /** Advance by active wall-clock seconds; the controller excludes pauses. */
     step(dt) {
-      const d = Number.isFinite(dt) && dt > 0 ? Math.min(dt, 0.1) : 0;
+      const d = Number.isFinite(dt) && dt > 0 ? dt : 0;
+      // Slow active frames still count in full. Capping their duration makes
+      // quiet/wake periods depend on frame rate and can leave a slow device
+      // dormant well past the intended interaction timing.
+      const sleeping = engaged ? d : Math.min(d, Math.max(0, config.quietSeconds - quiet));
       if (!engaged) quiet += d;
-      const sleeping = engaged || quiet < config.quietSeconds;
-      if (sleeping) level = Math.max(0, level - d / config.fallSeconds);
-      else level = Math.min(1, level + d / config.wakeSeconds);
+      // A single long frame may cross the quiet boundary: only its remaining
+      // time belongs to waking, after any time spent continuing to dim.
+      level = Math.max(0, level - sleeping / config.fallSeconds);
+      level = Math.min(1, level + (d - sleeping) / config.wakeSeconds);
       return this.state;
     },
     get state() {

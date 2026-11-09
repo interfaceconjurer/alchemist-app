@@ -3,7 +3,11 @@ import { createDormancy, DORMANCY } from './dormancy';
 
 const run = (d, seconds, step = 1 / 60) => {
   let s = d.state;
-  for (let t = 0; t < seconds; t += step) s = d.step(step);
+  for (let t = 0; t < seconds;) {
+    const dt = Math.min(step, seconds - t);
+    s = d.step(dt);
+    t += dt;
+  }
   return s;
 };
 
@@ -54,12 +58,48 @@ describe('crystal dormancy', () => {
     }
   });
 
-  it('ignores invalid deltas and bounds unusually long active frames', () => {
+  it('ignores non-finite, negative and zero deltas', () => {
     const d = createDormancy();
     d.engage();
-    d.step(NaN); d.step(-1);
+    for (const dt of [NaN, Infinity, -Infinity, -1, 0]) d.step(dt);
     expect(d.state.awake).toBe(true);
-    d.step(30); // Resumed frames are separately skipped by DormancyController.
-    expect(d.state.vitality).toBeGreaterThan(0.8);
+    d.step(DORMANCY.fallSeconds);
+    d.release();
+    for (const dt of [NaN, Infinity, -Infinity, -1, 0]) d.step(dt);
+    expect(d.step(DORMANCY.quietSeconds).dormant).toBe(true);
+  });
+
+  it('keeps the intended fall and wake duration at four frames per second', () => {
+    const d = createDormancy();
+    d.engage();
+    expect(run(d, 1, 0.25).dormant).toBe(true);
+    expect(d.step(5).dormant).toBe(true); // A held crystal never wakes.
+    d.release();
+    const changing = run(d, 3.5, 0.25);
+    expect(changing.vitality).toBeGreaterThan(0);
+    expect(changing.awake).toBe(false);
+    expect(d.step(0.25).awake).toBe(true); // quiet + wake is 3.6 s.
+  });
+
+  it('divides a long active frame between the quiet period and waking', () => {
+    const d = createDormancy();
+    d.engage();
+    expect(d.step(30).dormant).toBe(true);
+    d.release();
+    const halfAwake = d.step(DORMANCY.quietSeconds + DORMANCY.wakeSeconds / 2);
+    expect(halfAwake.vitality).toBeCloseTo(0.5, 10);
+    expect(halfAwake.light).toBeCloseTo(DORMANCY.dormantLight + (1 - DORMANCY.dormantLight) / 2, 10);
+    expect(d.step(DORMANCY.wakeSeconds / 2).awake).toBe(true);
+  });
+
+  it.each([1 / 120, 1 / 60, 0.1, 0.25, 0.5, 3])('preserves the same easing progress with %s second frames', (step) => {
+    const d = createDormancy();
+    d.engage();
+    run(d, DORMANCY.fallSeconds + 0.1, step);
+    d.release();
+    const halfAwake = run(d, DORMANCY.quietSeconds + DORMANCY.wakeSeconds / 2, step);
+    expect(halfAwake.vitality).toBeCloseTo(0.5, 10);
+    expect(halfAwake.awake).toBe(false);
+    expect(halfAwake.dormant).toBe(false);
   });
 });

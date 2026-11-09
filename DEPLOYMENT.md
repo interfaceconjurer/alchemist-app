@@ -34,6 +34,8 @@ The combined PR #122 head failed the unchanged gate with a 190 ms warm task duri
 
 The procedural backdrop rasterizes and encodes PNGs in a same-origin module worker. Each layer is limited to two million output pixels (six million total); compositor textures still consume GPU memory and bandwidth. Resize, theme, visibility, and unmount cancel obsolete work and release owned resources. Unsupported or failed worker canvas support uses static CSS gradients. Keep the worker script and generated blob images permitted by CSP; successful worker rendering and deliberate fallback have separate browser assertions.
 
+Hosted CI subsequently exposed frame-rate-dependent wake timing. Dormancy now counts full active elapsed time and divides long frames across quiet/wake boundaries; hidden and first-resumed deltas remain excluded. The follow-up passed 177 unit tests and all 29 affected browser cases locally ([verification](client/performance/pr122-ci-followup-verification.json)), plus the unchanged hardware gate with zero estimated missed refreshes and zero warm long tasks ([capture](client/performance/pr122-ci-followup-webgpu.json)). These local results supplement the full hosted matrix. CI retains failed browser traces and screenshots for seven days.
+
 ## Compiled morph geometry
 
 The fixed transition sequence uses lossless Float64 coefficient tables generated ahead of rendering. The binary is fetched once through the existing lazy graphics boundary, decoded into bounded typed tables, compressed by the server, and included in runtime payload limits alongside JavaScript. Scene and shader effects share a pausable simulation clock so hidden time does not skip their animation phases.
