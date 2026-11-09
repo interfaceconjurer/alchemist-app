@@ -39,6 +39,23 @@ async function outstandingResources(page) {
   }));
 }
 
+async function trackSceneSubmissions(page) {
+  await page.addInitScript(() => {
+    window.__sceneSubmissions = 0;
+    window.__ALCHEMY_PROFILE__ = {
+      frame() {}, visibility() {}, sequence() {},
+      render() { window.__sceneSubmissions++; },
+    };
+  });
+}
+
+async function waitForSceneSubmissions(page, previous = 0, timeout = 5000) {
+  // PMREM generation also makes WebGL draw calls. Wait for the actual scene
+  // and bloom pipeline to allocate its targets before comparing resources.
+  await expect.poll(() => page.evaluate(() => window.__sceneSubmissions), { timeout }).toBeGreaterThanOrEqual(previous + 2);
+  await expect(page.locator('[data-symbol-fallback="unavailable"]')).toHaveCount(0);
+}
+
 test('graphics initialization failure preserves navigation and a static symbol', async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'gpu', { value: undefined, configurable: true });
@@ -110,25 +127,32 @@ test('denied storage keeps the page and theme toggle usable', async ({ page }) =
   expect(errors).toEqual([]);
 });
 
-test('theme changes do not grow outstanding GPU resources', async ({ page }) => {
+test('theme changes do not grow outstanding GPU resources', async ({ page }, testInfo) => {
   await trackWebGL(page);
+  await trackSceneSubmissions(page);
   // Isolate graph ownership at the quality floor; resolution adaptation is
   // tested separately and can legitimately replace backend render targets.
   await page.addInitScript(() => Object.defineProperty(window, 'devicePixelRatio', { value: 0.75 }));
   await page.goto('/');
   await expect(page.locator('.symbolContainer')).toHaveAttribute('data-render-state', 'active');
-  await expect.poll(() => page.evaluate(() => window.__gpuResources.draws), { timeout: 30_000 }).toBeGreaterThan(20);
+  await waitForSceneSubmissions(page, 0, 30_000);
   const baseline = await outstandingResources(page);
+  const samples = [{ theme: await page.locator('html').getAttribute('data-theme'), ...baseline }];
   for (let i = 0; i < 6; i++) {
-    const previous = await page.evaluate(() => window.__gpuResources.draws);
+    const previousTheme = await page.locator('html').getAttribute('data-theme');
     await page.getByRole('button', { name: /Switch to .* mode/ }).click();
-    await expect.poll(() => page.evaluate(() => window.__gpuResources.draws)).toBeGreaterThan(previous);
+    const theme = previousTheme === 'dark' ? 'light' : 'dark';
+    await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+    const previous = await page.evaluate(() => window.__sceneSubmissions);
+    await waitForSceneSubmissions(page, previous);
+    const after = await outstandingResources(page);
+    samples.push({ theme, ...after });
+    // Allow small backend bookkeeping changes, but reject the former 13 leaked
+    // textures and framebuffers per theme switch, including intermediate themes.
+    expect(after.textures).toBeLessThanOrEqual(baseline.textures + 2);
+    expect(after.framebuffers).toBeLessThanOrEqual(baseline.framebuffers + 2);
   }
-  const after = await outstandingResources(page);
-  // Allow small backend bookkeeping changes, but reject the former 13 leaked
-  // textures and framebuffers per theme switch. DPR changes may replace targets.
-  expect(after.textures).toBeLessThanOrEqual(baseline.textures + 2);
-  expect(after.framebuffers).toBeLessThanOrEqual(baseline.framebuffers + 2);
+  await testInfo.attach('theme-resources', { body: JSON.stringify(samples), contentType: 'application/json' });
   await expectUsableShell(page);
 });
 
@@ -155,16 +179,17 @@ test('moving the symbol offscreen pauses draws and resumes the same canvas', asy
 
 test('repeated canvas resizes release retired WebGL render targets', async ({ page }) => {
   await trackWebGL(page);
+  await trackSceneSubmissions(page);
   await page.addInitScript(() => Object.defineProperty(window, 'devicePixelRatio', { value: 0.75 }));
   await page.goto('/');
-  await expect.poll(() => page.evaluate(() => window.__gpuResources.draws), { timeout: 30_000 }).toBeGreaterThan(20);
+  await waitForSceneSubmissions(page, 0, 30_000);
   const baseline = await outstandingResources(page);
   for (let i = 0; i < 6; i++) {
-    const previous = await page.evaluate(() => window.__gpuResources.draws);
     const width = i % 2 ? 400 : 500;
     await page.setViewportSize({ width, height: 800 });
     await expect(page.locator('.symbolContainer canvas')).toHaveAttribute('width', String(width * 0.75));
-    await expect.poll(() => page.evaluate(() => window.__gpuResources.draws)).toBeGreaterThan(previous);
+    const previous = await page.evaluate(() => window.__sceneSubmissions);
+    await waitForSceneSubmissions(page, previous);
   }
   const after = await outstandingResources(page);
   expect(after.textures).toBeLessThanOrEqual(baseline.textures + 2);

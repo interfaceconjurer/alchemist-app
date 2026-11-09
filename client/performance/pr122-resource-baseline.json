@@ -1,0 +1,73 @@
+{
+  "recordedAt": "2026-11-09T18:10:24.279092+00:00",
+  "kind": "gpu-resource-test-synchronization",
+  "sourceApplicationCommit": "07bacf0cf6c4563bc6bcce48556be110781934f0",
+  "productionCodeChanged": false,
+  "hostedFailure": {
+    "run": "https://github.com/interfaceconjurer/alchemist-app/actions/runs/42668068828",
+    "passed": 123,
+    "failed": 1,
+    "case": "ios-webkit: theme changes do not grow outstanding GPU resources",
+    "traceBaseline": {
+      "internalDraws": 52,
+      "textures": 1,
+      "framebuffers": 42
+    },
+    "traceFinal": {
+      "internalDraws": 1108,
+      "textures": 17,
+      "framebuffers": 55
+    },
+    "diagnosis": "The aggregate WebGL draw threshold included PMREM environment-generation work, allowing the resource baseline before the main scene and bloom pipeline allocated its targets.",
+    "qualification": "This trace does not independently prove leak-free operation; repeated checks now compare a fully initialized scene and each subsequent theme."
+  },
+  "changes": [
+    "Wait for two completed opt-in scene/bloom submission callbacks before the resource baseline.",
+    "After each confirmed DOM theme change, wait for two further scene submissions, then enforce the original baseline plus two texture and framebuffer bounds.",
+    "Use the same initialized-scene baseline and post-resize submissions in the retired-target check.",
+    "Retain existing 30-second startup and five-second per-change wait deadlines, zero retries, and resource limits."
+  ],
+  "localChecks": {
+    "command": "COMPATIBILITY_TEST_PORT=5215 npm run test:e2e:compatibility -- runtime-resilience.spec.js --grep 'theme changes do not grow|repeated canvas resizes' --repeat-each=3",
+    "passed": 24,
+    "failed": 0,
+    "skipped": 0,
+    "projects": [
+      "chromium-desktop",
+      "webkit-desktop",
+      "android-chromium",
+      "ios-webkit"
+    ],
+    "applicationFilesComparedToPhoneSnapshot": 15,
+    "applicationFileMismatches": 0,
+    "negativeControls": [
+      {
+        "project": "ios-webkit",
+        "retainedActualHandles": {
+          "textures": 3
+        },
+        "baseline": 17,
+        "unchangedMaximum": 19,
+        "received": 20,
+        "expectedExitCode": 1,
+        "actualExitCode": 1,
+        "failedAtFirstThemeChange": true
+      },
+      {
+        "project": "ios-webkit",
+        "retainedActualHandles": {
+          "framebuffers": 3
+        },
+        "baseline": 55,
+        "unchangedMaximum": 57,
+        "received": 58,
+        "expectedExitCode": 1,
+        "actualExitCode": 1,
+        "failedAtFirstThemeChange": true
+      }
+    ]
+  },
+  "limitations": [
+    "Local mobile projects use browser emulation; physical iPhone confirmation of the shorter introduction remains pending."
+  ]
+}
