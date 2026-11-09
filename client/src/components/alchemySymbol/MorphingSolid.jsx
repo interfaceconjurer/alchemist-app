@@ -32,10 +32,10 @@ const restingSolids = SEQUENCE.map(solid => intersectHalfspaces(solid.planes));
 
 const HOLD_MS = 5000; // time resting on each solid
 const MORPH_MS = 2800; // time spent carving one solid into the next
-// Intro, two stages with the same smoothstep ease as the morphs:
-const BASE_MS = 1400; // 1. the square base spreads out of a point, flat
-const RISE_MS = 2000; // 2. the apex lifts out of the base into the full pyramid
-const RISE_OVERLAP_MS = 250; // start lifting just before the base finishes, so it flows
+// Brief two-stage intro with the same smoothstep ease as the morphs:
+const BASE_MS = 450; // 1. the square base spreads out of a point, flat
+const RISE_MS = 1100; // 2. the apex lifts out of the base into the full pyramid
+const RISE_OVERLAP_MS = 150; // start lifting just before the base finishes, so it flows
 const GROW_MS = BASE_MS + RISE_MS - RISE_OVERLAP_MS;
 
 const smoothstep01 = (x) => { const t = Math.min(1, Math.max(0, x)); return t * t * (3 - 2 * t); };

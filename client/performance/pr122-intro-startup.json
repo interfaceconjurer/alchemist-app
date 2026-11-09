@@ -1,0 +1,173 @@
+{
+  "recordedAt": "2026-11-09T17:46:47.033602+00:00",
+  "kind": "intro-startup-verification",
+  "source": {
+    "baseCommit": "4231739319723a86394eefecba8e35e74084fc2b",
+    "state": "First-load intro shortened; shaders, render quality and loading placeholder unchanged",
+    "productionBuildSha256": "dcf98a5bb238f94c1223217d26cd67a69f70774440539747d4c4dc8a4bd4635e"
+  },
+  "phoneBaseline": {
+    "kind": "user-supplied physical iPhone screenshot",
+    "device": "iPhone 18 Pro",
+    "browser": "Safari",
+    "candidate": "42317393",
+    "secureContext": true,
+    "sceneBackend": "webgpu",
+    "backdropRenderer": "worker",
+    "assetsReadyMs": 280,
+    "firstSceneUpdateMs": 870,
+    "firstDrawSubmittedMs": 910,
+    "introCompleteMs": 4050,
+    "precision": "HUD rounded to two decimal seconds; submission and intro callbacks are not first visible pixels."
+  },
+  "introSimulationMs": {
+    "before": {
+      "base": 1400,
+      "rise": 2000,
+      "overlap": 250,
+      "riseBegins": 1150,
+      "total": 3150
+    },
+    "after": {
+      "base": 450,
+      "rise": 1100,
+      "overlap": 150,
+      "riseBegins": 300,
+      "total": 1400
+    }
+  },
+  "localChecks": {
+    "clientUnitPassed": 177,
+    "clientUnitFiles": 24,
+    "focusedBrowserPassed": 16,
+    "focusedBrowserFailed": 0,
+    "focusedBrowserSkipped": 0,
+    "focusedCommand": "COMPATIBILITY_TEST_PORT=5215 npm run test:e2e:compatibility --prefix client -- runtime-resilience.spec.js --grep 'reduced motion|moving the symbol offscreen|shader and geometry clocks|default graphics backend'",
+    "bundleBytes": {
+      "entryGzip": 93495,
+      "runtimeGzip": 578776,
+      "runtimeRaw": 2024892,
+      "stylesheetRaw": 25489
+    }
+  },
+  "desktopVisualComparison": {
+    "environment": "headed WebKit 27.2 on Apple M3 Max; mobile viewport393x852, scale3",
+    "measurements": [
+      {
+        "variant": "before",
+        "targetShaderSeconds": null,
+        "firstSceneMs": 1052,
+        "firstSubmitMs": 1172,
+        "introCompleteMs": 4313,
+        "introFromFirstSceneMs": 3261,
+        "capturedShaderSeconds": 3.199999999999994,
+        "capturedPhase": "hold",
+        "backend": "webgpu",
+        "outlineSeen": false,
+        "errors": []
+      },
+      {
+        "variant": "before",
+        "targetShaderSeconds": 0.65,
+        "firstSceneMs": 1137,
+        "firstSubmitMs": 1201,
+        "introCompleteMs": null,
+        "introFromFirstSceneMs": null,
+        "capturedShaderSeconds": 0.6780000000000004,
+        "capturedPhase": "intro",
+        "backend": "webgpu",
+        "outlineSeen": false,
+        "errors": []
+      },
+      {
+        "variant": "before",
+        "targetShaderSeconds": 1.5,
+        "firstSceneMs": 1116,
+        "firstSubmitMs": 1188,
+        "introCompleteMs": null,
+        "introFromFirstSceneMs": null,
+        "capturedShaderSeconds": 1.5279999999999994,
+        "capturedPhase": "intro",
+        "backend": "webgpu",
+        "outlineSeen": false,
+        "errors": []
+      },
+      {
+        "variant": "before",
+        "targetShaderSeconds": 4,
+        "firstSceneMs": 1141,
+        "firstSubmitMs": 1206,
+        "introCompleteMs": 4344,
+        "introFromFirstSceneMs": 3203,
+        "capturedShaderSeconds": 4.0279999999999925,
+        "capturedPhase": "hold",
+        "backend": "webgpu",
+        "outlineSeen": false,
+        "errors": []
+      },
+      {
+        "variant": "after",
+        "targetShaderSeconds": null,
+        "firstSceneMs": 1158,
+        "firstSubmitMs": 1223,
+        "introCompleteMs": 2612,
+        "introFromFirstSceneMs": 1454,
+        "capturedShaderSeconds": 1.4479999999999993,
+        "capturedPhase": "hold",
+        "backend": "webgpu",
+        "outlineSeen": false,
+        "errors": []
+      },
+      {
+        "variant": "after",
+        "targetShaderSeconds": 0.65,
+        "firstSceneMs": 1023,
+        "firstSubmitMs": 1094,
+        "introCompleteMs": null,
+        "introFromFirstSceneMs": null,
+        "capturedShaderSeconds": 0.6780000000000004,
+        "capturedPhase": "intro",
+        "backend": "webgpu",
+        "outlineSeen": false,
+        "errors": []
+      },
+      {
+        "variant": "after",
+        "targetShaderSeconds": 1.5,
+        "firstSceneMs": 1021,
+        "firstSubmitMs": 1093,
+        "introCompleteMs": 2473,
+        "introFromFirstSceneMs": 1452,
+        "capturedShaderSeconds": 1.5279999999999996,
+        "capturedPhase": "hold",
+        "backend": "webgpu",
+        "outlineSeen": false,
+        "errors": []
+      },
+      {
+        "variant": "after",
+        "targetShaderSeconds": 4,
+        "firstSceneMs": 1018,
+        "firstSubmitMs": 1086,
+        "introCompleteMs": 2457,
+        "introFromFirstSceneMs": 1439,
+        "capturedShaderSeconds": 4.016999999999992,
+        "capturedPhase": "hold",
+        "backend": "webgpu",
+        "outlineSeen": false,
+        "errors": []
+      }
+    ],
+    "inspection": [
+      "At shaderTime0.678s the old version is a small flat plate and the new version is a raised textured crystal.",
+      "At approximately1.528s the new pyramid has completed its intro; the old remains a low slab.",
+      "At approximately4s the completed pyramid silhouette, surface treatment and colour remain consistent. Small timing and bubble-history differences prevent pixel-equivalence claims."
+    ]
+  },
+  "limitations": [
+    "This change shortens presentation timing; it does not claim faster asset loading or renderer initialization.",
+    "First scene update/render submission do not establish pixel presentation. Visual snapshots are separate from timing-only runs.",
+    "Desktop GPU/compiler caches are not controlled between comparison runs. Phone measurements for the changed intro remain pending.",
+    "The existing blank placeholder stays in use until the real scene loads; reduced-motion and actual failure retain their intentional static fallback."
+  ]
+}
