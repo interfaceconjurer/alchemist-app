@@ -4,7 +4,7 @@
   "description": "Client and server of alchemist-app",
   "scripts": {
     "start": "node server.js",
-    "heroku-postbuild": "npm ci --prefix client --include=dev && npm test --prefix client -- --run && npm run build --prefix client && npm test && npm run check:bundle --prefix client",
+    "heroku-postbuild": "npm ci --prefix client --include=dev && NODE_ENV=test npm test --prefix client -- --run && npm run build --prefix client && npm test && npm run check:bundle --prefix client",
     "test": "node --test test/*.test.js"
   },
   "repository": {
