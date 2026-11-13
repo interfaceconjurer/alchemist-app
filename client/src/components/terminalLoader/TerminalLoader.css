@@ -3,9 +3,10 @@
   inset: 0;
   display: flex;
   flex-direction: column;
-  z-index: 2;
+  /* Covers the whole stage pane, tab bar included, until the content is revealed. */
+  z-index: 30;
   opacity: 1;
-  transition: opacity 300ms ease;
+  transition: opacity 200ms ease; /* matches TIMING.FADE_DURATION */
   pointer-events: none;
 }
 
@@ -146,4 +147,24 @@
 
 [data-theme="dark"] .terminal-body .term-red {
   color: #f87171;
+}
+
+/* A block cursor that blinks --blinks times (on, then off) after the last line. */
+.terminal-cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.15em;
+  vertical-align: text-bottom;
+  background-color: #1f2937;
+  animation: terminal-cursor-blink var(--blink, 520ms) step-end var(--blinks, 2) forwards;
+}
+
+[data-theme="dark"] .terminal-cursor {
+  background-color: #e0e0e0;
+}
+
+@keyframes terminal-cursor-blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 0; }
 }

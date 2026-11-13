@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { buildTerminalOutput, TIMING } from "./terminalTemplate";
 import "./TerminalLoader.css";
 
-function TerminalLoader({ item, onFadeStart, onComplete }) {
+/** `idle`: show the empty terminal (command line only) without streaming yet. */
+function TerminalLoader({ item, onFadeStart, onComplete, idle = false }) {
   const [visibleLines, setVisibleLines] = useState(0);
   const [phase, setPhase] = useState("streaming");
   const output = useRef(null);
@@ -16,12 +17,13 @@ function TerminalLoader({ item, onFadeStart, onComplete }) {
   const { command, outputLines } = output.current;
   const totalLines = outputLines.length;
 
-  const stableOnFadeStart = useCallback(onFadeStart, []);
-  const stableOnComplete = useCallback(onComplete, []);
+  // Callbacks are optional while idle.
+  const stableOnFadeStart = useCallback(() => onFadeStart?.(), []);
+  const stableOnComplete = useCallback(() => onComplete?.(), []);
 
   // Schedule line reveals with per-line delays
   useEffect(() => {
-    if (phase !== "streaming") return;
+    if (idle || phase !== "streaming") return;
 
     const timers = [];
     let elapsed = 0;
@@ -40,7 +42,7 @@ function TerminalLoader({ item, onFadeStart, onComplete }) {
     }
 
     return () => timers.forEach(clearTimeout);
-  }, [phase, totalLines, outputLines]);
+  }, [idle, phase, totalLines, outputLines]);
 
   // Auto-scroll to bottom when new lines appear
   useEffect(() => {
@@ -74,7 +76,7 @@ function TerminalLoader({ item, onFadeStart, onComplete }) {
   const hasOutput = visibleLines > 0;
 
   return (
-    <div className={containerClass}>
+    <div className={containerClass} aria-hidden="true">
       <div className="terminal-window">
         <div className="terminal-command">
           <svg
@@ -109,6 +111,14 @@ function TerminalLoader({ item, onFadeStart, onComplete }) {
                   ))}
                 </div>
               ))}
+              {phase !== "streaming" && (
+                <div className="terminal-line">
+                  <span
+                    className="terminal-cursor"
+                    style={{ "--blink": `${TIMING.CURSOR_BLINK * 2}ms`, "--blinks": TIMING.CURSOR_BLINKS }}
+                  />
+                </div>
+              )}
             </div>
           </>
         )}
@@ -118,3 +128,11 @@ function TerminalLoader({ item, onFadeStart, onComplete }) {
 }
 
 export default TerminalLoader;
+
+const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+
+/** A tab plays the loader the first time it opens (not on restore, not for reduced motion). */
+export function tabIsLoading(tabId, animatedTabs) {
+  return !!tabId && !!animatedTabs && !animatedTabs.has(tabId) && !prefersReducedMotion();
+}
+

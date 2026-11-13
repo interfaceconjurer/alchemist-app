@@ -1,6 +1,7 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 const DURATION = 560;
+const PANEL_FILL_FADE = 600; // the panel's background eases in once the stage has arrived
 const EASING = 'cubic-bezier(0.32, 0.72, 0, 1)';
 
 /**
@@ -12,9 +13,14 @@ const EASING = 'cubic-bezier(0.32, 0.72, 0, 1)';
  *
  * Skipped on mobile (the stage is an overlay there), on the initial restore of
  * persisted tabs, and replaced by a short fade when the user prefers reduced motion.
+ *
+ * Returns `settled`: false while the stage is sliding into place, so content that
+ * animates inside it (the terminal loader) can wait for it to arrive.
  */
 export function useStageReveal({ panelRef, stageRef, stageVisible, panelWidth, enabled, ready }) {
   const previous = useRef({ stageVisible, ready });
+  const [settled, setSettled] = useState(true);
+  const run = useRef(0);
 
   useLayoutEffect(() => {
     const before = previous.current;
@@ -27,6 +33,7 @@ export function useStageReveal({ panelRef, stageRef, stageVisible, panelWidth, e
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     if (reduced) {
       if (stageVisible) stage?.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 200, easing: 'ease-out' });
+      setSettled(true);
       return;
     }
 
@@ -46,14 +53,35 @@ export function useStageReveal({ panelRef, stageRef, stageVisible, panelWidth, e
     // While content travels from the middle of the row it starts outside the
     // narrow panel; let it show instead of being clipped by the panel's scroller.
     if (stageVisible) {
-      // The panel's own background arrives with the content instead of popping in.
-      panel.animate([{ backgroundColor: 'transparent', boxShadow: 'none' }, {}], { duration: DURATION, easing: EASING });
+      // The panel's fill takes its final width at once while the stage is still
+      // sliding in from the right, which would leave a dark band between the two.
+      // Keep the panel clear for the whole slide; fade its fill in once the stage
+      // has arrived (below).
+      const clear = { backgroundColor: 'transparent', boxShadow: 'none' };
+      const holdFill = panel.animate([clear, clear], { duration: DURATION, fill: 'forwards' });
       panel.classList.add('left-panel--revealing');
       Promise.all(animations.map((a) => a.finished.catch(() => {}))).then(() => panel.classList.remove('left-panel--revealing'));
-      stage?.animate?.(
-        [{ transform: `translateX(${full - narrow}px)`, opacity: 0 }, { transform: 'none', opacity: 1 }],
+      // A pure slide, no fade: the stage and everything in it arrive as one piece.
+      const slide = stage?.animate?.(
+        [{ transform: `translateX(${full - narrow}px)` }, { transform: 'none' }],
         { duration: DURATION, easing: EASING },
       );
+      // Settled once the stage has arrived (or the slide was cancelled by closing it again).
+      const id = ++run.current;
+      setSettled(false);
+      const done = () => {
+        if (run.current !== id) { holdFill.cancel(); return; }
+        setSettled(true);
+        holdFill.cancel();
+        panel.animate([clear, {}], { duration: PANEL_FILL_FADE, easing: 'ease-in-out' });
+      };
+      if (slide?.finished) slide.finished.then(done, done);
+      else done();
+    } else {
+      run.current++;
+      setSettled(true);
     }
   }, [stageVisible, panelWidth, enabled, ready, panelRef, stageRef]);
+
+  return { settled };
 }

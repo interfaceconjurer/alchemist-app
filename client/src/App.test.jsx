@@ -77,7 +77,7 @@ it('opens the stage while a work item is dragged and closes it again if the drag
   expect(document.querySelectorAll('.stage-tab')).toHaveLength(0);
 });
 
-it('does not swallow the next click after a work item is dropped on the stage', async () => {
+it('does not swallow the next click after a work item is dropped on the stage', { timeout: 10000 }, async () => {
   vi.stubGlobal('localStorage', { getItem: () => null, setItem: vi.fn() });
   await act(async () => { render(<App />); });
   // Target the list items themselves (an earlier test's fading drag ghost is a clone).
@@ -95,8 +95,10 @@ it('does not swallow the next click after a work item is dropped on the stage', 
   await act(async () => { fireEvent.mouseMove(document, { clientX: 1300, clientY: 400 }); });
   await act(async () => { fireEvent.mouseUp(document, { clientX: 1300, clientY: 400 }); });
   expect(document.querySelectorAll('.stage-tab')).toHaveLength(2);
-  // Let the drop's task end, then close the first tab with one click.
-  await act(async () => { await new Promise((r) => setTimeout(r, 10)); });
+  // Let the drop's task end and the new tab's terminal loader finish (the tab bar
+  // is hidden while it plays; each phase starts after a render, so wait in steps),
+  // then close the first tab with one click.
+  for (let i = 0; i < 30; i++) await act(async () => { await new Promise((r) => setTimeout(r, 100)); });
   await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Close Fine Tunes' })); });
   expect([...document.querySelectorAll('.stage-tab-title')].map((t) => t.textContent)).toEqual(['Portfolio review with Apollo']);
 });

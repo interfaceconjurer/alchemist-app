@@ -1,7 +1,14 @@
+// The stream plays at SPEED x its authored per-line delays (about 1.8 s -> 0.5 s),
+// so the whole loader, including the pause and fade, takes under a second.
 export const TIMING = {
-  READY_PAUSE: 500,
-  FADE_DURATION: 250,
+  SPEED: 0.28,
+  // After the last line, a cursor blinks twice (two on/off cycles) before the fade.
+  CURSOR_BLINK: 260, // ms per on or off half-cycle
+  CURSOR_BLINKS: 2,
+  FADE_DURATION: 200,
 };
+// The hold after the stream: the cursor's blinks.
+TIMING.READY_PAUSE = TIMING.CURSOR_BLINK * 2 * TIMING.CURSOR_BLINKS;
 
 function hashCode(str) {
   let hash = 0;
@@ -68,12 +75,6 @@ export function buildTerminalOutput(item) {
       ],
     },
     {
-      delay: 18,
-      spans: [
-        { text: "    @react-three/drei", color: "magenta" },
-      ],
-    },
-    {
       delay: 15,
       spans: [
         { text: "  (", color: "dim" },
@@ -102,7 +103,7 @@ export function buildTerminalOutput(item) {
       delay: 40,
       spans: [
         { text: "  VITE ", color: "green" },
-        { text: "v6.3.5", color: "dim" },
+        { text: "v8.3.6", color: "dim" },
         { text: "  ready in ", color: "dim" },
         { text: `${readyMs} ms`, color: "green" },
       ],
@@ -222,5 +223,8 @@ export function buildTerminalOutput(item) {
     },
   ];
 
-  return { command, outputLines };
+  return {
+    command,
+    outputLines: outputLines.map((line) => ({ ...line, delay: Math.round(line.delay * TIMING.SPEED) })),
+  };
 }

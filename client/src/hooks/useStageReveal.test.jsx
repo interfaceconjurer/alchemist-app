@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { act } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
 import { useStageReveal } from './useStageReveal';
@@ -60,4 +61,27 @@ it('accepts the panel width as a fraction of the row', () => {
   const { rerender } = render(<Fraction stageVisible={false} />);
   rerender(<Fraction stageVisible />);
   expect(calls.find((c) => c.el === 'App-header').keyframes[0].transform).toBe('translateX(432px)'); // (1440 - 576) / 2
+});
+
+it('reports the stage unsettled until its slide-in finishes', async () => {
+  let finish;
+  Element.prototype.animate = vi.fn(function () {
+    const finished = this.className === 'stage' ? new Promise((r) => { finish = r; }) : Promise.resolve();
+    return { finished, cancel() {} };
+  });
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 1440, left: 0, top: 0, height: 900 });
+  const seen = [];
+  function Probe({ stageVisible }) {
+    const panelRef = useRef(null);
+    const stageRef = useRef(null);
+    const { settled } = useStageReveal({ panelRef, stageRef, stageVisible, panelWidth: 576, enabled: true, ready: true });
+    seen.push(settled);
+    return <div><section ref={panelRef}><header className="App-header" /></section><section className="stage" ref={stageRef} /></div>;
+  }
+  const { rerender } = render(<Probe stageVisible={false} />);
+  expect(seen.at(-1)).toBe(true);
+  rerender(<Probe stageVisible />);
+  expect(seen.at(-1)).toBe(false);
+  await act(async () => { finish(); await Promise.resolve(); });
+  expect(seen.at(-1)).toBe(true);
 });

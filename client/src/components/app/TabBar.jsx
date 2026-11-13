@@ -2,6 +2,9 @@ import React from 'react';
 import { getSectionIconForItem } from '../workList/workList';
 
 const TabBar = ({
+  // While the active tab's loader plays, the bar is hidden; it fades in with the content.
+  loading = false,
+  revealing = false,
   tabs,
   paneId,
   activeTabId,
@@ -17,7 +20,11 @@ const TabBar = ({
   onSelectTab
 }) => {
   return (
-    <div className="stage-tabs" role="tablist">
+    <div
+      className={`stage-tabs${loading ? ' stage-tabs--loading' : ''}${revealing ? ' stage-tabs--revealing' : ''}`}
+      role="tablist"
+      aria-hidden={loading || undefined}
+    >
       <div className="stage-tabs-list" ref={paneId === null ? tabListRef : null}>
         {tabs.map((tab, index) => (
           <div

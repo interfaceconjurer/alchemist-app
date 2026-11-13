@@ -12,7 +12,8 @@ import { resolveWorkItemsByIds } from "./resolveWorkItems";
 import StatusBar from "./components/statusBar/StatusBar";
 import CommandPalette from "./components/commandPalette/CommandPalette";
 import TabBar from "./components/app/TabBar";
-import TabContent from "./components/app/TabContent";
+import { tabIsLoading } from "./components/terminalLoader/TerminalLoader";
+import TabContent, { TabLoader } from "./components/app/TabContent";
 import DropZones from "./components/app/DropZones";
 import { LEFT_PANEL_MIN_WIDTH, LEFT_PANEL_DEFAULT_WIDTH, getLeftPanelMaxWidth, getInitialState, normalizeSplitView } from "./utils/stateHelpers";
 import { workspaceReducer } from "./workspaceReducer";
@@ -119,8 +120,10 @@ function App() {
     if (state.splitView.enabled && paneId) {
       previewTabId = paneId === 'left' ? state.splitView.leftPanePreviewTabId : state.splitView.rightPanePreviewTabId;
     }
+    const loading = tabIsLoading(activeTabId, state.animatedTabs);
     return (
       <TabBar
+        loading={loading && !state.fadingTabs.has(activeTabId)} revealing={loading && state.fadingTabs.has(activeTabId)}
         tabs={tabs} paneId={paneId} activeTabId={activeTabId} previewTabId={previewTabId}
         isInactivePane={isInactivePane} dropTargetIndex={state.dropTargetIndex} draggedTabId={state.draggedTabId} tabListRef={tabListRef}
         onTabClick={(tabId, clickPaneId) => dispatch({ type: 'PANE_TAB_CLICK', tabId, paneId: clickPaneId })}
@@ -138,9 +141,16 @@ function App() {
       activeTabId = paneId === 'left' ? state.splitView.leftActiveTabId : state.splitView.rightActiveTabId;
     }
     return (
-      <TabContent
-        tabs={tabs} activeTabId={activeTabId}
-      />
+      <>
+        <TabContent tabs={tabs} activeTabId={activeTabId} animatedTabs={state.animatedTabs} fadingTabs={state.fadingTabs} />
+        <TabLoader
+          tab={tabs.find((t) => t.id === activeTabId)}
+          animatedTabs={state.animatedTabs}
+          waiting={!stageSettled}
+          onStartTabFade={tabActions.startTabFade}
+          onMarkAnimationComplete={tabActions.markAnimationComplete}
+        />
+      </>
     );
   };
 
@@ -148,7 +158,7 @@ function App() {
   // and while a work item is being dragged so there is somewhere to drop it.
   const draggingWorkItem = state.dragThreshold.isDragging && state.dragThreshold.dragSource === 'sidebar';
   const stageVisible = SHOW_STAGE || !!state.activeTabId || draggingWorkItem;
-  useStageReveal({ panelRef: leftPanelRef, stageRef: stageSectionRef, stageVisible, panelWidth: SHOW_STAGE ? state.leftPanelWidth : panelWidthFor, enabled: !isMobile && !SHOW_STAGE, ready: state.stateLoaded });
+  const { settled: stageSettled } = useStageReveal({ panelRef: leftPanelRef, stageRef: stageSectionRef, stageVisible, panelWidth: SHOW_STAGE ? state.leftPanelWidth : panelWidthFor, enabled: !isMobile && !SHOW_STAGE, ready: state.stateLoaded });
 
   const leftPaneTabs = useMemo(() => state.splitView.enabled ? state.openTabs.filter(t => state.splitView.leftPaneTabIds.includes(t.id)) : [], [state.openTabs, state.splitView.enabled, state.splitView.leftPaneTabIds]);
   const rightPaneTabs = useMemo(() => state.splitView.enabled ? state.openTabs.filter(t => state.splitView.rightPaneTabIds.includes(t.id)) : [], [state.openTabs, state.splitView.enabled, state.splitView.rightPaneTabIds]);
