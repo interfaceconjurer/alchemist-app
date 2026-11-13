@@ -5,13 +5,13 @@ import { useDormancyInteraction } from './useDormancyInteraction';
 
 function Surface({ dormancy }) {
   const { pressed, handlers } = useDormancyInteraction(dormancy);
-  return <div role="button" tabIndex={0} aria-pressed={pressed} {...handlers} />;
+  return <div role="img" aria-label="Crystal" data-pressed={pressed} {...handlers} />;
 }
 
 const setup = () => {
   const dormancy = createDormancy();
   const { getByRole } = render(<Surface dormancy={dormancy} />);
-  const surface = getByRole('button');
+  const surface = getByRole('img');
   const captures = new Set();
   surface.setPointerCapture = vi.fn((id) => captures.add(id));
   surface.hasPointerCapture = vi.fn((id) => captures.has(id));
@@ -33,12 +33,12 @@ it('keeps a two-pointer hold dormant after one pointer is released', () => {
   pointer('pointerdown', 2);
   run(dormancy, 2);
   pointer('pointerup', 1);
-  expect(surface).toHaveAttribute('aria-pressed', 'true');
+  expect(surface).toHaveAttribute('data-pressed', 'true');
   expect(dormancy.engaged).toBe(true);
   run(dormancy, 5);
   expect(dormancy.state.dormant).toBe(true);
   pointer('pointerup', 2);
-  expect(surface).toHaveAttribute('aria-pressed', 'false');
+  expect(surface).toHaveAttribute('data-pressed', 'false');
   expect(dormancy.engaged).toBe(false);
   run(dormancy, 5);
   expect(dormancy.state.awake).toBe(true);
@@ -51,42 +51,19 @@ it.each(['pointercancel', 'lostpointercapture'])('releases only the owning point
   pointer(event, 99); // An unrelated/duplicate end cannot cancel another hold.
   pointer(event, 1);
   expect(dormancy.engaged).toBe(true);
-  expect(surface).toHaveAttribute('aria-pressed', 'true');
+  expect(surface).toHaveAttribute('data-pressed', 'true');
   pointer(event, 2);
   expect(dormancy.engaged).toBe(false);
-  expect(surface).toHaveAttribute('aria-pressed', 'false');
+  expect(surface).toHaveAttribute('data-pressed', 'false');
 });
 
-it('clears every pointer and keyboard hold on blur and accepts a fresh interaction', () => {
-  const { dormancy, surface, pointer, captures } = setup();
-  pointer('pointerdown', 1);
-  pointer('pointerdown', 2);
+it('is not focusable and ignores keyboard input', () => {
+  const { dormancy, surface } = setup();
+  expect(surface).not.toHaveAttribute('tabindex');
   fireEvent.keyDown(surface, { key: 'Enter' });
-  fireEvent.blur(surface);
+  fireEvent.keyDown(surface, { key: ' ' });
   expect(dormancy.engaged).toBe(false);
-  expect(surface).toHaveAttribute('aria-pressed', 'false');
-  expect(captures.size).toBe(0);
-  pointer('lostpointercapture', 1);
-  pointer('pointerup', 2);
-  pointer('pointerdown', 3);
-  expect(dormancy.engaged).toBe(true);
-  pointer('pointercancel', 3);
-  expect(dormancy.engaged).toBe(false);
-});
-
-it('ignores keyboard repeats and keeps keyboard and pointer ownership independent', () => {
-  const { dormancy, surface, pointer } = setup();
-  fireEvent.keyDown(surface, { key: ' ', repeat: false });
-  fireEvent.keyDown(surface, { key: ' ', repeat: true });
-  expect(dormancy.engaged).toBe(true);
-  pointer('pointerdown', 1);
-  pointer('pointerup', 1);
-  expect(dormancy.engaged).toBe(true);
-  pointer('pointerdown', 2);
-  fireEvent.keyDown(surface, { key: ' ', repeat: false });
-  expect(dormancy.engaged).toBe(true);
-  pointer('pointerup', 2);
-  expect(dormancy.engaged).toBe(false);
+  expect(surface).toHaveAttribute('data-pressed', 'false');
 });
 
 it.each(['window blur', 'document hidden'])('clears all holds and captures after %s without restarting an existing quiet period', (reason) => {
@@ -100,18 +77,16 @@ it.each(['window blur', 'document hidden'])('clears all holds and captures after
   try {
     pointer('pointerdown', 1);
     pointer('pointerdown', 2);
-    fireEvent.keyDown(surface, { key: 'Enter' });
     run(dormancy, 2);
     losePage();
     expect(dormancy.engaged).toBe(false);
-    expect(surface).toHaveAttribute('aria-pressed', 'false');
+    expect(surface).toHaveAttribute('data-pressed', 'false');
     expect(captures.size).toBe(0);
     expect(release).toHaveBeenCalledOnce();
 
     // Repeated lifecycle/element events cannot restart the 1.2s quiet period.
     run(dormancy, 0.9);
     losePage();
-    fireEvent.blur(surface);
     pointer('lostpointercapture', 1);
     pointer('pointerup', 2);
     expect(release).toHaveBeenCalledOnce();
@@ -129,8 +104,11 @@ it('keeps holds when the document remains visible and removes lifecycle listener
   const dormancy = createDormancy();
   const release = vi.spyOn(dormancy, 'release');
   const { getByRole, unmount } = render(<Surface dormancy={dormancy} />);
-  const surface = getByRole('button');
-  fireEvent.keyDown(surface, { key: 'Enter' });
+  const surface = getByRole('img');
+  surface.setPointerCapture = vi.fn();
+  const down = new Event('pointerdown', { bubbles: true });
+  Object.defineProperty(down, 'pointerId', { value: 1 });
+  fireEvent(surface, down);
   const visibility = vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');
   try {
     fireEvent(document, new Event('visibilitychange'));

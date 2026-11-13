@@ -38,6 +38,16 @@ const RISE_MS = 1100; // 2. the apex lifts out of the base into the full pyramid
 const RISE_OVERLAP_MS = 150; // start lifting just before the base finishes, so it flows
 const GROW_MS = BASE_MS + RISE_MS - RISE_OVERLAP_MS;
 
+// Calm mode (reduced motion): nothing moves. The pyramid fades in at rest, the
+// backlights keep breathing, and every so often the solid fades out and back in
+// as the next one.
+// Turned about 15° to the viewer's left of edge-on, so every solid shows its depth
+// (an edge pointing straight at the camera reads flat). The no-graphics outline
+// in GraphicsBoundary is drawn at the same angle.
+export const REST_ROTATION = Math.PI / 4 - 0.26;
+const CALM_HOLD_MS = 12000;
+const CALM_FADE_MS = 1200; // each way: fade out, swap the solid, fade in
+
 const smoothstep01 = (x) => { const t = Math.min(1, Math.max(0, x)); return t * t * (3 - 2 * t); };
 
 // Preallocated GPU buffers (WebGPU can't grow buffers in place).
@@ -64,7 +74,7 @@ const THEME = {
   light: { light: 1, halo: 0.34, bubbles: 0.7, bloom: 0.2, darkBubbles: 0.4, darkBubbleOpacity: 1.3 },
 };
 
-function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dormancy, timeScale }) {
+function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dormancy, timeScale, calm = false }) {
   const previousTime = useRef(animationTime.value);
   const look = isDark ? THEME.dark : THEME.light;
   const gl = useThree((s) => s.gl);
@@ -77,7 +87,13 @@ function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dorman
   const edgesRef = useRef();
   const jointsRef = useRef();
   const polyRef = useRef(null);
-  const clock = useRef({ index: 0, elapsed: 0, lastT: -1, cycle: 0 });
+  const clock = useRef({ index: 0, elapsed: 0, lastT: -1, cycle: 0, swapped: false, opening: false });
+  const fade = useRef(1);
+  const setFade = useCallback((value) => {
+    if (value === fade.current) return;
+    fade.current = value;
+    gl.domElement.style.opacity = value === 1 ? '' : String(value);
+  }, [gl]);
   const profileSimulationMs = useRef(0);
 
   const environment = useMemo(() => createStudioEnvironment(gl), [gl]);
@@ -198,9 +214,18 @@ function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dorman
   useEffect(() => { profileObserver?.sequence(SEQUENCE.map(solid => solid.name)); }, []);
 
   // First frame: the pyramid at (almost) zero size; the intro grows it.
+  // Calm mode starts with the full pyramid at rest, faded out, and fades it in.
   useEffect(() => {
-    writePoly(pyramidGrow.at(0, 0));
-  }, [writePoly, pyramidGrow]);
+    if (!calm) { writePoly(pyramidGrow.at(0, 0)); return; }
+    growElapsed.current = GROW_MS;
+    clock.current.elapsed = CALM_HOLD_MS + CALM_FADE_MS;
+    clock.current.swapped = true;
+    clock.current.opening = true;
+    writePoly(restingSolids[0]);
+    haloIntro.value = 1;
+    setFade(0);
+    if (spinRef.current) spinRef.current.rotation.y = REST_ROTATION;
+  }, [writePoly, pyramidGrow, calm, haloIntro, setFade]);
 
   useFrame((state, frameDelta) => {
     const delta = animationDelta(animationTime.value - previousTime.current);
@@ -212,7 +237,7 @@ function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dorman
     let transitionComplete = false;
     if (profileObserver) profileSimulationMs.current += delta * 1000;
     try {
-    if (spinRef.current) spinRef.current.rotation.y += delta * 0.5;
+    if (!calm && spinRef.current) spinRef.current.rotation.y += delta * 0.5;
 
     // Intro: base spreads out flat, then the apex lifts out of it (see BASE_MS/RISE_MS).
     // The hold timer starts afterwards.
@@ -227,6 +252,28 @@ function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dorman
     }
 
     const c = clock.current;
+    if (calm) {
+      c.elapsed += delta * 1000;
+      if (c.elapsed < CALM_HOLD_MS) { phase = 'hold'; return; }
+      const f = c.elapsed - CALM_HOLD_MS;
+      phase = 'fade';
+      progress = Math.min(1, f / (2 * CALM_FADE_MS));
+      if (f < CALM_FADE_MS) { setFade(1 - smoothstep01(f / CALM_FADE_MS)); return; }
+      if (!c.swapped) {
+        c.swapped = true;
+        c.index = (c.index + 1) % SEQUENCE.length;
+        if (c.index === 0) c.cycle++;
+        writePoly(restingSolids[c.index]);
+      }
+      if (f < 2 * CALM_FADE_MS) { setFade(smoothstep01((f - CALM_FADE_MS) / CALM_FADE_MS)); return; }
+      setFade(1);
+      // The opening fade-in isn't a transition between solids.
+      transitionComplete = !c.opening;
+      c.opening = false;
+      c.elapsed = 0;
+      c.swapped = false;
+      return;
+    }
     c.elapsed += delta * 1000;
     if (c.elapsed < HOLD_MS) return;
 
@@ -260,6 +307,7 @@ function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dorman
         dpr: state.viewport.dpr, shaderTime: animationTime.value,
         vitality: timeScale.current, light: uVitality.value,
         dormancy: dormancyPhase(dormancy.state), engaged: dormancy.engaged,
+        mode: calm ? 'calm' : 'full', rotation: spinRef.current?.rotation.y ?? 0, fade: fade.current,
       });
     }
   });
@@ -291,6 +339,7 @@ function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dorman
         <mesh ref={meshRef} geometry={geometry} material={material} frustumCulled={false} renderOrder={1} />
         <instancedMesh ref={edgesRef} args={[edgeGeometry, filament, MAX_EDGES]} frustumCulled={false} />
         <instancedMesh ref={jointsRef} args={[jointGeometry, filament, MAX_JOINTS]} frustumCulled={false} />
+        {/* Calm mode: bubbles twinkle in place instead of rising. */}
         <FloatingBubbles
           animationTime={animationTime}
           color="#ffffff"
@@ -299,14 +348,19 @@ function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dorman
           darkOpacityScale={look.darkBubbleOpacity}
           spawnPoint={spawnPoint}
           visibility={bubbleVisibility}
+          drift={!calm}
         />
       </group>
     </group>
   );
 }
 
-/** One persistent canvas; the solid carves itself into the next instead of cross-fading. */
-export default function MorphingSolid({ active = true }) {
+/**
+ * One persistent canvas; the solid carves itself into the next instead of cross-fading.
+ * `calm` (reduced motion): fade in at rest, then only the light changes, with an
+ * occasional fade to the next solid.
+ */
+export default function MorphingSolid({ active = true, calm = false }) {
   const { isDark } = useThemeColor();
   const { dpr, lowerDpr } = useRenderDpr();
   const animationTime = useMemo(() => uniform(0), []);
@@ -328,10 +382,10 @@ export default function MorphingSolid({ active = true }) {
     <div
       className="crystal-surface"
       data-dormancy={dormantState}
-      role="button"
-      tabIndex={0}
-      aria-pressed={pressed}
-      aria-label={dormantState === 'dormant' || pressed ? 'Crystal symbol, dormant. It wakes when left alone.' : 'Crystal symbol. Press to still it.'}
+      // Decorative: not in the tab order. Pressing it with a pointer stills it.
+      role="img"
+      aria-label="Crystal symbol"
+      data-pressed={pressed}
       style={{ width: '100%', height: '100%', touchAction: 'pan-y' }}
       {...handlers}
     >
@@ -346,7 +400,7 @@ export default function MorphingSolid({ active = true }) {
           onState={setDormantState}
         />
         <RenderPolicyController active={active} lowerDpr={lowerDpr} animationTime={animationTime} timeScale={timeScale} />
-        <MorphShape isDark={isDark} animationTime={animationTime} uVitality={uVitality} bubbleVisibility={bubbleVisibility} dormancy={dormancy} timeScale={timeScale} />
+        <MorphShape calm={calm} isDark={isDark} animationTime={animationTime} uVitality={uVitality} bubbleVisibility={bubbleVisibility} dormancy={dormancy} timeScale={timeScale} />
         <Bloom strength={bloom} gain={bloomGain} />
       </Canvas>
     </div>

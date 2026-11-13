@@ -5,7 +5,7 @@ import { useSymbolVisibility } from './useSymbolVisibility';
 function Probe() {
   const ref = useRef();
   const policy = useSymbolVisibility(ref);
-  return <div ref={ref} data-testid="policy" data-active={policy.active} data-reduced={policy.reducedMotion} data-started={policy.started} />;
+  return <div ref={ref} data-testid="policy" data-active={policy.active} data-visible={policy.visible} data-reduced={policy.reducedMotion} data-started={policy.started} />;
 }
 
 it('waits for visibility, then pauses without discarding the mounted scene', () => {
@@ -39,6 +39,8 @@ it('observes live reduced-motion preferences and cleans up their listener', () =
     const { unmount } = render(<Probe />);
     expect(screen.getByTestId('policy')).toHaveAttribute('data-reduced', 'true');
     expect(screen.getByTestId('policy')).toHaveAttribute('data-active', 'false');
+    // Still visible: reduced motion keeps rendering its calm crystal.
+    expect(screen.getByTestId('policy')).toHaveAttribute('data-visible', 'true');
     act(() => { query.matches = false; change(); });
     expect(screen.getByTestId('policy')).toHaveAttribute('data-active', 'true');
     unmount();
