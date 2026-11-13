@@ -1,4 +1,5 @@
 import React from 'react';
+import { getSectionIconForItem } from '../workList/workList';
 
 const TabBar = ({
   tabs,
@@ -45,7 +46,7 @@ const TabBar = ({
             onDoubleClick={() => onTabDoubleClick(tab.id)}
             onMouseDown={(e) => onTabMouseDown(e, tab.id)}
           >
-            <img src="/favicon.ico" alt="" className="stage-tab-icon" width={16} height={16} />
+            <span className="stage-tab-icon" aria-hidden="true">{getSectionIconForItem(tab.id)}</span>
             <span className="stage-tab-title">{tab.title}</span>
             <button
               type="button"

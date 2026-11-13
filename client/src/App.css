@@ -82,6 +82,7 @@ body {
 
 .left-panel {
   position: relative;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -141,6 +142,27 @@ body {
 
 .main--stage-hidden .stage {
   display: none;
+}
+
+@media (min-width: 900px) {
+  /* The crystal canvas keeps the full viewport width whether or not the stage is
+     open, centred on the panel and clipped by it. Resizing a WebGPU canvas clears
+     it, which would blank the crystal for a few frames each time the stage toggles. */
+  .left-panel {
+    overflow-x: clip;
+  }
+
+  .main .left-panel .symbolContainer {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+  }
+
+  /* While the panel's content slides over from the middle of the row (see
+     useStageReveal), don't clip it to the narrow panel. */
+  .left-panel.left-panel--revealing {
+    overflow: visible;
+  }
 }
 
 .stage {
@@ -229,7 +251,11 @@ body {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-  object-fit: contain;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
   filter: grayscale(1);
   opacity: 0.75;
   transition:
@@ -316,6 +342,37 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--heading-color);
 }
 
+.stage-content-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-color);
+  opacity: 0.8;
+  margin: 0 0 0.5rem 0;
+}
+
+.stage-content-meta > * + *::before {
+  content: "·";
+  margin-right: 0.5rem;
+}
+
+.stage-back {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  align-self: flex-start;
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  border: none;
+  background: none;
+  color: var(--text-color);
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
 .stage-content-description {
   font-size: 0.9rem;
   color: var(--text-color);
@@ -373,57 +430,11 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--stage-empty-icon-color);
 }
 
+/* The empty stage shows only the beaker: no frame or text. */
 .stage-empty-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
-  padding: 2.5rem 3.5rem;
-  border: 1px dashed var(--stage-empty-content-border-color);
-  border-radius: 12px;
-  background-color: var(--stage-empty-content-bg);
-}
-
-.stage-empty-title {
-  font-size: 1.125rem;
-  font-family: var(--font-mono);
-  font-weight: 400;
-  color: var(--stage-empty-text-color);
-  margin: 0;
-}
-
-.stage-empty-hints {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.stage-empty-hint {
-  font-family: var(--font-mono);
-  font-weight: 400;
-  color: var(--stage-empty-text-color);
-  margin: 0;
-}
-
-.stage-empty-hint:first-child {
-  font-size: 0.9375rem;
-}
-
-.stage-empty-hint:last-child {
-  font-size: 0.8125rem;
-}
-
-.stage-empty-kbd {
-  display: inline-block;
-  padding: 0.2em 0.5em;
-  font-family: var(--font-mono);
-  font-size: 1em;
-  font-weight: 400;
-  border: none;
-  border-radius: 3px;
-  background-color: var(--stage-empty-kbd-bg);
-  color: var(--stage-empty-kbd-color);
 }
 
 .App-title {
@@ -522,6 +533,72 @@ a:active {
 }
 
 /* ====== /nav ====== */
+
+/* ====== work feed (items under the profile links) ====== */
+
+.work-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 28rem;
+  margin: 0 auto;
+}
+
+.work-feed-title {
+  margin: 0.5rem 0 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text-color);
+  opacity: 0.8;
+  text-align: center;
+}
+
+.work-item.work-feed-item {
+  backdrop-filter: blur(10px);
+  flex-direction: row;
+  align-items: center;
+  gap: 0.625rem;
+  text-align: left;
+}
+
+/* The section's emoji, as on the item's stage tab. */
+.work-feed-item-icon {
+  flex-shrink: 0;
+  width: 1.25rem;
+  font-size: 1.1rem;
+  line-height: 1;
+  text-align: center;
+}
+
+.work-feed-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.work-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.work-item-type {
+  font-family: var(--font-mono);
+  font-size: 0.75em;
+  color: var(--text-color-dark);
+}
+
+.work-item-type + .work-item-date::before {
+  content: "·";
+  margin-right: 0.5rem;
+}
+
+/* ====== /work feed ====== */
 
 /* ====== work list ====== */
 
@@ -714,6 +791,13 @@ a:active {
     var(--resize-handle-accent-active) 50%,
     var(--transparent) 100%
   );
+}
+
+/* While dragging (work items, tabs, the splitter), embedded documents such as the
+   deck iframe must not capture the pointer: the page would stop receiving mouse
+   moves and the drag ghost would freeze until the pointer left the frame. */
+body.is-dragging iframe {
+  pointer-events: none;
 }
 
 /* Drop Zones */

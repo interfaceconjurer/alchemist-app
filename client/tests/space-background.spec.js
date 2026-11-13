@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { openSearch, toggleTheme } from './shell-helpers.js';
 
 // Keep GPU startup out of the backdrop's functional checks. Native combined
 // animation profiling separately qualifies generated backdrops and the crystal.
@@ -80,7 +81,7 @@ test('both themes display three valid backdrop layers', async ({ page }, testInf
   await page.goto('/');
   const dark = await inspectBackdrop(page, 'dark');
   expectValidBackdrop(dark);
-  await page.getByRole('button', { name: /Switch to .* mode/ }).click();
+  await toggleTheme(page);
   const light = await inspectBackdrop(page, 'light', dark);
   expectValidBackdrop(light);
   expect(light.renderer).toBe(dark.renderer);
@@ -101,7 +102,7 @@ test('theme and viewport changes leave the final backdrop usable', async ({ page
     [viewport.width + 320, Math.max(360, viewport.height - 160)],
     [viewport.width + 320, Math.max(360, viewport.height - 160)],
   ]) {
-    await page.getByRole('button', { name: /Switch to .* mode/ }).click();
+    await toggleTheme(page);
     await page.setViewportSize({ width, height });
   }
   const final = await inspectBackdrop(page, 'light', first);
@@ -114,8 +115,7 @@ test('theme and viewport changes leave the final backdrop usable', async ({ page
     }
     expect(final.layers[2].brightness).toBeLessThan(first.layers[2].brightness);
   }
-  await page.getByRole('button', { name: 'Search', exact: true }).click();
-  await expect(page.getByPlaceholder('Search work items and actions...')).toBeFocused();
+  await openSearch(page);
 });
 
 test('a worker failure preserves a static backdrop and working navigation', async ({ page }) => {
@@ -135,8 +135,7 @@ test('a worker failure preserves a static backdrop and working navigation', asyn
   expectValidBackdrop(backdrop, 'fallback');
   expect(await page.locator('.space-layer').evaluateAll(layers => layers.every(layer => layer.getAnimations().length === 0))).toBe(true);
   await expect(page.getByRole('heading', { name: 'Jordan L. Wright' })).toBeVisible();
-  await page.getByRole('button', { name: 'Search', exact: true }).click();
-  await expect(page.getByPlaceholder('Search work items and actions...')).toBeFocused();
+  await openSearch(page);
 });
 
 test('reduced motion disables every backdrop animation', async ({ page }) => {

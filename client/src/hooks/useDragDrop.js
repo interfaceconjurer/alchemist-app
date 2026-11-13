@@ -43,6 +43,7 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onEnd);
       document.body.style.cursor = 'grabbing';
+      document.body.classList.add('is-dragging');
     };
 
     const onMove = (e) => {
@@ -60,6 +61,7 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onEnd);
       document.body.style.cursor = '';
+      document.body.classList.remove('is-dragging');
 
       if (dropZone && dtTabId) {
         if (dropZone === 'split-left' || dropZone === 'split-right') {
@@ -106,6 +108,7 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onEnd);
       document.body.style.cursor = 'grabbing';
+      document.body.classList.add('is-dragging');
     };
 
     const onMove = (e) => {
@@ -135,6 +138,7 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onEnd);
       document.body.style.cursor = '';
+      document.body.classList.remove('is-dragging');
 
       if (dropZone && item) {
         dispatch({ type: 'SIDEBAR_DROP', item, dropZone });
@@ -143,7 +147,13 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
       dispatch({ type: 'CLEAR_DRAG' });
       dragStateRef.current = null;
 
-      window.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); }, { capture: true, once: true });
+      // Releasing a drag can fire a click on the element under the pointer (e.g. the
+      // work item itself when the drag ends where it started). Swallow only that
+      // click, dispatched in the same task as this mouseup. A drop on the stage fires
+      // no click at all, so a lingering listener would eat the user's next real click.
+      const swallowClick = (e) => { e.stopPropagation(); e.preventDefault(); };
+      window.addEventListener('click', swallowClick, { capture: true, once: true });
+      setTimeout(() => window.removeEventListener('click', swallowClick, { capture: true }), 0);
     };
 
     const onCancel = () => {
