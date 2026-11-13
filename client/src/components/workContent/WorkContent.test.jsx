@@ -84,3 +84,20 @@ it('leaves artifacts marked viewable: false as plain media outside the viewer', 
   fireEvent.click(screen.getByRole('button', { name: 'View Project Identity larger' }));
   expect(within(document.querySelector('dialog')).getByText('1 / 2')).toBeInTheDocument();
 });
+
+it('gives an image card with no image neighbour the full row, and lets adjacent image cards share it', () => {
+  render(<ThemeProvider><WorkContent content={{ artifacts: [
+    { type: 'diagram', src: '/d.svg', alt: 'Diagram', label: 'Diagram' },
+    { src: '/a.png', alt: 'Lone', label: 'Lone image' },
+    { type: 'code', label: 'CLI', code: 'run' },
+    { src: '/b.png', alt: 'Pair one', label: 'Pair one' },
+    { src: '/c.png', alt: 'Pair two', label: 'Pair two' },
+    { type: 'diagram', src: '/e.svg', alt: 'Another', label: 'Another' },
+    { src: '/f.png', alt: 'Last', label: 'Last image' },
+  ] }} /></ThemeProvider>);
+  const card = (label) => screen.getByRole('heading', { name: label }).closest('.work-content-artifact');
+  expect(card('Lone image')).toHaveClass('work-content-artifact--solo');
+  expect(card('Pair one')).not.toHaveClass('work-content-artifact--solo');
+  expect(card('Pair two')).not.toHaveClass('work-content-artifact--solo');
+  expect(card('Last image')).toHaveClass('work-content-artifact--solo'); // last in the list
+});

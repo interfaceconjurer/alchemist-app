@@ -3,6 +3,10 @@ import { useTheme } from "../../contexts/ThemeContext";
 import ArtifactViewer from "./ArtifactViewer";
 import "./WorkContent.css";
 
+const isImage = (artifact) => !!artifact && (artifact.type || 'image') === 'image';
+/** An image card with no image card beside it (its neighbours span the full row). */
+const isSoloImage = (artifacts, i) => isImage(artifacts[i]) && !isImage(artifacts[i - 1]) && !isImage(artifacts[i + 1]);
+
 const dimension = (value, fallback) => (Number.isFinite(value) && value > 0 ? value : fallback);
 
 /** The text that accompanies an artifact, for its "open larger" label. */
@@ -25,7 +29,7 @@ function Viewable({ item, onOpen, className = "", style, children }) {
   );
 }
 
-function ArtifactRenderer({ artifact, viewerItem, onOpen }) {
+function ArtifactRenderer({ artifact, viewerItem, onOpen, solo = false }) {
   const { theme } = useTheme();
   const type = artifact.type || 'image';
   const heading = (
@@ -77,7 +81,7 @@ function ArtifactRenderer({ artifact, viewerItem, onOpen }) {
   }
 
   return (
-    <div className="work-content-artifact">
+    <div className={`work-content-artifact${solo ? ' work-content-artifact--solo' : ''}`}>
       <div className="work-content-artifact-copy">{heading}</div>
       <Viewable item={viewerItem} onOpen={onOpen} className="work-content-image-placeholder">
         <img src={artifact.src} alt={artifact.alt} loading="lazy" />
@@ -146,6 +150,7 @@ function WorkContentBody({ content }) {
               <ArtifactRenderer
                 key={i}
                 artifact={artifact}
+                solo={isSoloImage(content.artifacts, i)}
                 viewerItem={artifactIndex.has(i) ? viewerItems[artifactIndex.get(i)] : null}
                 onOpen={() => setViewing(artifactIndex.get(i))}
               />

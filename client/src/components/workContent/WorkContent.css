@@ -42,10 +42,26 @@
 }
 
 /* Artifacts — card grid */
+/* Image artifacts sit side by side when there's room (at least ~16rem each) and
+   stack full width when there isn't. Diagrams, embeds and code span the whole row
+   (see below), and an image card that is the only one in its run does too, so its
+   text never squeezes into a fraction of the width. */
 .work-content-artifacts {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
   gap: 1.25rem;
+}
+
+.work-content-artifact--solo {
+  grid-column: 1 / -1;
+}
+
+/* A full-width image card: copy beside the image when there's room, stacked when not. */
+.work-content-artifact--solo:not(.work-content-artifact--diagram) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: 0 1.5rem;
+  align-items: start;
 }
 
 .work-content-artifact {
