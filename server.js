@@ -5,6 +5,7 @@ const { constants } = require('node:zlib');
 
 const YEAR_SECONDS = 365 * 24 * 60 * 60;
 const HASHED_ASSET = /-[a-zA-Z0-9_-]{8,}\.[a-zA-Z0-9]+$/;
+const EMBEDDABLE_PREFIX = '/work/';
 
 function getConfiguration(env) {
   const production = env.NODE_ENV === 'production';
@@ -51,11 +52,16 @@ function securityHeaders(production) {
     "manifest-src 'self'",
   ];
   if (production) directives.push('upgrade-insecure-requests');
+  const policy = directives.join('; ');
+  // Self-contained work artifacts (e.g. HTML slide decks) are embedded by the
+  // portfolio itself; only this site may frame them. Everything else stays unframeable.
+  const embeddablePolicy = policy.replace("frame-ancestors 'none'", "frame-ancestors 'self'");
   return (req, res, next) => {
+    const embeddable = req.path.startsWith(EMBEDDABLE_PREFIX);
     res.set({
-      'Content-Security-Policy': directives.join('; '),
+      'Content-Security-Policy': embeddable ? embeddablePolicy : policy,
       'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'DENY',
+      'X-Frame-Options': embeddable ? 'SAMEORIGIN' : 'DENY',
       'Referrer-Policy': 'strict-origin-when-cross-origin',
       'Cross-Origin-Opener-Policy': 'same-origin',
       'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',

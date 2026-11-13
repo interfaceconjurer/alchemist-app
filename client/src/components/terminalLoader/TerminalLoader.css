@@ -3,9 +3,10 @@
   inset: 0;
   display: flex;
   flex-direction: column;
-  z-index: 2;
+  /* Covers the whole stage pane, tab bar included, until the content is revealed. */
+  z-index: 30;
   opacity: 1;
-  transition: opacity 300ms ease;
+  transition: opacity 200ms ease; /* matches TIMING.FADE_DURATION */
   pointer-events: none;
 }
 
@@ -18,7 +19,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: var(--bg-color);
+  background-color: var(--stage-bg);
   overflow: hidden;
 }
 
@@ -45,7 +46,7 @@
 .terminal-icon {
   width: 14px;
   height: 14px;
-  color: #6b7280;
+  color: #4b5563;
   flex-shrink: 0;
 }
 
@@ -81,38 +82,44 @@
   min-height: 1.6em;
 } */
 
-/* Light mode text (readable on light bg) */
+/* Light mode: fully saturated hues, each taken just dark enough to stay above
+   4.5:1 (WCAG AA) on the light stage. */
+:root:not([data-theme="dark"]) .terminal-body,
+:root:not([data-theme="dark"]) .terminal-command {
+  font-weight: 500;
+}
+
 .term-white {
-  color: #374151;
+  color: #1f2937;
 }
 
 .term-green {
-  color: #059669;
+  color: #006536;
 }
 
 .term-cyan {
-  color: #0891b2;
+  color: #005f79;
 }
 
 .term-dim {
-  color: #9ca3af;
+  color: #4b5563;
 }
 
 .term-bold {
-  color: #111827;
-  font-weight: 600;
+  color: #0b1220;
+  font-weight: 700;
 }
 
 .term-yellow {
-  color: #b45309;
+  color: #894400;
 }
 
 .term-magenta {
-  color: #7c3aed;
+  color: #6f00ee;
 }
 
 .term-red {
-  color: #dc2626;
+  color: #b2000c;
 }
 
 [data-theme="dark"] .terminal-body .term-white,
@@ -129,7 +136,7 @@
 }
 
 [data-theme="dark"] .terminal-body .term-dim {
-  color: #6b7280;
+  color: #838b99; /* 5.8:1 on the dark stage */
 }
 
 [data-theme="dark"] .terminal-body .term-bold {
@@ -146,4 +153,24 @@
 
 [data-theme="dark"] .terminal-body .term-red {
   color: #f87171;
+}
+
+/* A block cursor that blinks --blinks times (on, then off) after the last line. */
+.terminal-cursor {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.15em;
+  vertical-align: text-bottom;
+  background-color: #1f2937;
+  animation: terminal-cursor-blink var(--blink, 520ms) step-end var(--blinks, 2) forwards;
+}
+
+[data-theme="dark"] .terminal-cursor {
+  background-color: #e0e0e0;
+}
+
+@keyframes terminal-cursor-blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 0; }
 }

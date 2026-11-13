@@ -1,0 +1,29 @@
+{
+  "pdf": true,
+  "slides": 17,
+  "files": {
+    "THIRD_PARTY_NOTICES.txt": "05f3e3a7a799d027d2ca7cc54fa2396a8d32aef631867dcd77668216dad95b97",
+    "apollo-portfolio-jordan-wright.pdf": "26acc956d95e2ce8b38fa8f02a126459e27547ec1786c5079db53ef622faf1ad",
+    "assets/apollo-mark-dots.js": "d6035abb29292c6efb9d3c2c94ffbe33ad2c651e708ff51f77de1378d9e3dcb9",
+    "assets/apollo-mark-dots.svg": "1913a949ce807e95546c4a2b90e39899b4bed26327cee812a3f6864ebb58149a",
+    "assets/apollo-mark.svg": "d9286f315807b64a4f642a85a5d21953fdeda61921119303655aff12182a0ae0",
+    "assets/bg/bgfx.js": "f5d97b83a581d7af2cbac16888a5e4d830b5ce17811037518caa363646a08663",
+    "assets/bg/cover.png": "571271baefa33dc1610aa11cf64806d99b9a9efc5d8c2051bf3b27a5ea6f0999",
+    "assets/bg/s14.png": "9da7800f3aa06c8fa88b9eeb6c355de98f884ac8f3264d3c2b629ef5df25e981",
+    "assets/cover-dots.js": "f3de0dfacd695f3d7094de906edc956a759346ba11b6cab396ee76823eb6d0eb",
+    "assets/gifs/s05-vibes.gif": "277a42b5503f2f75947c3478ff5ab8768c68daf98da3030aa940f4bb40fd7230",
+    "assets/gifs/s11-banner-fixed-hint.gif": "5462e64c9eb3d59110ccb997c8078d3c346de58a6cb7082ae1a1f00ca1d91474",
+    "assets/plugin-rec-banner.png": "4326e1731b5aa8f6a2a50047d7e655ed6d152b7f9b8f1f28f1aae36aba9bdae4",
+    "assets/plugin-rec-first.png": "5170f1dd760f11d9bfb2b2aeb402e3e2e261af21ec1c1f26ae36d8215be1e7fd",
+    "assets/plugin-session-start.png": "16bd447b4d7b1f4c6070f220937cbbd32a97dd80ce321480f99ec6fa0efc0bb4",
+    "assets/vibes-hero.png": "840a59e5b9d703278fb68f2187944effe8dd405625f21eca27252569b3ed01c8",
+    "assets/vibes-rec-first.png": "8c790c8b40343e45c4d66b17dc7d74acaeb6310c03815bfa3ff6cbdf98df6ea6",
+    "deck.js": "99578170cd8f9470a666700672c806db0b698cf435f84ec493bb17a8889d7942",
+    "fonts/AvantGarde-Demi.woff2": "c9e4fa78c0c98df6a1903d28156534861220ffabdc6491a028b2d77184b20abc",
+    "fonts/GeistMono.woff2": "b7ac144b394cbd81052d6397ec0c33397977b1d7e9bc095e744e652a378c6fb3",
+    "fonts/InterVariable.woff2": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
+    "index.html": "d26f1c9a68b799f2e8a975cd8d0398c25deeb39e44aad78a51baeed07bdf3a4e",
+    "robots.txt": "331ea9090db0c9f6f597bd9840fd5b171830f6e0b3ba1cb24dfa91f0c95aedc1",
+    "styles.css": "eb530549bbf77e8ee7769137657723031562287788924490f31457fb71d2cf19"
+  }
+}

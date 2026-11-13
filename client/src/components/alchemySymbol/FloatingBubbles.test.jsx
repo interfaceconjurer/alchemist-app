@@ -50,3 +50,24 @@ it('keeps legacy callers bounded when they do not supply a shared clock', () => 
   tick(12);
   expect(particle.userData.life).toBeCloseTo(life + 0.05);
 });
+
+it('holds bubbles in place while still fading them when drift is off', () => {
+  const animationTime = { value: 0 };
+  renderHook(() => FloatingBubbles({ color: '#ffffff', count: 1, spawnPoint: () => new Vector3(1, 0, 0), animationTime, drift: false }));
+  const particle = sprites[0];
+  const position = particle.position.toArray();
+  const scale = particle.scale.x;
+  const opacities = [];
+  // Run through a full life, including the respawn at the end.
+  for (let i = 0; i < 400; i++) {
+    animationTime.value += 1 / 60;
+    tick(1 / 60);
+    opacities.push(particle.material.opacity);
+    if (particle.userData.life > 0) {
+      expect(particle.position.toArray()).toEqual(position);
+      expect(particle.scale.x).toBe(scale);
+    }
+  }
+  expect(Math.max(...opacities)).toBeGreaterThan(0);
+  expect(Math.min(...opacities)).toBeCloseTo(0, 6);
+});

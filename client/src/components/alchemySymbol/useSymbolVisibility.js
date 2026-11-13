@@ -27,7 +27,9 @@ export function useSymbolVisibility(ref) {
     return () => observer.disconnect();
   }, [ref]);
 
-  const active = pageVisible && inView && !reducedMotion;
+  // `visible`: on screen in a visible page. `active`: visible and allowed to animate fully.
+  const visible = pageVisible && inView;
+  const active = visible && !reducedMotion;
   useEffect(() => { if (active) setStarted(true); }, [active]);
-  return { active, reducedMotion, started };
+  return { active, visible, reducedMotion, started };
 }

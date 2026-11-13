@@ -6,22 +6,24 @@
   --text-color: #2f3034; /* 7.9:1 on --bg-color; 4.9:1 at the intro line's 0.8 opacity */
   --text-color-dark: #2a2b2f; /* 8.4:1 */
   --heading-color: #232428; /* 9.2:1 */
+  /* Secondary text (breadcrumbs, dates, sections): 5.8:1 on the status bar, 5.0:1 on the darkest panel grey. */
+  --text-muted: #46474b;
+  /* Interaction accent (selection, active tab, drop zones, focus): a soft violet,
+     kept muted so the work itself carries the colour. Used as rgba(var(--accent-rgb), a). */
+  --accent-rgb: 146, 114, 202;
   --border-color: #979797;
   --border-color-light: #a9abaf; /* hairlines on the #c6c7ca page (was #e0e0e0, which read as white) */
-  --focus-shadow: rgba(139, 0, 255, 0.5);
-  --accent-color: rgba(139, 0, 255, 0.5);
+  --focus-shadow: rgba(var(--accent-rgb), 0.5);
+  --accent-color: rgba(var(--accent-rgb), 0.5);
   --button-bg: #d4d5d8;
+  /* The stage (and its active tab and loader) sits a step lighter than the page. */
+  --stage-bg: #dedfe2;
 
   /* Scrollbar - transparent track, white thumb in light mode */
   --scrollbar-track: transparent;
   --scrollbar-thumb: rgba(0, 0, 0, 0.18);
   --scrollbar-thumb-hover: rgba(0, 0, 0, 0.28);
 
-  /* 3D component colors - purple in light mode */
-  --wireframe-color: #8b00ff;
-  --wireframe-emissive: #8b00ff;
-  --fill-opacity-base: 0.08;
-  --fill-opacity-seed: 0.12;
 
   /* UI surface / component overrides (light) */
   --top-bar-bg: rgba(0, 0, 0, 0.09);
@@ -32,10 +34,6 @@
   --stage-tab-hover-bg: rgba(0, 0, 0, 0.02);
   --stage-tab-close-hover-bg: rgba(0, 0, 0, 0.08);
   --stage-empty-icon-color: rgba(0, 0, 0, 0.25);
-  --stage-empty-content-border-color: rgba(0, 0, 0, 0.22);
-  --stage-empty-text-color: rgba(0, 0, 0, 0.35);
-  --stage-empty-kbd-bg: rgba(0, 0, 0, 0.07);
-  --stage-empty-kbd-color: rgba(0, 0, 0, 0.4);
   --out-bound-link-bg: rgba(255, 255, 255, 0.22);
   --out-bound-link-border: rgba(0, 0, 0, 0.1);
   --out-bound-link-hover-bg: rgba(255, 255, 255, 0.42);
@@ -43,36 +41,35 @@
   --work-item-bg: rgba(0, 0, 0, 0.06);
   --work-item-border: rgba(0, 0, 0, 0.08);
   --work-item-hover-bg: rgba(0, 0, 0, 0.16);
-  --work-item-selected-bg: rgba(139, 0, 255, 0.1);
-  --work-item-selected-border: rgba(139, 0, 255, 0.25);
-  --work-item-selected-hover-bg: rgba(139, 0, 255, 0.2);
-  --work-item-selected-hover-border: rgba(139, 0, 255, 0.4);
-  --work-item-selected-focus-bg: rgba(139, 0, 255, 0.1);
-  --work-item-selected-focus-border: rgba(139, 0, 255, 0.25);
-  --work-item-selected-hover-focus-bg: rgba(139, 0, 255, 0.2);
-  --work-item-selected-hover-focus-border: rgba(139, 0, 255, 0.4);
+  --work-item-selected-bg: rgba(var(--accent-rgb), 0.1);
+  --work-item-selected-border: rgba(var(--accent-rgb), 0.25);
+  --work-item-selected-hover-bg: rgba(var(--accent-rgb), 0.2);
+  --work-item-selected-hover-border: rgba(var(--accent-rgb), 0.4);
+  --work-item-selected-focus-bg: rgba(var(--accent-rgb), 0.1);
+  --work-item-selected-focus-border: rgba(var(--accent-rgb), 0.25);
+  --work-item-selected-hover-focus-bg: rgba(var(--accent-rgb), 0.2);
+  --work-item-selected-hover-focus-border: rgba(var(--accent-rgb), 0.4);
 
   /* Transparent / generic */
   --transparent: transparent;
 
   /* Resize handle & splitter accent */
-  --resize-handle-accent: rgba(139, 0, 255, 0.15);
-  --resize-handle-accent-active: rgba(139, 0, 255, 0.25);
+  --resize-handle-accent: rgba(var(--accent-rgb), 0.15);
+  --resize-handle-accent-active: rgba(var(--accent-rgb), 0.25);
 
   /* Stage tab drop indicator */
-  --stage-tab-drop-indicator: rgba(139, 0, 255, 0.6);
-  --stage-tab-inactive-active-border: rgba(139, 0, 255, 0.3);
+  --stage-tab-drop-indicator: rgba(var(--accent-rgb), 0.6);
+  --stage-tab-inactive-active-border: rgba(var(--accent-rgb), 0.3);
 
   /* Stage empty content background */
-  --stage-empty-content-bg: rgba(0, 0, 0, 0.04);
 
   /* Drop zone */
-  --drop-zone-bg: rgba(139, 0, 255, 0.1);
-  --drop-zone-border: rgba(139, 0, 255, 0.4);
-  --drop-zone-active-bg: rgba(139, 0, 255, 0.2);
-  --drop-zone-active-border: rgba(139, 0, 255, 0.6);
-  --drop-zone-active-shadow: inset 0 0 20px rgba(139, 0, 255, 0.3);
-  --drop-zone-label-color: rgb(139, 0, 255);
+  --drop-zone-bg: rgba(var(--accent-rgb), 0.1);
+  --drop-zone-border: rgba(var(--accent-rgb), 0.4);
+  --drop-zone-active-bg: rgba(var(--accent-rgb), 0.2);
+  --drop-zone-active-border: rgba(var(--accent-rgb), 0.6);
+  --drop-zone-active-shadow: inset 0 0 20px rgba(var(--accent-rgb), 0.3);
+  --drop-zone-label-color: rgb(80, 54, 128); /* deep tone of the accent: 4.9:1 on the light drop zone */
 
   /* Drag ghost shadow */
   --drag-ghost-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -81,13 +78,15 @@
 [data-theme="dark"] {
   /* Dark theme */
   --bg-color: #0a0a0a;
+  --stage-bg: #0a0a0a;
   --text-color: #b8b8b8;
   --text-color-dark: #d0d0d0;
+  --text-muted: #8f8f8f; /* 5.8:1 on the status bar */
   --heading-color: #d0d0d0;
   --border-color: #4a4a4a;
   --border-color-light: #242424;
-  --focus-shadow: rgba(139, 0, 255, 0.5);
-  --accent-color: rgba(139, 0, 255, 0.5);
+  --focus-shadow: rgba(var(--accent-rgb), 0.5);
+  --accent-color: rgba(var(--accent-rgb), 0.5);
   --button-bg: #1a1a1a;
 
   /* Scrollbar - transparent track, black thumb in dark mode */
@@ -95,11 +94,6 @@
   --scrollbar-thumb: #000000;
   --scrollbar-thumb-hover: #2a2a2a;
 
-  /* 3D component colors - white with purple glow */
-  --wireframe-color: #ffffff;
-  --wireframe-emissive: #8b00ff;
-  --fill-opacity-base: 0.12;
-  --fill-opacity-seed: 0.3;
 
   /* UI surface / component overrides (dark) */
   --top-bar-bg: rgba(30, 30, 30, 0.4);
@@ -110,10 +104,6 @@
   --stage-tab-hover-bg: rgba(255, 255, 255, 0.03);
   --stage-tab-close-hover-bg: rgba(255, 255, 255, 0.1);
   --stage-empty-icon-color: rgba(255, 255, 255, 0.18);
-  --stage-empty-content-border-color: rgba(255, 255, 255, 0.12);
-  --stage-empty-text-color: rgba(255, 255, 255, 0.35);
-  --stage-empty-kbd-bg: rgba(255, 255, 255, 0.08);
-  --stage-empty-kbd-color: rgba(255, 255, 255, 0.4);
   --out-bound-link-bg: rgba(30, 30, 30, 0.4);
   --out-bound-link-border: rgba(100, 100, 100, 0.3);
   --out-bound-link-hover-bg: rgba(30, 30, 30, 0.8);
@@ -121,36 +111,35 @@
   --work-item-bg: rgba(30, 30, 30, 0.4);
   --work-item-border: rgba(100, 100, 100, 0.3);
   --work-item-hover-bg: rgba(30, 30, 30, 0.8);
-  --work-item-selected-bg: rgba(139, 0, 255, 0.12);
-  --work-item-selected-border: rgba(139, 0, 255, 0.3);
-  --work-item-selected-hover-bg: rgba(139, 0, 255, 0.24);
-  --work-item-selected-hover-border: rgba(139, 0, 255, 0.45);
-  --work-item-selected-focus-bg: rgba(139, 0, 255, 0.12);
-  --work-item-selected-focus-border: rgba(139, 0, 255, 0.3);
-  --work-item-selected-hover-focus-bg: rgba(139, 0, 255, 0.24);
-  --work-item-selected-hover-focus-border: rgba(139, 0, 255, 0.45);
+  --work-item-selected-bg: rgba(var(--accent-rgb), 0.12);
+  --work-item-selected-border: rgba(var(--accent-rgb), 0.3);
+  --work-item-selected-hover-bg: rgba(var(--accent-rgb), 0.24);
+  --work-item-selected-hover-border: rgba(var(--accent-rgb), 0.45);
+  --work-item-selected-focus-bg: rgba(var(--accent-rgb), 0.12);
+  --work-item-selected-focus-border: rgba(var(--accent-rgb), 0.3);
+  --work-item-selected-hover-focus-bg: rgba(var(--accent-rgb), 0.24);
+  --work-item-selected-hover-focus-border: rgba(var(--accent-rgb), 0.45);
 
   /* Transparent / generic */
   --transparent: transparent;
 
   /* Resize handle & splitter accent */
-  --resize-handle-accent: rgba(139, 0, 255, 0.2);
-  --resize-handle-accent-active: rgba(139, 0, 255, 0.3);
+  --resize-handle-accent: rgba(var(--accent-rgb), 0.2);
+  --resize-handle-accent-active: rgba(var(--accent-rgb), 0.3);
 
   /* Stage tab drop indicator */
-  --stage-tab-drop-indicator: rgba(139, 0, 255, 0.6);
-  --stage-tab-inactive-active-border: rgba(139, 0, 255, 0.3);
+  --stage-tab-drop-indicator: rgba(var(--accent-rgb), 0.6);
+  --stage-tab-inactive-active-border: rgba(var(--accent-rgb), 0.3);
 
   /* Stage empty content background */
-  --stage-empty-content-bg: rgba(255, 255, 255, 0.03);
 
   /* Drop zone */
-  --drop-zone-bg: rgba(139, 0, 255, 0.12);
-  --drop-zone-border: rgba(139, 0, 255, 0.45);
-  --drop-zone-active-bg: rgba(139, 0, 255, 0.24);
-  --drop-zone-active-border: rgba(139, 0, 255, 0.6);
-  --drop-zone-active-shadow: inset 0 0 20px rgba(139, 0, 255, 0.35);
-  --drop-zone-label-color: rgb(180, 100, 255);
+  --drop-zone-bg: rgba(var(--accent-rgb), 0.12);
+  --drop-zone-border: rgba(var(--accent-rgb), 0.45);
+  --drop-zone-active-bg: rgba(var(--accent-rgb), 0.24);
+  --drop-zone-active-border: rgba(var(--accent-rgb), 0.6);
+  --drop-zone-active-shadow: inset 0 0 20px rgba(var(--accent-rgb), 0.35);
+  --drop-zone-label-color: rgb(180, 160, 225); /* light tone of the accent: readable on the dark drop zone */
 
   /* Drag ghost shadow */
   --drag-ghost-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);

@@ -3,6 +3,15 @@ import { cleanup } from '@testing-library/react';
 import { afterEach, beforeAll } from 'vitest';
 
 beforeAll(() => {
+  // jsdom has <dialog> but not its modal API; model open/close for components that use it.
+  if (typeof HTMLDialogElement !== 'undefined' && !HTMLDialogElement.prototype.showModal) {
+    HTMLDialogElement.prototype.showModal = function showModal() { this.setAttribute('open', ''); };
+    HTMLDialogElement.prototype.close = function close() {
+      if (!this.hasAttribute('open')) return;
+      this.removeAttribute('open');
+      this.dispatchEvent(new Event('close'));
+    };
+  }
   global.ResizeObserver = class ResizeObserver {
     observe() {}
     unobserve() {}

@@ -30,6 +30,7 @@ export function useSplitView(stateRef, dispatch, stageRef) {
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onEnd);
       document.body.style.cursor = previousCursor;
+      document.body.classList.remove('is-dragging');
       document.body.style.userSelect = previousSelection;
       cleanupRef.current = null;
     };
@@ -41,6 +42,7 @@ export function useSplitView(stateRef, dispatch, stageRef) {
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onEnd);
     document.body.style.cursor = 'col-resize';
+    document.body.classList.add('is-dragging');
     document.body.style.userSelect = 'none';
   }, [stateRef, dispatch, stageRef]);
 

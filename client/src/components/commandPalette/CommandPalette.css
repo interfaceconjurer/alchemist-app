@@ -71,11 +71,11 @@
 }
 
 .command-palette-item--highlighted {
-  background: rgba(139, 0, 255, 0.08);
+  background: rgba(var(--accent-rgb), 0.08);
 }
 
 [data-theme="dark"] .command-palette-item--highlighted {
-  background: rgba(139, 0, 255, 0.15);
+  background: rgba(var(--accent-rgb), 0.15);
 }
 
 .command-palette-item-left {
@@ -89,7 +89,7 @@
 .command-palette-action-prefix {
   font-family: var(--font-mono);
   font-size: 0.8rem;
-  color: rgba(139, 0, 255, 0.7);
+  color: rgba(var(--accent-rgb), 0.7);
   flex-shrink: 0;
 }
 
@@ -105,8 +105,7 @@
 .command-palette-item-section {
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  color: var(--text-color);
-  opacity: 0.5;
+  color: var(--text-muted);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -130,8 +129,7 @@
 .command-palette-item-date {
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  color: var(--text-color);
-  opacity: 0.5;
+  color: var(--text-muted);
   white-space: nowrap;
   flex-shrink: 0;
 }

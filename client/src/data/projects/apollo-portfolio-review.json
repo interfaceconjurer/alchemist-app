@@ -1,0 +1,27 @@
+{
+  "id": "apollo-portfolio-review",
+  "section": "trenches",
+  "type": "Presentation",
+  "title": "Portfolio review with Apollo",
+  "description": "Deterministic where it matters. Fluid everywhere else.",
+  "date": "Oct 21, 2026",
+  "tags": ["Presentation", "Agentic UX", "Developer Tools", "Agentforce Vibes", "Claude Code"],
+  "content": {
+    "context": "A portfolio review for the Apollo GraphQL design panel on designing trust into agentic developer tools. When an agent can do the work, how does a person stay in control without slowing it down? Two projects answer that question: Agentforce Vibes, which sets how much the agent may do and where a person signs off, and the Salesforce Development Plugin for Claude Code, which shows what the agent can do and where you are. The deck was built in its final medium, as HTML.",
+    "artifacts": [
+      {
+        "type": "embed",
+        "src": "/work/apollo-portfolio-review/index.html",
+        "title": "Portfolio review with Apollo slide deck",
+        "width": 1920,
+        "height": 1080,
+        "label": "The deck",
+        "description": "Open the deck, then use the arrow keys or swipe to move through the slides.",
+        "download": {
+          "href": "/work/apollo-portfolio-review/apollo-portfolio-jordan-wright.pdf",
+          "label": "Download PDF"
+        }
+      }
+    ]
+  }
+}

@@ -3,6 +3,8 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { animationDelta } from './renderPolicy';
 
+const RISE = 3.5; // how far a drifting bubble climbs over its life
+
 function discTexture(fill) {
   const canvas = document.createElement('canvas');
   canvas.width = 64;
@@ -24,12 +26,14 @@ function discTexture(fill) {
  * drifts rather than the same bubbles always being dark.
  * `darkOpacityScale`: dark motes read much stronger than light ones on a dark
  * background's glow, so they get their own opacity.
+ * `drift`: false holds each bubble in place (reduced motion). It appears a
+ * little above the solid, fades in and out where it is, then reappears elsewhere.
  */
 export default function FloatingBubbles({
   color, spawnPoint, count = 15, opacityScale = 1,
   darkRatio = 0, darkColor = '#0b0c0f', darkOpacityScale = 1.4, animationTime,
   // Optional ref (0..1): fades every bubble together (dormancy).
-  visibility,
+  visibility, drift = true,
 }) {
   const particlesRef = useRef([]);
   const groupRef = useRef();
@@ -41,6 +45,11 @@ export default function FloatingBubbles({
     [color],
   );
   const darkTexture = useMemo(() => discTexture(darkColor), [darkColor]);
+
+  const place = (sprite, from) => {
+    sprite.position.copy(from);
+    if (!drift) sprite.position.y += Math.random() * RISE;
+  };
 
   const roll = (sprite) => {
     const dark = Math.random() < darkRatio;
@@ -61,7 +70,7 @@ export default function FloatingBubbles({
         })
       );
       const startPos = spawnPoint();
-      sprite.position.copy(startPos);
+      place(sprite, startPos);
       sprite.userData = {
         life: Math.random() * 4,
         maxLife: 3 + Math.random() * 2,
@@ -81,7 +90,7 @@ export default function FloatingBubbles({
     };
     // roll() closes over darkRatio/textures; re-create sprites when they change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bubbleTexture, darkTexture, darkRatio, count, spawnPoint]);
+  }, [bubbleTexture, darkTexture, darkRatio, count, spawnPoint, drift]);
 
   useEffect(() => () => { bubbleTexture.dispose(); darkTexture.dispose(); }, [bubbleTexture, darkTexture]);
 
@@ -98,15 +107,17 @@ export default function FloatingBubbles({
       if (life >= maxLife) {
         sprite.userData.life = 0;
         const newStart = spawnPoint();
-        sprite.position.copy(newStart);
+        place(sprite, newStart);
         sprite.userData.startPos.copy(newStart);
         roll(sprite);
         return;
       }
 
-      sprite.position.y = sprite.userData.startPos.y + progress * 3.5;
-      sprite.position.x = sprite.userData.startPos.x + Math.sin(life * 2) * 0.15;
-      sprite.position.z = sprite.userData.startPos.z + Math.cos(life * 1.5) * 0.1;
+      if (drift) {
+        sprite.position.y = sprite.userData.startPos.y + progress * RISE;
+        sprite.position.x = sprite.userData.startPos.x + Math.sin(life * 2) * 0.15;
+        sprite.position.z = sprite.userData.startPos.z + Math.cos(life * 1.5) * 0.1;
+      }
 
       let opacity;
       if (progress < 0.1) opacity = progress * 10;
@@ -115,7 +126,7 @@ export default function FloatingBubbles({
       const scale = sprite.userData.dark ? darkOpacityScale : opacityScale;
       sprite.material.opacity = Math.max(0, opacity * 0.4 * scale * (visibility ? visibility.current : 1));
 
-      const s = sprite.userData.size * (1 + progress * 0.3);
+      const s = sprite.userData.size * (drift ? 1 + progress * 0.3 : 1);
       sprite.scale.set(s, s, 1);
     });
   });

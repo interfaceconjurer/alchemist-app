@@ -35,11 +35,11 @@
 }
 
 .status-bar-section {
-  opacity: 0.6;
+  color: var(--text-muted);
 }
 
 .status-bar-separator {
-  opacity: 0.4;
+  color: var(--text-muted);
 }
 
 .status-bar-title {
@@ -47,7 +47,7 @@
 }
 
 .status-bar-date {
-  opacity: 0.5;
+  color: var(--text-muted);
   white-space: nowrap;
 }
 
@@ -64,7 +64,7 @@
   background-color: rgba(0, 0, 0, 0.06);
   font-size: 0.7rem;
   white-space: nowrap;
-  opacity: 0.8;
+  opacity: 0.9;
 }
 
 [data-theme="dark"] .status-bar-tag {

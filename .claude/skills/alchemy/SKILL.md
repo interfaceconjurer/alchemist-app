@@ -108,6 +108,9 @@ The portfolio site has a theme toggle (light/dark). When a README uses `<picture
 - `"image"` (default, can be omitted) — standard image with label and description, rendered in a 3-column grid
 - `"diagram"` — full-width image, typically architectural/flow diagrams. Use for SVG diagrams, pipeline visualizations, and project logos/identity images that benefit from full-width display.
 - `"code"` — styled code block. Uses `code` field instead of `src`. Use sparingly — only for the signature CLI interface or key API.
+- `"embed"` — a self-contained HTML document (e.g. a slide deck) served from `client/public/work/<id>/`, shown in a 16:9 frame. Optional `download: { href, label }`.
+
+Images, diagrams, embeds and outcome images open in a full-screen viewer when clicked, with their label/caption and description. Set `"viewable": false` on an artifact that gains nothing from a larger view (e.g. a small informational diagram) to leave it as plain media.
 
 ### Editorial guidelines
 

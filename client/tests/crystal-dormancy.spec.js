@@ -33,7 +33,7 @@ test('press and drag sends the crystal dormant, and it wakes only after being le
   const { x, y } = await center(page);
   await page.mouse.move(x, y);
   await page.mouse.down();
-  await expect(surface(page)).toHaveAttribute('aria-pressed', 'true'); // reflects the press immediately
+  await expect(surface(page)).toHaveAttribute('data-pressed', 'true'); // reflects the press immediately
   await page.mouse.move(x + 120, y + 30, { steps: 10 });
   await expect(surface(page)).toHaveAttribute('data-dormancy', 'dormant', { timeout: 5000 });
   await expect.poll(async () => (await lastFrame(page))?.dormancy).toBe('dormant');
@@ -55,7 +55,7 @@ test('press and drag sends the crystal dormant, and it wakes only after being le
   await expect.poll(async () => (await lastFrame(page))?.engaged).toBe(false);
   await expect.poll(async () => (await lastFrame(page))?.vitality, { timeout: 6000 }).toBeGreaterThan(0);
   await expect(surface(page)).toHaveAttribute('data-dormancy', 'awake', { timeout: 6000 });
-  await expect(surface(page)).toHaveAttribute('aria-pressed', 'false');
+  await expect(surface(page)).toHaveAttribute('data-pressed', 'false');
   await expect.poll(async () => (await lastFrame(page))?.shaderTime).toBeGreaterThan(held.last.shaderTime);
   const woke = await lastFrame(page);
   expect(woke.simulationMs).toBeGreaterThan(held.last.simulationMs);
@@ -78,14 +78,13 @@ test('the canvas and its ancestors leave vertical touch scrolling available', as
   await expect(surface(page)).toHaveCSS('touch-action', 'pan-y');
 });
 
-test('keyboard users can still and release the crystal', async ({ page }) => {
+test('the crystal is decorative and stays out of the tab order', async ({ page }) => {
   await waitForCrystal(page);
-  await surface(page).focus();
-  await page.keyboard.press('Enter');
-  await expect(surface(page)).toHaveAttribute('aria-pressed', 'true');
-  await expect(surface(page)).toHaveAttribute('data-dormancy', 'dormant', { timeout: 5000 });
-  await page.keyboard.press('Enter');
-  await expect(surface(page)).toHaveAttribute('data-dormancy', 'awake', { timeout: 6000 });
+  await expect(surface(page)).not.toHaveAttribute('tabindex');
+  await expect(surface(page)).toHaveAttribute('role', 'img');
+  // The first Tab stop is the first real control, not the crystal.
+  await page.keyboard.press('Tab');
+  expect(await page.evaluate(() => document.activeElement?.closest('.crystal-surface') === null)).toBe(true);
 });
 
 test('pointer cancellation releases a held crystal', async ({ page }) => {
@@ -101,7 +100,7 @@ test('pointer cancellation releases a held crystal', async ({ page }) => {
     await page.locator('.crystal-surface canvas').evaluate(canvas => canvas.dispatchEvent(new PointerEvent('pointercancel', {
       pointerId: window.__pressedCrystalPointer, pointerType: 'mouse', bubbles: true,
     })));
-    await expect(surface(page)).toHaveAttribute('aria-pressed', 'false');
+    await expect(surface(page)).toHaveAttribute('data-pressed', 'false');
     await expect(surface(page)).toHaveAttribute('data-dormancy', 'awake', { timeout: 6000 });
   } finally {
     await page.mouse.up();
@@ -125,7 +124,7 @@ test('window focus loss releases a hold and wakes the crystal without a pointer 
     // engines does not reliably reproduce OS focus loss. Keep the real mouse
     // button down so no pointer-up/cancel can accidentally release the hold.
     await page.evaluate(() => window.dispatchEvent(new Event('blur')));
-    await expect(surface(page)).toHaveAttribute('aria-pressed', 'false');
+    await expect(surface(page)).toHaveAttribute('data-pressed', 'false');
     await expect.poll(async () => (await lastFrame(page))?.engaged).toBe(false);
     await expect(surface(page)).toHaveAttribute('data-dormancy', 'awake', { timeout: 6000 });
     await expect.poll(async () => (await lastFrame(page))?.shaderTime).toBeGreaterThan(dormant.shaderTime);
@@ -179,7 +178,7 @@ test('native vertical touch panning scrolls the page and releases the crystal @t
     await session.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: point.x, y: point.y, id: 1, radiusX: 5, radiusY: 5, force: 1 }] });
     touching = true;
     await expect.poll(() => page.evaluate(() => window.__crystalTouchPan.started)).toBe(true);
-    await expect(surface(page)).toHaveAttribute('aria-pressed', 'true');
+    await expect(surface(page)).toHaveAttribute('data-pressed', 'true');
     // Acknowledge the real press, then give touch handlers and the compositor
     // a rendered frame between native input updates on slow software renderers.
     for (let step = 1; step <= 10; step++) {
@@ -190,7 +189,7 @@ test('native vertical touch panning scrolls the page and releases the crystal @t
     await expect.poll(() => panel.evaluate(element => element.scrollTop)).toBeGreaterThan(20);
     await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     touching = false;
-    await expect(surface(page)).toHaveAttribute('aria-pressed', 'false');
+    await expect(surface(page)).toHaveAttribute('data-pressed', 'false');
     await expect(surface(page)).toHaveAttribute('data-dormancy', 'awake', { timeout: 8000 });
   } finally {
     if (touching) await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });

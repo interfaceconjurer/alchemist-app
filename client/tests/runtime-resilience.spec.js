@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { openSearch, toggleTheme } from './shell-helpers.js';
 
 async function expectUsableShell(page) {
   await expect(page.getByRole('heading', { name: 'Jordan L. Wright' })).toBeVisible();
-  await page.getByRole('button', { name: 'Search', exact: true }).click();
+  await openSearch(page);
   await expect(page.locator('.command-palette')).toBeVisible();
-  await expect(page.getByPlaceholder('Search work items and actions...')).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(page.locator('.command-palette')).not.toBeVisible();
 }
@@ -103,16 +103,27 @@ test('a failed graphics chunk preserves the shell', async ({ page }) => {
   await expectUsableShell(page);
 });
 
-test('reduced motion avoids mounting or downloading the GPU scene', async ({ page }) => {
-  const graphicsRequests = [];
-  page.on('request', request => {
-    if (/\/assets\/(MorphingSolid|Polyhedron)-/.test(request.url())) graphicsRequests.push(request.url());
+test('reduced motion grows the crystal in, then holds it at rest while the light changes', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.__calmFrames = [];
+    window.__ALCHEMY_PROFILE__ = {
+      visibility() {}, sequence() {}, render() {},
+      frame(sample) { window.__calmFrames.push({ phase: sample.phase, mode: sample.mode, rotation: sample.rotation, shaderTime: sample.shaderTime }); },
+    };
   });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  await expect(page.locator('[data-symbol-fallback="reduced-motion"]')).toBeVisible();
-  await expect(page.locator('.symbolContainer canvas')).toHaveCount(0);
-  expect(graphicsRequests).toEqual([]);
+  await expect(page.locator('.symbolContainer')).toHaveAttribute('data-render-state', 'reduced-motion');
+  await expect(page.locator('.symbolContainer canvas')).toBeVisible();
+  await expect(page.locator('[data-symbol-fallback]')).toHaveCount(0);
+  // Wait until the intro is over and the crystal has held for a while.
+  await expect.poll(() => page.evaluate(() => window.__calmFrames.filter(f => f.phase === 'hold').length), { timeout: 20_000 }).toBeGreaterThan(20);
+  const frames = await page.evaluate(() => window.__calmFrames);
+  expect(frames.every(f => f.mode === 'calm')).toBe(true);
+  const held = frames.filter(f => f.phase === 'hold');
+  // No spin once it has come to rest, but the light keeps breathing.
+  for (const f of held) expect(f.rotation).toBeCloseTo(Math.PI / 4 - 0.26, 6);
+  expect(held.at(-1).shaderTime).toBeGreaterThan(held[0].shaderTime);
   await expectUsableShell(page);
 });
 
@@ -136,7 +147,7 @@ for (const [name, saved] of Object.entries({
   });
 }
 
-test('denied storage keeps the page and theme toggle usable', async ({ page }) => {
+test('denied storage keeps the page and theme switching usable', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -148,7 +159,7 @@ test('denied storage keeps the page and theme toggle usable', async ({ page }) =
   await page.goto('/');
   await expectUsableShell(page);
   const initialTheme = await page.locator('html').getAttribute('data-theme');
-  await page.getByRole('button', { name: /Switch to .* mode/ }).click();
+  await toggleTheme(page);
   await expect(page.locator('html')).toHaveAttribute('data-theme', initialTheme === 'dark' ? 'light' : 'dark');
   expect(errors).toEqual([]);
 });
@@ -165,7 +176,7 @@ test('theme changes do not grow outstanding GPU resources', async ({ page }, tes
   const samples = [baseline];
   let theme = baseline.theme;
   for (let i = 0; i < 6; i++) {
-    await page.getByRole('button', { name: /Switch to .* mode/ }).click();
+    await toggleTheme(page);
     theme = theme === 'dark' ? 'light' : 'dark';
     const after = await sceneResources(page, { theme });
     samples.push(after);

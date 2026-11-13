@@ -2,7 +2,7 @@ import React, { useReducer, useEffect, useRef, useMemo } from "react";
 import "./App.css";
 import Icon from "./components/icon/view";
 import { icons } from "./components/iconList/iconList";
-import { workSections, getSectionForItem } from "./components/workList/workList";
+import { workSections, feedItems, getSectionForItem, getSectionIconForItem } from "./components/workList/workList";
 import AlchemySymbol from "./components/alchemySymbol/mediator";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import SpaceBackground from "./components/space/SpaceBackground";
@@ -12,7 +12,8 @@ import { resolveWorkItemsByIds } from "./resolveWorkItems";
 import StatusBar from "./components/statusBar/StatusBar";
 import CommandPalette from "./components/commandPalette/CommandPalette";
 import TabBar from "./components/app/TabBar";
-import TabContent from "./components/app/TabContent";
+import { tabIsLoading } from "./components/terminalLoader/TerminalLoader";
+import TabContent, { TabLoader } from "./components/app/TabContent";
 import DropZones from "./components/app/DropZones";
 import { LEFT_PANEL_MIN_WIDTH, LEFT_PANEL_DEFAULT_WIDTH, getLeftPanelMaxWidth, getInitialState, normalizeSplitView } from "./utils/stateHelpers";
 import { workspaceReducer } from "./workspaceReducer";
@@ -23,11 +24,12 @@ import { useResize } from "./hooks/useResize";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useSwipeBack } from "./hooks/useSwipeBack";
+import { useStageReveal } from "./hooks/useStageReveal";
+import { SHOW_STAGE, SHOW_WORK_LIST, SHOW_TOP_BAR } from "./featureFlags";
 
-// Temporarily hide the stage so the left panel fills the window. Flip to true to restore.
-const SHOW_STAGE = false;
-// Temporarily hide the "My Work" list in the left panel. Flip to true to restore.
-const SHOW_WORK_LIST = false;
+// While the stage flag is off, an opened stage splits the row 40 / 60 with the panel.
+const PANEL_FRACTION = 0.4;
+const panelWidthFor = (rowWidth) => rowWidth * PANEL_FRACTION;
 
 function App() {
   const [state, dispatch] = useReducer(workspaceReducer, undefined, getInitialState);
@@ -35,6 +37,8 @@ function App() {
   stateRef.current = state;
 
   const stageRef = useRef(null);
+  const leftPanelRef = useRef(null);
+  const stageSectionRef = useRef(null);
   const tabListRef = useRef(null);
 
   const tabActions = useTabManager(dispatch);
@@ -116,8 +120,10 @@ function App() {
     if (state.splitView.enabled && paneId) {
       previewTabId = paneId === 'left' ? state.splitView.leftPanePreviewTabId : state.splitView.rightPanePreviewTabId;
     }
+    const loading = tabIsLoading(activeTabId, state.animatedTabs);
     return (
       <TabBar
+        loading={loading && !state.fadingTabs.has(activeTabId)} revealing={loading && state.fadingTabs.has(activeTabId)}
         tabs={tabs} paneId={paneId} activeTabId={activeTabId} previewTabId={previewTabId}
         isInactivePane={isInactivePane} dropTargetIndex={state.dropTargetIndex} draggedTabId={state.draggedTabId} tabListRef={tabListRef}
         onTabClick={(tabId, clickPaneId) => dispatch({ type: 'PANE_TAB_CLICK', tabId, paneId: clickPaneId })}
@@ -135,11 +141,24 @@ function App() {
       activeTabId = paneId === 'left' ? state.splitView.leftActiveTabId : state.splitView.rightActiveTabId;
     }
     return (
-      <TabContent
-        tabs={tabs} activeTabId={activeTabId}
-      />
+      <>
+        <TabContent tabs={tabs} activeTabId={activeTabId} animatedTabs={state.animatedTabs} fadingTabs={state.fadingTabs} />
+        <TabLoader
+          tab={tabs.find((t) => t.id === activeTabId)}
+          animatedTabs={state.animatedTabs}
+          waiting={!stageSettled}
+          onStartTabFade={tabActions.startTabFade}
+          onMarkAnimationComplete={tabActions.markAnimationComplete}
+        />
+      </>
     );
   };
+
+  // While the stage flag is off, the stage still opens for an open work item,
+  // and while a work item is being dragged so there is somewhere to drop it.
+  const draggingWorkItem = state.dragThreshold.isDragging && state.dragThreshold.dragSource === 'sidebar';
+  const stageVisible = SHOW_STAGE || !!state.activeTabId || draggingWorkItem;
+  const { settled: stageSettled } = useStageReveal({ panelRef: leftPanelRef, stageRef: stageSectionRef, stageVisible, panelWidth: SHOW_STAGE ? state.leftPanelWidth : panelWidthFor, enabled: !isMobile && !SHOW_STAGE, ready: state.stateLoaded });
 
   const leftPaneTabs = useMemo(() => state.splitView.enabled ? state.openTabs.filter(t => state.splitView.leftPaneTabIds.includes(t.id)) : [], [state.openTabs, state.splitView.enabled, state.splitView.leftPaneTabIds]);
   const rightPaneTabs = useMemo(() => state.splitView.enabled ? state.openTabs.filter(t => state.splitView.rightPaneTabIds.includes(t.id)) : [], [state.openTabs, state.splitView.enabled, state.splitView.rightPaneTabIds]);
@@ -155,6 +174,7 @@ function App() {
           onAction={keyboard.handlePaletteAction}
           openTabIds={state.openTabs.map((t) => t.id)}
         />
+        {SHOW_TOP_BAR && (
         <div className="top-bar">
           {isMobile && state.activeTabId && (
             <button type="button" className="top-bar-back" onClick={() => dispatch({ type: 'CLOSE_ACTIVE_TAB' })} aria-label="Back to sidebar">
@@ -172,8 +192,9 @@ function App() {
           </button>
           <ThemeToggle />
         </div>
-        <main className={`main${SHOW_STAGE ? '' : ' main--stage-hidden'}`}>
-          <section className="left-panel" style={isMobile || !SHOW_STAGE ? undefined : { width: state.leftPanelWidth }}>
+        )}
+        <main className={`main${stageVisible ? '' : ' main--stage-hidden'}`}>
+          <section className="left-panel" ref={leftPanelRef} style={isMobile || !stageVisible ? undefined : { width: SHOW_STAGE ? state.leftPanelWidth : `${PANEL_FRACTION * 100}%` }}>
             {!isMobile && SHOW_STAGE && <div className="left-panel-resize-handle" onMouseDown={resize.handleResizeStart} aria-label="Resize left panel" />}
             <section className="left-panel-top">
               <header className="App-header">
@@ -195,6 +216,29 @@ function App() {
                 </a>
               </nav>
             </section>
+            {feedItems.length > 0 && (
+            <section className="work-feed" aria-labelledby="work-feed-title">
+              <h2 className="work-feed-title" id="work-feed-title">Cross section of recent work and thoughts</h2>
+              {feedItems.map((item) => (
+                <button key={item.id} type="button"
+                  data-work-item-id={item.id}
+                  className={`work-item work-feed-item ${state.activeTabId === item.id ? "work-item--selected" : ""}`}
+                  aria-pressed={state.activeTabId === item.id}
+                  onClick={() => tabActions.openWorkItem(item)}
+                  onMouseDown={(e) => !isMobile && e.button === 0 && handleWorkItemMouseDown(e, item)}
+                >
+                  <span className="work-feed-item-icon" aria-hidden="true">{getSectionIconForItem(item.id)}</span>
+                  <span className="work-feed-item-body">
+                    <span className="work-item-title">{item.title}</span>
+                    <span className="work-item-meta">
+                      {item.type && <span className="work-item-type">{item.type}</span>}
+                      {item.date && <time className="work-item-date">{item.date}</time>}
+                    </span>
+                  </span>
+                </button>
+              ))}
+            </section>
+            )}
             {SHOW_WORK_LIST && (
             <section className="work-list">
               <h2 className="work-list-title">My Work</h2>
@@ -222,13 +266,21 @@ function App() {
             </section>
             )}
           </section>
-          <section className={`stage${isMobile && !state.activeTabId ? ' stage--hidden' : ''}`}>
+          <section ref={stageSectionRef} className={`stage${isMobile && !state.activeTabId ? ' stage--hidden' : ''}`}>
             <div className="stage-editor">
               <div className="stage-main" ref={stageRef} style={{ position: 'relative' }}>
+                {isMobile && !SHOW_TOP_BAR && state.activeTabId && (
+                  <button type="button" className="stage-back" onClick={() => dispatch({ type: 'CLOSE_ACTIVE_TAB' })} aria-label="Back">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                    Back
+                  </button>
+                )}
                 {isMobile || !state.splitView.enabled ? (
                   <>
                     {!isMobile && renderTabs(state.openTabs)}
-                    {state.openTabs.length > 0 ? renderTabContent(state.openTabs) : (
+                    {state.openTabs.length > 0 ? renderTabContent(state.openTabs) : draggingWorkItem && state.dragThreshold.dropZone ? null : (
                       <div className="stage-empty">
                         <div className="stage-empty-content">
                           <div className="stage-empty-icon-wrap">
@@ -246,11 +298,6 @@ function App() {
                                 <rect className="stage-empty-icon-shimmer-rect" x={-282} y={0} width={500} height={200} fill="url(#stage-empty-shimmer-grad)" />
                               </g>
                             </svg>
-                          </div>
-                          <p className="stage-empty-title">No open files</p>
-                          <div className="stage-empty-hints">
-                            <p className="stage-empty-hint"><kbd className="stage-empty-kbd">{"\u2318"}K</kbd> to search</p>
-                            <p className="stage-empty-hint">or select from My Work in the sidebar</p>
                           </div>
                         </div>
                       </div>

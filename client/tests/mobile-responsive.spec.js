@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { SHOW_TOP_BAR } from './shell-helpers.js';
 
 const MOBILE_VIEWPORT = { width: 375, height: 812 };
 const DESKTOP_VIEWPORT = { width: 1280, height: 800 };
@@ -37,6 +38,7 @@ test.describe('Mobile Responsive View', () => {
   });
 
   test('mobile: clicking work item shows content overlay with back button', async ({ page }) => {
+    test.skip(!SHOW_TOP_BAR, 'The mobile back button lives in the hidden top bar.');
     await page.setViewportSize(MOBILE_VIEWPORT);
     await page.waitForTimeout(300);
     const workItem = page.locator('.work-item').first();
@@ -51,6 +53,7 @@ test.describe('Mobile Responsive View', () => {
   });
 
   test('mobile: back button closes tab and returns to sidebar', async ({ page }) => {
+    test.skip(!SHOW_TOP_BAR, 'The mobile back button lives in the hidden top bar.');
     await page.setViewportSize(MOBILE_VIEWPORT);
     await page.waitForTimeout(300);
     await page.locator('.work-item').first().click();

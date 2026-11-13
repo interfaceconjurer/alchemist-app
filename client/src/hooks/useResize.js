@@ -14,6 +14,7 @@ export function useResize(stateRef, dispatch) {
   const handleResizeStart = useCallback((e) => {
     e.preventDefault();
     isResizingRef.current = true;
+    document.body.classList.add('is-dragging');
     startXRef.current = e.clientX;
     startWidthRef.current = stateRef.current.leftPanelWidth;
   }, [stateRef]);
@@ -27,6 +28,7 @@ export function useResize(stateRef, dispatch) {
 
   const handleResizeEnd = useCallback(() => {
     pendingWidth.flush();
+    if (isResizingRef.current) document.body.classList.remove('is-dragging');
     isResizingRef.current = false;
   }, [pendingWidth]);
 
