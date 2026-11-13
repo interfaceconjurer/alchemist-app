@@ -183,7 +183,7 @@ body {
   min-height: 0;
   border: 1px solid var(--border-color-light);
   overflow: hidden;
-  background-color: var(--bg-color);
+  background-color: var(--stage-bg);
 }
 
 .stage-main {
@@ -247,7 +247,7 @@ body {
 }
 
 .stage-tab--active {
-  background-color: var(--bg-color);
+  background-color: var(--stage-bg);
   color: var(--text-color-dark);
   border-bottom: 2px solid var(--accent-color);
 }

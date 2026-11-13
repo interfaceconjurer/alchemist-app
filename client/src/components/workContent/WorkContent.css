@@ -108,7 +108,7 @@
 
 /* Shared image styles */
 .work-content-image-placeholder {
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: rgba(255, 255, 255, 0.3);
   border-radius: 0.5rem;
   overflow: hidden;
   aspect-ratio: 16 / 10;
@@ -208,7 +208,7 @@
 }
 
 button.work-content-image-placeholder {
-  background-color: rgba(0, 0, 0, 0.04);
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
 [data-theme="dark"] button.work-content-image-placeholder {
@@ -258,13 +258,38 @@ button.work-content-image-placeholder {
   padding: 0;
   border: 0;
   background: transparent;
-  color: #e8e8ea;
+  /* Dark theme. The light theme overrides these below. */
+  --viewer-text: #e8e8ea;
+  --viewer-title: #f0f0f2;
+  --viewer-description: #c4c4c8;
+  --viewer-control-text: #f0f0f2;
+  --viewer-control-border: rgba(255, 255, 255, 0.14);
+  --viewer-control-bg: rgba(255, 255, 255, 0.06);
+  --viewer-control-hover-bg: rgba(255, 255, 255, 0.14);
+  color: var(--viewer-text);
+}
+
+/* Light theme: the same grey as the panel beside the stage, dark text and controls. */
+:root:not([data-theme="dark"]) .artifact-viewer {
+  --viewer-text: #2f3034;
+  --viewer-title: #232428;
+  --viewer-description: #2f3034;
+  --viewer-control-text: #2a2b2f;
+  --viewer-control-border: rgba(0, 0, 0, 0.16);
+  --viewer-control-bg: rgba(0, 0, 0, 0.05);
+  --viewer-control-hover-bg: rgba(0, 0, 0, 0.11);
 }
 
 /* Fully opaque so the page underneath never competes with the artifact (a
-   transparent diagram would otherwise show the page through it). */
+   transparent diagram would otherwise show the page through it). Literal colours:
+   ::backdrop doesn't inherit custom properties in every browser. */
 .artifact-viewer::backdrop {
   background: #060608;
+}
+
+/* The left panel's colour in light mode: --bg-color (#c6c7ca) under --left-panel-bg (4% black). */
+:root:not([data-theme="dark"]) .artifact-viewer::backdrop {
+  background: #bebfc2;
 }
 
 .artifact-viewer[open] {
@@ -302,9 +327,9 @@ button.work-content-image-placeholder {
 .artifact-viewer-nav {
   display: grid;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
-  color: #f0f0f2;
+  border: 1px solid var(--viewer-control-border);
+  background: var(--viewer-control-bg);
+  color: var(--viewer-control-text);
   font: inherit;
   cursor: pointer;
   transition: background-color 0.15s ease;
@@ -329,17 +354,17 @@ button.work-content-image-placeholder {
 
 .artifact-viewer-close:hover,
 .artifact-viewer-nav:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: var(--viewer-control-hover-bg);
 }
 
-/* The site's global button:focus/:active glow and text colour don't apply here:
-   the viewer is always dark, and a focus ring shows for keyboard focus only. */
+/* The site's global button:focus/:active glow and text colour don't apply here;
+   a focus ring shows for keyboard focus only. */
 .artifact-viewer .artifact-viewer-close:focus,
 .artifact-viewer .artifact-viewer-close:active,
 .artifact-viewer .artifact-viewer-nav:focus,
 .artifact-viewer .artifact-viewer-nav:active {
   box-shadow: none;
-  color: #f0f0f2;
+  color: var(--viewer-control-text);
 }
 
 .artifact-viewer .artifact-viewer-close:focus-visible,
@@ -399,7 +424,7 @@ button.work-content-image-placeholder {
 
 .artifact-viewer-title {
   margin: 0;
-  color: #f0f0f2;
+  color: var(--viewer-title);
   font-family: var(--font-mono);
   font-size: 0.95rem;
   font-weight: 600;
@@ -407,7 +432,7 @@ button.work-content-image-placeholder {
 
 .artifact-viewer-description {
   margin: 0.35rem 0 0;
-  color: #c4c4c8;
+  color: var(--viewer-description);
   font-size: 0.85rem;
   line-height: 1.5;
 }
