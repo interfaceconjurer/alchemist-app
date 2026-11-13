@@ -46,7 +46,7 @@
 .terminal-icon {
   width: 14px;
   height: 14px;
-  color: #6b7280;
+  color: #4b5563;
   flex-shrink: 0;
 }
 
@@ -82,38 +82,44 @@
   min-height: 1.6em;
 } */
 
-/* Light mode text (readable on light bg) */
+/* Light mode: fully saturated hues, each taken just dark enough to stay above
+   4.5:1 (WCAG AA) on the light stage. */
+:root:not([data-theme="dark"]) .terminal-body,
+:root:not([data-theme="dark"]) .terminal-command {
+  font-weight: 500;
+}
+
 .term-white {
-  color: #374151;
+  color: #1f2937;
 }
 
 .term-green {
-  color: #059669;
+  color: #006536;
 }
 
 .term-cyan {
-  color: #0891b2;
+  color: #005f79;
 }
 
 .term-dim {
-  color: #9ca3af;
+  color: #4b5563;
 }
 
 .term-bold {
-  color: #111827;
-  font-weight: 600;
+  color: #0b1220;
+  font-weight: 700;
 }
 
 .term-yellow {
-  color: #b45309;
+  color: #894400;
 }
 
 .term-magenta {
-  color: #7c3aed;
+  color: #6f00ee;
 }
 
 .term-red {
-  color: #dc2626;
+  color: #b2000c;
 }
 
 [data-theme="dark"] .terminal-body .term-white,
@@ -130,7 +136,7 @@
 }
 
 [data-theme="dark"] .terminal-body .term-dim {
-  color: #6b7280;
+  color: #838b99; /* 5.8:1 on the dark stage */
 }
 
 [data-theme="dark"] .terminal-body .term-bold {

@@ -6,6 +6,8 @@
   --text-color: #2f3034; /* 7.9:1 on --bg-color; 4.9:1 at the intro line's 0.8 opacity */
   --text-color-dark: #2a2b2f; /* 8.4:1 */
   --heading-color: #232428; /* 9.2:1 */
+  /* Secondary text (breadcrumbs, dates, sections): 5.8:1 on the status bar, 5.0:1 on the darkest panel grey. */
+  --text-muted: #46474b;
   /* Interaction accent (selection, active tab, drop zones, focus): a soft violet,
      kept muted so the work itself carries the colour. Used as rgba(var(--accent-rgb), a). */
   --accent-rgb: 146, 114, 202;
@@ -14,10 +16,10 @@
   --focus-shadow: rgba(var(--accent-rgb), 0.5);
   --accent-color: rgba(var(--accent-rgb), 0.5);
   --button-bg: #d4d5d8;
-
-  /* Scrollbar - transparent track, white thumb in light mode */
   /* The stage (and its active tab and loader) sits a step lighter than the page. */
   --stage-bg: #dedfe2;
+
+  /* Scrollbar - transparent track, white thumb in light mode */
   --scrollbar-track: transparent;
   --scrollbar-thumb: rgba(0, 0, 0, 0.18);
   --scrollbar-thumb-hover: rgba(0, 0, 0, 0.28);
@@ -76,9 +78,10 @@
 [data-theme="dark"] {
   /* Dark theme */
   --bg-color: #0a0a0a;
+  --stage-bg: #0a0a0a;
   --text-color: #b8b8b8;
   --text-color-dark: #d0d0d0;
-  --stage-bg: #0a0a0a;
+  --text-muted: #8f8f8f; /* 5.8:1 on the status bar */
   --heading-color: #d0d0d0;
   --border-color: #4a4a4a;
   --border-color-light: #242424;

@@ -105,8 +105,7 @@
 .command-palette-item-section {
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  color: var(--text-color);
-  opacity: 0.5;
+  color: var(--text-muted);
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -130,8 +129,7 @@
 .command-palette-item-date {
   font-family: var(--font-mono);
   font-size: 0.7rem;
-  color: var(--text-color);
-  opacity: 0.5;
+  color: var(--text-muted);
   white-space: nowrap;
   flex-shrink: 0;
 }
