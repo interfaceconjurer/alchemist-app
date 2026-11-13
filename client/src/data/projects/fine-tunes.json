@@ -1,9 +1,10 @@
 {
   "id": "fine-tunes",
   "section": "sidequests",
+  "type": "Tool",
   "title": "Fine Tunes",
   "description": "Curate images, run a prompt, get a trained model. That's it.",
-  "date": "2025",
+  "date": "Mar 2026",
   "tags": ["Python", "CLI", "Replicate", "Flux LoRA", "Generative AI"],
   "repo": "https://github.com/interfaceconjurer/fine-tunes",
   "content": {
@@ -39,6 +40,7 @@
         },
         "alt": "Flux style pipeline showing train, status, and generate stages",
         "label": "Training Pipeline",
+        "viewable": false,
         "description": "The full pipeline from dataset preparation through training to image generation — all orchestrated through a single CLI with three commands."
       },
       {
@@ -59,6 +61,7 @@
         },
         "alt": "LoRA scale guide showing style strength from subtle to dominant",
         "label": "LoRA Scale Tuning",
+        "viewable": false,
         "description": "Visual guide to the key creative control — LoRA scale determines how strongly your trained style overrides the base model, from subtle influence to full stylistic dominance."
       },
       {
@@ -72,6 +75,7 @@
         },
         "alt": "Cost breakdown for training and generation on Replicate",
         "label": "Cost Model",
+        "viewable": false,
         "description": "Transparent cost breakdown — training a model runs about $1.50, and generation is fractions of a cent per image. Makes experimentation cheap."
       },
       {

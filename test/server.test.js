@@ -75,6 +75,22 @@ test('security policy permits existing assets while forbidding external scripts 
   assert.equal(response.headers['strict-transport-security'], undefined);
 });
 
+test('only self-contained work artifacts may be framed, and only by this site', async () => {
+  await fs.mkdir(path.join(distDir, 'work', 'deck'), { recursive: true });
+  await fs.writeFile(path.join(distDir, 'work', 'deck', 'index.html'), '<!doctype html><title>Deck</title>');
+  const get = await serve();
+  const artifact = await get('/work/deck/index.html');
+  assert.equal(artifact.status, 200);
+  assert.match(artifact.headers['content-security-policy'], /frame-ancestors 'self'/);
+  assert.doesNotMatch(artifact.headers['content-security-policy'], /frame-ancestors 'none'/);
+  assert.equal(artifact.headers['x-frame-options'], 'SAMEORIGIN');
+  for (const requestPath of ['/', '/workshop', '/work']) {
+    const response = await get(requestPath);
+    assert.match(response.headers['content-security-policy'], /frame-ancestors 'none'/, requestPath);
+    assert.equal(response.headers['x-frame-options'], 'DENY', requestPath);
+  }
+});
+
 test('trusted HTTPS requests work and receive HSTS without trusting forwarded hosts', async () => {
   const get = await serve(production);
   const response = await get('/', {
