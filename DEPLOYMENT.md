@@ -1,6 +1,6 @@
 # Production delivery
 
-Use Node 24 LTS at version 24.15 or later (`nvm use`) and npm 11. CI runs on pull requests, on `master`, weekly, and on demand. Every run installs both lockfiles with `npm ci` and runs the security audits, unit, server, and profile tests, a production build, and the bundle-growth gate. The browser compatibility suite runs as five parallel jobs, one per browser or device. It runs on `master` and for the weekly and manual runs, and on pull requests only when they touch code, styles, tests, the server, dependencies, or the workflow. Copy-only changes, such as project JSON, documents, or images, skip it. The deployment build also uses frozen installs and runs unit/server/bundle checks.
+Use Node 24 LTS at version 24.15 or later (`nvm use`) and npm 11. CI runs on pull requests, on `master`, weekly, and on demand. Every run installs both lockfiles with `npm ci` and runs the security audits, unit, server, and profile tests, a production build, and the bundle-growth gate. The browser compatibility suite runs as five parallel jobs, one per browser or device. It runs on `master` and for the weekly and manual runs, and on pull requests when they touch code, styles, tests, the server, dependencies, the workflow, or this deployment guide. Other copy-only changes, such as project JSON, documents, or images, skip it. Deployment-guide changes receive the full PR checks so reviews of delivery and dependency verification include browser results directly on the PR. The deployment build also uses frozen installs and runs unit/server/bundle checks.
 
 Before the next production release, set `PUBLIC_ORIGIN` to the canonical HTTPS origin, for example `https://portfolio.example.com`, without a path. Production startup intentionally fails when this is missing or invalid. Redirects always use this configured origin, including when a request supplies a hostile Host header.
 
@@ -14,9 +14,7 @@ The client dependency override selects patched MCP server 2.3.0 only under vgpu 
 
 Performance gates catch regressions; headless software rendering does not certify hardware frame rates. Validate the intended device/browser matrix before claiming a zero-jank release.
 
-
 Three 0.187.0 has a WebGL fallback defect that abandons framebuffer handles when render targets resize. The client pins that exact release and applies a guarded, idempotent postinstall/build compatibility fix to its source and exported bundles, using the public texture.renderTarget ownership. The script fails on unexpected versions or source so an upgrade requires explicit revalidation. CI verifies stable outstanding textures/framebuffers during repeated canvas resizes. Remove the compatibility patch when adopting an upstream release that fixes this path.
-
 
 ## Animation profiling
 
@@ -44,9 +42,26 @@ The fixed transition sequence uses lossless Float64 coefficient tables generated
 
 When changing solids or morph equations, run `npm run generate:morph --prefix client`, review the generated artifact, then run client tests. `npm run check:morph --prefix client` and every production build reject stale tables. `npm run bench:morph --prefix client` compares reference and compiled geometry costs across all six transitions; equivalence tests cover continuous positions, topology, and winding. `npm run test:profile --prefix client` verifies the statistics and evidence qualification rules without needing a GPU.
 
-
 ## Browser and mobile compatibility
 
 `npm run test:e2e --prefix client` (also `test:e2e:compatibility`) builds production output and runs desktop Chromium and WebKit plus Android Chrome, iPhone, and iPad device emulation. Install matching engines with `npx --prefix client playwright install chromium webkit`. CI installs their required system dependencies and runs the same matrix, one job per project in parallel; each job still runs its tests one at a time. The earlier hidden-workspace flow specs are retained for feature restoration; the default suite exercises the current public shell without changing its visibility flags.
 
 The compatibility matrix verifies default graphics startup, forced fallback, missing chunks/geometry, storage recovery, reduced motion, GPU resource stability, pause/resume, touch search, portrait/landscape bounds, keyboard recovery, persisted theme actions, reachable navigation, and responsive breakpoint changes. It also decodes all backdrop layers in both themes, checks resize races and static worker failure recovery, and verifies actual crystal clock/light dormancy plus vertical touch scrolling. Touch cases are selected only for emulated touch devices; the native CDP swipe case runs on Android Chromium. WebKit emulation is engine coverage, not a run of branded Safari on a physical iPhone. Actual phone GPU timing, browser chrome/keyboard behavior, sustained thermal performance, and a deployed staging smoke test remain separate release evidence.
+
+## Dependabot reconciliation — 2026-11-13
+
+All seven open Dependabot PRs were checked against master at `5e4970c2`. Its committed lockfiles already satisfy every proposed fix through newer releases or removal of the affected package:
+
+| Superseded PR                                                       | Proposed update                                               | Resolution already on master                                                         |
+| ------------------------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [#113](https://github.com/interfaceconjurer/alchemist-app/pull/113) | qs 6.15.2                                                     | Server lockfile resolves qs 6.17.1.                                                  |
+| [#115](https://github.com/interfaceconjurer/alchemist-app/pull/115) | Remove esbuild; React plugin 6.0.2, Vite 8.0.16, Vitest 4.1.8 | Client resolves React plugin 6.2.1, Vite 8.3.6, and Vitest 5.1.0; esbuild is absent. |
+| [#116](https://github.com/interfaceconjurer/alchemist-app/pull/116) | form-data 4.0.6                                               | form-data is absent from the client lockfile.                                        |
+| [#117](https://github.com/interfaceconjurer/alchemist-app/pull/117) | Babel core 7.29.7                                             | @babel/core is absent from the client lockfile.                                      |
+| [#118](https://github.com/interfaceconjurer/alchemist-app/pull/118) | React plugin 6.0.3, Vite 8.1.0, Vitest 4.1.9                  | Client resolves React plugin 6.2.1, Vite 8.3.6, and Vitest 5.1.0.                    |
+| [#119](https://github.com/interfaceconjurer/alchemist-app/pull/119) | body-parser 2.3.0 and qs 6.15.3                               | Server resolves body-parser 2.4.0 and qs 6.17.1.                                     |
+| [#121](https://github.com/interfaceconjurer/alchemist-app/pull/121) | PostCSS 8.5.26                                                | Client resolves PostCSS 8.5.32.                                                      |
+
+Fresh `npm ci` installs of both lockfiles passed on Node 24.16.0 and npm 11.13.0. The server production audit (`npm audit --omit=dev --audit-level=high`) and full client audit (`npm audit --prefix client --audit-level=high`) each reported zero vulnerabilities. All 11 server tests, 209 client tests, and 18 profiling statistics tests passed, as did the production build, generated morph-table check, and bundle budgets.
+
+This reconciliation changes documentation only. Existing dependency versions, the Three 0.187.0 disposal patch, and the scoped MCP server override remain in place. The browser matrix and hardware animation profiler were not rerun for this documentation change. Audit results are a dated snapshot; CI continues to audit subsequent changes and weekly runs.

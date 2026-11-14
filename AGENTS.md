@@ -41,7 +41,7 @@ npm run test:e2e:compatibility --prefix client  # Playwright: Chromium, WebKit, 
 
 Playwright browsers: `npx --prefix client playwright install chromium webkit`.
 
-CI (`.github/workflows/ci.yml`) runs npm audit (high), server and client tests, test:profile, a production build, and the bundle check on every pull request and `master` push. The e2e compatibility suite runs as five parallel jobs, one per browser or device. On pull requests it runs only when code, styles, tests, the server, dependencies or the workflow change, and it always runs on `master` and weekly. Before you call work done, run the relevant subset locally.
+CI (`.github/workflows/ci.yml`) runs npm audit (high), server and client tests, test:profile, a production build, and the bundle check on every pull request and `master` push. The e2e compatibility suite runs as five parallel jobs, one per browser or device. On pull requests it runs when code, styles, tests, the server, dependencies, the workflow, or `DEPLOYMENT.md` change, and it always runs on `master` and weekly. Before you call work done, run the relevant subset locally.
 
 ## Conventions
 
