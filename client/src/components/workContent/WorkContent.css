@@ -259,8 +259,11 @@ button.work-content-image-placeholder {
 /* ====== Artifact viewer (full-screen modal) ====== */
 
 .artifact-viewer {
-  width: 100vw;
-  height: 100dvh;
+  /* Insets, not 100vw: Arc Search letterboxes the page but sizes 100vw to the screen. */
+  inset: 0;
+  width: auto;
+  height: auto;
+  container-type: size;
   max-width: none;
   max-height: none;
   margin: 0;
@@ -410,7 +413,7 @@ button.work-content-image-placeholder {
 
 .artifact-viewer-embed {
   /* Largest box of the artifact's aspect ratio that fits the stage. */
-  width: min(100%, calc((100dvh - 9rem) * var(--artifact-ratio, 16 / 9)));
+  width: min(100%, calc((100cqh - 9rem) * var(--artifact-ratio, 16 / 9)));
   max-height: 100%;
   min-width: 0;
   border-radius: 0.5rem;
@@ -466,7 +469,7 @@ button.work-content-image-placeholder {
      and the controls and caption move to a narrow column beside it. The stage's
      children join the frame's grid so previous / next can sit in that column. */
   .artifact-viewer-frame {
-    --viewer-side: clamp(8.5rem, 24vw, 13rem);
+    --viewer-side: clamp(8.5rem, 24cqw, 13rem);
     grid-template-columns: minmax(0, 1fr) var(--viewer-side);
     grid-template-rows: auto minmax(0, 1fr) auto;
     grid-template-areas:
@@ -492,7 +495,7 @@ button.work-content-image-placeholder {
   }
   .artifact-viewer-embed {
     /* The full frame height, less its vertical padding. */
-    width: min(100%, calc((100dvh - 1.5rem) * var(--artifact-ratio, 16 / 9)));
+    width: min(100%, calc((100cqh - 1.5rem) * var(--artifact-ratio, 16 / 9)));
   }
   .artifact-viewer-nav {
     position: static;
