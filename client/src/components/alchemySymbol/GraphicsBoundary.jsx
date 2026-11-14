@@ -30,7 +30,9 @@ export function StaticSymbol({ reason = 'unavailable' }) {
 export class GraphicsBoundary extends Component {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
-  reportFailure = () => { this.setState({ failed: true }); };
+  // Tell the slot the crystal won't arrive (it stops waiting and shows this outline).
+  componentDidCatch() { this.props.onFailure?.(); }
+  reportFailure = () => { this.setState({ failed: true }); this.props.onFailure?.(); };
   render() {
     if (this.state.failed) return <StaticSymbol />;
     return (
