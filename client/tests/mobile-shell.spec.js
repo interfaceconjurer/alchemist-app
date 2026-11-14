@@ -163,3 +163,40 @@ test('crossing the responsive breakpoint preserves theme and public-shell contro
     await expect(page.locator('.command-palette')).toHaveCount(0);
   }
 });
+
+const overlaps = (a, b) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
+for (const [id, kind, media, gallery] of [
+  ['apollo-portfolio-review', 'deck', '.artifact-viewer-embed', false],
+  ['fine-tunes', 'image gallery', '.artifact-viewer-image', true],
+]) {
+  test(`the ${kind} viewer fills a landscape phone with its controls beside the artifact`, async ({ page }) => {
+    // Software-rendered CI is slow to lay out and dispatch taps at this size.
+    test.setTimeout(120_000);
+    await page.setViewportSize({ width: 812, height: 375 });
+    await page.locator(`[data-work-item-id="${id}"]`).tap();
+    const open = page.locator('.work-content-viewable').first();
+    await open.scrollIntoViewIfNeeded();
+    await open.tap();
+    const viewer = page.locator('.artifact-viewer');
+    await expect(viewer).toBeVisible();
+
+    const artifact = viewer.locator(media);
+    const controls = [viewer.getByRole('button', { name: 'Close' }), viewer.locator('.artifact-viewer-caption')];
+    if (gallery) controls.push(viewer.getByRole('button', { name: 'Previous' }), viewer.getByRole('button', { name: 'Next' }));
+    await expectWithinViewport(page, artifact, { vertical: true });
+    // Height is the scarce dimension: the artifact gets nearly all of it.
+    expect((await artifact.boundingBox()).height).toBeGreaterThanOrEqual(375 * 0.75);
+    for (const control of controls) {
+      await expectWithinViewport(page, control, { vertical: true });
+      await expectCenterHittable(control);
+      expect(overlaps(await artifact.boundingBox(), await control.boundingBox())).toBe(false);
+    }
+    if (gallery) {
+      await viewer.getByRole('button', { name: 'Next' }).tap();
+      await expect(viewer.locator('.artifact-viewer-count')).toHaveText(/^2 \//);
+    }
+    await viewer.getByRole('button', { name: 'Close' }).tap();
+    await expect(viewer).not.toBeVisible();
+  });
+}
