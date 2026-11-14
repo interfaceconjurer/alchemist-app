@@ -1,17 +1,28 @@
 name: Verify application
 
+# Pull requests and master only, so a push to a PR branch doesn't run everything twice.
+# A weekly run catches regressions from dependency or runner-image changes.
 on:
   push:
+    branches: [master]
   pull_request:
+  schedule:
+    - cron: "0 9 * * 1"
+  workflow_dispatch:
 
 permissions:
   contents: read
 
+# A newer push to the same branch or PR cancels the run it supersedes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  # Fast checks for every change (about 2 minutes).
   verify:
     runs-on: ubuntu-latest
-    # The browser compatibility suite alone takes about 15 minutes on a hosted runner.
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,14 +39,73 @@ jobs:
       - run: npm test
       - run: npm test --prefix client -- --run
       - run: npm run test:profile --prefix client
-      - run: npx --prefix client playwright install --with-deps chromium webkit
-      - run: npm run test:e2e:compatibility --prefix client
+      - run: npm run build --prefix client
       - run: npm run check:bundle --prefix client
+
+  # Decides whether the browser suite needs to run: always on master, the weekly run
+  # and manual runs; on pull requests only when the change can affect what it tests.
+  # Copy-only changes (project JSON, docs, images) skip it.
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      browser: ${{ steps.decide.outputs.browser }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: decide
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENT" != "pull_request" ]; then
+            echo "browser=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          changed=$(git diff --name-only "$BASE" "$HEAD")
+          echo "$changed"
+          if echo "$changed" | grep -qE '^(server\.js|package(-lock)?\.json|\.nvmrc|\.github/workflows/|client/(index\.html|vite\.config\.js|playwright[^/]*\.config\.js|package(-lock)?\.json|scripts/|tests/|public/(manifest\.json|robots\.txt)$|src/(App|index|theme)\.(jsx?|css)$|src/(featureFlags|workspace[^/]*|resolveWorkItems)\.js$|src/(components|contexts|hooks|utils|graphix)/))'; then
+            echo "browser=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "browser=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # The cross-browser suite, one job per browser or device, running in parallel.
+  # Each job still runs its tests one at a time (workers: 1), because many of them
+  # measure GPU resources and animation timing.
+  browser:
+    needs: changes
+    if: needs.changes.outputs.browser == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium-desktop, webkit-desktop, android-chromium, ios-webkit, ipad-webkit]
+    name: browser (${{ matrix.project }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix client --include=dev
+      - name: Install the browser engine
+        run: npx --prefix client playwright install --with-deps ${{ contains(matrix.project, 'webkit') && 'webkit' || 'chromium' }}
+      - run: npm run test:e2e:compatibility --prefix client -- --project=${{ matrix.project }}
       - name: Retain browser failure traces
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: browser-failures-${{ github.run_id }}-${{ github.run_attempt }}
+          name: browser-failures-${{ matrix.project }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: client/test-results/
           if-no-files-found: ignore
           retention-days: 7
