@@ -26,6 +26,17 @@ npm ci
 npm ci --prefix client --include=dev
 ```
 
+## Worktrees
+
+Keep the main checkout (`~/git-repos/alchemist-app`) on `master`. Do each change in its own worktree in the sibling `alchemist-app.worktrees/` directory, branched from `origin/master`:
+
+```sh
+git fetch origin
+git worktree add -b interfaceconjurer/<name> ../alchemist-app.worktrees/<name> origin/master
+```
+
+Run the setup above inside the new worktree. Don't put worktrees in `/tmp`, because macOS clears it. Once the branch has merged, remove the worktree with `git worktree remove ../alchemist-app.worktrees/<name>` and delete the branch.
+
 ## Commands
 
 ```sh
