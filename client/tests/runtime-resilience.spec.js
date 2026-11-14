@@ -165,6 +165,8 @@ test('denied storage keeps the page and theme switching usable', async ({ page }
 });
 
 test('theme changes do not grow outstanding GPU resources', async ({ page }, testInfo) => {
+  // Software-rendered CI needs time for startup and six full theme switches.
+  test.setTimeout(90_000);
   await trackWebGL(page);
   await trackSceneSubmissions(page);
   // Isolate graph ownership at the quality floor; resolution adaptation is
