@@ -22,7 +22,7 @@ describe('site metadata', () => {
   it('points canonical, Open Graph and Twitter at the jordanwright.codes origin', () => {
     expect(doc.querySelector('link[rel="canonical"]').getAttribute('href')).toBe(`${ORIGIN}/`);
     expect(meta('meta[property="og:url"]')).toBe(`${ORIGIN}/`);
-    expect(meta('meta[property="og:image"]')).toBe(`${ORIGIN}/og-image.png`);
+    expect(meta('meta[property="og:image"]')).toBe(`${ORIGIN}/og-image-square.png`);
     expect(meta('meta[name="twitter:image"]')).toBe(`${ORIGIN}/og-image.png`);
     expect(meta('meta[name="twitter:card"]')).toBe('summary_large_image');
     expect(meta('meta[property="og:image:alt"]')).toBeTruthy();
@@ -35,12 +35,14 @@ describe('site metadata', () => {
     };
     expect(size('og-image.png')).toEqual([1200, 630]);
     expect(size('og-image-square.png')).toEqual([630, 630]);
-    // The wide card comes first: most apps use the first og:image.
+    // The square crystal comes first: Slack shows the first og:image as a square
+    // thumbnail. X keeps the wide card through twitter:image.
     expect([...doc.querySelectorAll('meta[property="og:image"]')].map((m) => m.getAttribute('content')))
-      .toEqual([`${ORIGIN}/og-image.png`, `${ORIGIN}/og-image-square.png`]);
+      .toEqual([`${ORIGIN}/og-image-square.png`, `${ORIGIN}/og-image.png`]);
     expect(size('apple-touch-icon.png')).toEqual([180, 180]);
-    expect(meta('meta[property="og:image:width"]')).toBe('1200'); // first image's size
+    expect(meta('meta[property="og:image:width"]')).toBe('630'); // first image's size
     expect(meta('meta[property="og:image:height"]')).toBe('630');
+    expect(meta('meta[name="twitter:image"]')).toBe(`${ORIGIN}/og-image.png`);
   });
 
   it('has valid Person structured data and no old branding', () => {
