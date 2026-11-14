@@ -43,8 +43,8 @@ jobs:
       - run: npm run check:bundle --prefix client
 
   # Decides whether the browser suite needs to run: always on master, the weekly run
-  # and manual runs; on pull requests only when the change can affect what it tests.
-  # Copy-only changes (project JSON, docs, images) skip it.
+  # and manual runs; on pull requests when code or deployment guidance changes.
+  # Other copy-only changes (project JSON, docs, images) skip it.
   changes:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -68,7 +68,7 @@ jobs:
           fi
           changed=$(git diff --name-only "$BASE" "$HEAD")
           echo "$changed"
-          if echo "$changed" | grep -qE '^(server\.js|package(-lock)?\.json|\.nvmrc|\.github/workflows/|client/(index\.html|vite\.config\.js|playwright[^/]*\.config\.js|package(-lock)?\.json|scripts/|tests/|public/(manifest\.json|robots\.txt)$|src/(App|index|theme)\.(jsx?|css)$|src/(featureFlags|workspace[^/]*|resolveWorkItems)\.js$|src/(components|contexts|hooks|utils|graphix)/))'; then
+          if echo "$changed" | grep -qE '^(DEPLOYMENT\.md$|server\.js|package(-lock)?\.json|\.nvmrc|\.github/workflows/|client/(index\.html|vite\.config\.js|playwright[^/]*\.config\.js|package(-lock)?\.json|scripts/|tests/|public/(manifest\.json|robots\.txt)$|src/(App|index|theme)\.(jsx?|css)$|src/(featureFlags|workspace[^/]*|resolveWorkItems)\.js$|src/(components|contexts|hooks|utils|graphix)/))'; then
             echo "browser=true" >> "$GITHUB_OUTPUT"
           else
             echo "browser=false" >> "$GITHUB_OUTPUT"
