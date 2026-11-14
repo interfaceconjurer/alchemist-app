@@ -104,6 +104,8 @@ test('a failed graphics chunk preserves the shell', async ({ page }) => {
 });
 
 test('reduced motion grows the crystal in, then holds it at rest while the light changes', async ({ page }) => {
+  // Software rendering must complete the opening fade and collect 21 held frames.
+  test.setTimeout(90_000);
   await page.addInitScript(() => {
     window.__calmFrames = [];
     window.__ALCHEMY_PROFILE__ = {
@@ -117,7 +119,7 @@ test('reduced motion grows the crystal in, then holds it at rest while the light
   await expect(page.locator('.symbolContainer canvas')).toBeVisible();
   await expect(page.locator('[data-symbol-fallback]')).toHaveCount(0);
   // Wait until the intro is over and the crystal has held for a while.
-  await expect.poll(() => page.evaluate(() => window.__calmFrames.filter(f => f.phase === 'hold').length), { timeout: 20_000 }).toBeGreaterThan(20);
+  await expect.poll(() => page.evaluate(() => window.__calmFrames.filter(f => f.phase === 'hold').length), { timeout: 45_000 }).toBeGreaterThan(20);
   const frames = await page.evaluate(() => window.__calmFrames);
   expect(frames.every(f => f.mode === 'calm')).toBe(true);
   const held = frames.filter(f => f.phase === 'hold');
