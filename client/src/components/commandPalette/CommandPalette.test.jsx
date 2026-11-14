@@ -21,7 +21,7 @@ function Harness({ onAction = () => {}, onSelectItem = () => {} }) {
   return (
     <ThemeProvider>
       <button onClick={() => setOpen(true)}>Open search</button>
-      <CommandPalette isOpen={open} onClose={() => setOpen(false)} onAction={onAction} onSelectItem={onSelectItem} openTabIds={[]} />
+      <CommandPalette isOpen={open} onClose={() => setOpen(false)} onAction={onAction} onSelectItem={onSelectItem} />
     </ThemeProvider>
   );
 }

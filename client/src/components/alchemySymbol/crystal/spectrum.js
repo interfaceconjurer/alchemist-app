@@ -7,7 +7,7 @@ import { exp, Fn, vec3 } from 'three/tsl';
  */
 const gauss = (t, mu, sigma) => Math.exp(-(((t - mu) / sigma) ** 2));
 
-export function spectrumRgbJs(t) {
+function spectrumRgbJs(t) {
   return [
     gauss(t, 0.1, 0.24) + 0.35 * gauss(t, 0.95, 0.1),
     gauss(t, 0.45, 0.22),

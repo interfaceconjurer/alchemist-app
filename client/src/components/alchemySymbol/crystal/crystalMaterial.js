@@ -121,7 +121,7 @@ function edgeProximity(widthWorld) {
  * than the page, mirroring how dark mode sits a few steps darker than black:
  * the solid reads by its highlights and backlight, not by silhouette contrast.
  */
-export const LIGHT_BODY = [0.15, 0.155, 0.168]; // linear, before tone mapping; dark smoky stone, ~60 levels under the #c6c7ca page
+const LIGHT_BODY = [0.15, 0.155, 0.168]; // linear, before tone mapping; dark smoky stone, ~60 levels under the #c6c7ca page
 
 /**
  * Bump the world-space normal by a scalar height field using screen-space

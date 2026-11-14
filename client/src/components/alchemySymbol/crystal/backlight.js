@@ -9,7 +9,7 @@ import { color, float, max, normalize, sin, smoothstep, time, vec3 } from 'three
  * Directions are world-space (camera looks down -Z), so the lights stay behind
  * the solid while it spins in front of them.
  */
-export const BACKLIGHTS = [
+const BACKLIGHTS = [
   { hex: '#6d4dff', dir: [-0.55, 0.35, -1], period: 11, phase: 0.0 }, // violet
   { hex: '#19c3ff', dir: [0.6, -0.15, -1], period: 13, phase: 2.1 }, // cyan
   { hex: '#ff3d8b', dir: [0.15, 0.75, -1], period: 17, phase: 4.4 }, // rose
@@ -22,7 +22,7 @@ function fade({ period, phase }, animationTime) {
 }
 
 /** Shared TSL nodes so every material breathes in sync. */
-export function backlightNodes(animationTime = time) {
+function backlightNodes(animationTime = time) {
   return BACKLIGHTS.map((l) => ({
     color: color(l.hex),
     dir: normalize(vec3(...l.dir)),

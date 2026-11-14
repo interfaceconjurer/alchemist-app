@@ -14,8 +14,6 @@ export const getInitialState = () => ({
   animatedTabs: new Set(),
   fadingTabs: new Set(),
   commandPaletteOpen: false,
-  draggedTabId: null,
-  dropTargetIndex: null,
   previewTabId: null,
   // Split view state
   splitView: {
@@ -31,9 +29,6 @@ export const getInitialState = () => ({
   },
   // Enhanced drag state
   dragThreshold: {
-    startX: 0,
-    startY: 0,
-    startTime: 0,
     tabId: null,
     isDragging: false,
     dropZone: null,
@@ -50,9 +45,6 @@ export const DOUBLE_CLICK_DELAY = 250; // milliseconds
 
 // Get default drag threshold state
 export const getDefaultDragThreshold = () => ({
-  startX: 0,
-  startY: 0,
-  startTime: 0,
   tabId: null,
   isDragging: false,
   dropZone: null,

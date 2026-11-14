@@ -100,7 +100,6 @@ function TerminalLoader({ item, onFadeStart, onComplete, idle = false }) {
         </div>
         {hasOutput && (
           <>
-            <div className="terminal-divider" />
             <div className="terminal-body" ref={bodyRef}>
               {outputLines.slice(0, visibleLines).map((line, i) => (
                 <div key={i} className="terminal-line">

@@ -37,7 +37,7 @@ export function useDragDrop(stateRef, dispatch, stageRef, splitViewActions) {
       ghostRef.current = createGhostElement(tabElement, e.clientX, e.clientY);
       if (ghostRef.current) document.body.appendChild(ghostRef.current);
 
-      dispatch({ type: 'SET_DRAG_STATE', payload: { isDragging: true, tabId: ds.tabId }, draggedTabId: ds.tabId });
+      dispatch({ type: 'SET_DRAG_STATE', payload: { isDragging: true, tabId: ds.tabId } });
 
       document.removeEventListener('mousemove', onDetect);
       document.addEventListener('mousemove', onMove);

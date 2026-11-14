@@ -198,7 +198,6 @@ body {
   display: flex;
   flex-wrap: nowrap;
   gap: 0;
-  /* border-bottom: 1px solid var(--border-color-light); */
   background-color: var(--stage-tabs-bg);
   min-height: 2.25rem;
   flex-shrink: 0;
@@ -254,10 +253,6 @@ body {
 
 .stage-tab--preview .stage-tab-title {
   font-style: italic;
-}
-
-.stage-tab--drop-before {
-  box-shadow: -2px 0 0 0 var(--stage-tab-drop-indicator);
 }
 
 .stage-tab-icon {
@@ -453,7 +448,6 @@ h1, h2, h3, h4, h5, h6 {
 .App-title {
   position: relative; /* sits over the bottom of the symbol canvas (see .symbolContainer margin) */
   font-size: 1.5em;
-  text-align: left;
   margin: 0;
   padding-bottom: 0.25rem;
   font-family: var(--font-mono);
@@ -461,7 +455,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .App-intro {
-  text-align: left;
   margin: 0;
   font-size: 0.9em;
   opacity: 0.8;
@@ -474,10 +467,6 @@ h1, h2, h3, h4, h5, h6 {
 :root:not([data-theme="dark"]) .App-intro,
 :root:not([data-theme="dark"]) .work-feed-title {
   opacity: 0.92;
-}
-
-.App-intro-subtitle {
-  font-size: 0.85em;
 }
 
 button:focus,
@@ -509,7 +498,6 @@ a:active {
   text-decoration: none;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   transition: all 0.2s ease;
   backdrop-filter: blur(10px);
   flex: none;

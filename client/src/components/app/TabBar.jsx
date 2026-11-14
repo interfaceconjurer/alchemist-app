@@ -10,9 +10,6 @@ const TabBar = ({
   activeTabId,
   previewTabId,
   isInactivePane,
-  dropTargetIndex,
-  draggedTabId,
-  tabListRef,
   onTabClick,
   onTabDoubleClick,
   onTabMouseDown,
@@ -25,8 +22,8 @@ const TabBar = ({
       role="tablist"
       aria-hidden={loading || undefined}
     >
-      <div className="stage-tabs-list" ref={paneId === null ? tabListRef : null}>
-        {tabs.map((tab, index) => (
+      <div className="stage-tabs-list">
+        {tabs.map((tab) => (
           <div
             key={tab.id}
             role="tab"
@@ -37,9 +34,6 @@ const TabBar = ({
               activeTabId === tab.id ? "stage-tab--active" : "",
               previewTabId === tab.id ? "stage-tab--preview" : "",
               isInactivePane && activeTabId === tab.id ? "stage-tab--inactive-active" : "",
-              dropTargetIndex === index && draggedTabId !== tab.id
-                ? "stage-tab--drop-before"
-                : "",
             ]
               .filter(Boolean)
               .join(" ")}

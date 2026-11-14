@@ -10,7 +10,7 @@ export const useGraphicsFailure = () => useContext(GraphicsFailureContext);
  * the centre of the 600 px-tall canvas. Back faces and edges are drawn first and
  * fainter, so the shape reads as transparent.
  */
-export function StaticSymbol({ reason = 'unavailable' }) {
+function StaticSymbol({ reason = 'unavailable' }) {
   return (
     <div className="symbol-fallback" data-symbol-fallback={reason} role="img" aria-label="Crystal symbol">
       <svg viewBox="-300 -300 600 600" aria-hidden="true" focusable="false">

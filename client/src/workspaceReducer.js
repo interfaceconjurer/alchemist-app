@@ -318,10 +318,10 @@ export function workspaceReducer(state, action) {
       return { ...state, leftPanelWidth: action.width };
 
     case 'SET_DRAG_STATE':
-      return { ...state, dragThreshold: { ...state.dragThreshold, ...action.payload }, ...(action.draggedTabId !== undefined ? { draggedTabId: action.draggedTabId } : {}) };
+      return { ...state, dragThreshold: { ...state.dragThreshold, ...action.payload } };
 
     case 'CLEAR_DRAG':
-      return { ...state, dragThreshold: getDefaultDragThreshold(), draggedTabId: null, dropTargetIndex: null };
+      return { ...state, dragThreshold: getDefaultDragThreshold() };
 
     case 'TOGGLE_COMMAND_PALETTE':
       return { ...state, commandPaletteOpen: !state.commandPaletteOpen };
