@@ -35,7 +35,7 @@ git fetch origin
 git worktree add -b interfaceconjurer/<name> ../alchemist-app.worktrees/<name> origin/master
 ```
 
-Run the setup above inside the new worktree. Don't put worktrees in `/tmp`, because macOS clears it. Once the branch has merged, remove the worktree with `git worktree remove ../alchemist-app.worktrees/<name>` and delete the branch.
+Run the setup above inside the new worktree. Don't put worktrees in `/tmp`, because macOS clears it. GitHub deletes the remote branch when its PR merges. After that, remove the worktree with `git worktree remove ../alchemist-app.worktrees/<name>`, delete the local branch, and run `git fetch --prune`. Delete branches from closed, unmerged PRs by hand.
 
 ## Commands
 
