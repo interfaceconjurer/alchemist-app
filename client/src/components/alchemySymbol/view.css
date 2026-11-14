@@ -15,6 +15,54 @@
   display: block;
 }
 
+/* ====== Crystal loader (CrystalLoader.jsx) ======
+   Centred on the crystal's resting position: the solid sits a little above the
+   canvas centre (about 54% of the height down is the middle of the pyramid). */
+.symbolContainer {
+  position: relative;
+}
+
+.crystal-loader {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 54%;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 250ms ease; /* FADE_MS */
+}
+
+.crystal-loader--visible {
+  opacity: 1;
+}
+
+/* A braille cell: a 2×3 grid of round dots, sized like a 28px braille glyph. */
+.crystal-loader-cell {
+  display: grid;
+  grid-template-columns: repeat(2, 3.5px);
+  grid-template-rows: repeat(3, 3.5px);
+  gap: 3px;
+}
+
+.crystal-loader-dot {
+  border-radius: 50%;
+  background: rgb(var(--accent-rgb));
+  opacity: 0;
+}
+
+/* Light mode: a deeper tone of the accent, 4.9:1 on the page. */
+:root:not([data-theme="dark"]) .crystal-loader-dot {
+  background: #56408c;
+}
+
+.crystal-loader-dot--on {
+  opacity: 1;
+}
+
 /* Transition wrapper — stays full size, never transforms */
 .symbol-transition {
   width: 100%;

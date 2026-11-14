@@ -355,12 +355,21 @@ function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dorman
   );
 }
 
+/** Reports once, after the first frame has been rendered (Bloom renders at priority 1). */
+function FirstFrame({ onFirstFrame }) {
+  const reported = useRef(false);
+  useFrame(() => { if (!reported.current) { reported.current = true; onFirstFrame?.(); } }, 2);
+  return null;
+}
+
 /**
  * One persistent canvas; the solid carves itself into the next instead of cross-fading.
  * `calm` (reduced motion): fade in at rest, then only the light changes, with an
  * occasional fade to the next solid.
+ * `held`: keep rendering (so the GPU work of the first frame happens) but freeze the
+ * animation clock, so the intro waits at its first frame until the loader is gone.
  */
-export default function MorphingSolid({ active = true, calm = false }) {
+export default function MorphingSolid({ active = true, calm = false, held = false, onFirstFrame }) {
   const { isDark } = useThemeColor();
   const { dpr, lowerDpr } = useRenderDpr();
   const animationTime = useMemo(() => uniform(0), []);
@@ -374,6 +383,7 @@ export default function MorphingSolid({ active = true, calm = false }) {
   const bloomGain = useRef(1);
   // 'starting' until the first rendered frame, then awake / changing / dormant.
   const [dormantState, setDormantState] = React.useState('starting');
+  const running = active && !held;
   const { pressed, handlers } = useDormancyInteraction(dormancy);
   const setBloomGain = useCallback((g) => { bloomGain.current = g; }, []);
 
@@ -390,8 +400,9 @@ export default function MorphingSolid({ active = true, calm = false }) {
       {...handlers}
     >
       <Canvas gl={createRenderer} dpr={dpr} frameloop={active ? 'always' : 'never'} camera={{ position: [0, 1.2, 7.5], fov: 60 }} style={{ background: 'transparent' }}>
+        <FirstFrame onFirstFrame={onFirstFrame} />
         <DormancyController
-          active={active}
+          active={running}
           dormancy={dormancy}
           timeScale={timeScale}
           uVitality={uVitality}
@@ -399,7 +410,7 @@ export default function MorphingSolid({ active = true, calm = false }) {
           setBloomGain={setBloomGain}
           onState={setDormantState}
         />
-        <RenderPolicyController active={active} lowerDpr={lowerDpr} animationTime={animationTime} timeScale={timeScale} />
+        <RenderPolicyController active={running} lowerDpr={lowerDpr} animationTime={animationTime} timeScale={timeScale} />
         <MorphShape calm={calm} isDark={isDark} animationTime={animationTime} uVitality={uVitality} bubbleVisibility={bubbleVisibility} dormancy={dormancy} timeScale={timeScale} />
         <Bloom strength={bloom} gain={bloomGain} />
       </Canvas>
