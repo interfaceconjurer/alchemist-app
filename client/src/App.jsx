@@ -39,7 +39,6 @@ function App() {
   const stageRef = useRef(null);
   const leftPanelRef = useRef(null);
   const stageSectionRef = useRef(null);
-  const tabListRef = useRef(null);
 
   const tabActions = useTabManager(dispatch);
   const splitViewActions = useSplitView(stateRef, dispatch, stageRef);
@@ -125,7 +124,7 @@ function App() {
       <TabBar
         loading={loading && !state.fadingTabs.has(activeTabId)} revealing={loading && state.fadingTabs.has(activeTabId)}
         tabs={tabs} paneId={paneId} activeTabId={activeTabId} previewTabId={previewTabId}
-        isInactivePane={isInactivePane} dropTargetIndex={state.dropTargetIndex} draggedTabId={state.draggedTabId} tabListRef={tabListRef}
+        isInactivePane={isInactivePane}
         onTabClick={(tabId, clickPaneId) => dispatch({ type: 'PANE_TAB_CLICK', tabId, paneId: clickPaneId })}
         onTabDoubleClick={keyboard.handleTabDoubleClick}
         onTabMouseDown={handleTabMouseDown}
@@ -172,7 +171,6 @@ function App() {
           onClose={() => dispatch({ type: 'CLOSE_COMMAND_PALETTE' })}
           onSelectItem={tabActions.openWorkItem}
           onAction={keyboard.handlePaletteAction}
-          openTabIds={state.openTabs.map((t) => t.id)}
         />
         {SHOW_TOP_BAR && (
         <div className="top-bar">

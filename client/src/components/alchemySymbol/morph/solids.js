@@ -3,7 +3,7 @@ import { intersectHalfspaces, planesFromVertices } from './halfspace.js';
 const PHI = (1 + Math.sqrt(5)) / 2;
 
 /** Uniform circumradius so every solid reads at the same size through the morph. */
-export const SOLID_RADIUS = 2.07; // 10% smaller than the original 2.3
+const SOLID_RADIUS = 2.07; // 10% smaller than the original 2.3
 
 const normalizeTo = (vertices, r) => {
   const max = Math.max(...vertices.map((v) => Math.hypot(...v)));

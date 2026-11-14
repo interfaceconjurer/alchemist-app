@@ -41,7 +41,7 @@ export const ThemeProvider = ({ children }) => {
     manuallySelected.current = true;
     setTheme(current => current === 'light' ? 'dark' : 'light');
   }, []);
-  const value = useMemo(() => ({ theme, toggleTheme, isLight: theme === 'light', isDark: theme === 'dark' }), [theme, toggleTheme]);
+  const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 };

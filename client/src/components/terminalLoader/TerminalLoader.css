@@ -54,16 +54,6 @@
   color: #9ca3af;
 }
 
-/* Divider between command and output */
-.terminal-divider {
-  /* height: 1px; */
-  /* background-color: rgba(0, 0, 0, 0.08); */
-}
-
-[data-theme="dark"] .terminal-divider {
-  background-color: rgba(255, 255, 255, 0.06);
-}
-
 /* Output body */
 .terminal-body {
   padding: 1rem 1.5rem;
@@ -76,11 +66,6 @@
   min-height: 0;
   margin: 0;
 }
-
-/* .terminal-line {
-  white-space: pre;
-  min-height: 1.6em;
-} */
 
 /* Light mode: fully saturated hues, each taken just dark enough to stay above
    4.5:1 (WCAG AA) on the light stage. */

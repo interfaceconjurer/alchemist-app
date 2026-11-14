@@ -136,11 +136,6 @@ export function intersectHalfspaces(planes, tol = 1e-5) {
   return { vertices, faces, edges };
 }
 
-/** Max distance from origin to any vertex (circumradius about the origin). */
-export function circumradius(vertices) {
-  return vertices.reduce((r, v) => Math.max(r, len(v)), 0);
-}
-
 /** Largest plane offset s.t. the plane still touches the vertex set: max n·v. */
 export function support(vertices, n) {
   return vertices.reduce((m, v) => Math.max(m, dot(n, v)), -Infinity);

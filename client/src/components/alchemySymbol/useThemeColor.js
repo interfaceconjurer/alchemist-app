@@ -11,5 +11,5 @@ export function useThemeColor() {
     return () => observer.disconnect();
   }, []);
 
-  return { shapeColor: isDark ? '#ffffff' : '#000000', isDark };
+  return { isDark };
 }

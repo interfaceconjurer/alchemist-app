@@ -110,22 +110,6 @@
   flex-shrink: 0;
 }
 
-.command-palette-item-hint {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  padding: 0.1em 0.35em;
-  border: 1px solid var(--border-color-light);
-  border-radius: 3px;
-  background-color: rgba(0, 0, 0, 0.04);
-  color: var(--text-color);
-  opacity: 0.7;
-  flex-shrink: 0;
-}
-
-[data-theme="dark"] .command-palette-item-hint {
-  background-color: rgba(255, 255, 255, 0.06);
-}
-
 .command-palette-item-date {
   font-family: var(--font-mono);
   font-size: 0.7rem;

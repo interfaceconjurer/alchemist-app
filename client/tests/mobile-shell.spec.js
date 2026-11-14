@@ -122,6 +122,8 @@ test('an outside touch dismisses search and leaves the header usable', async ({ 
 });
 
 test('portrait and landscape navigation links remain reachable without horizontal scrolling', async ({ page }) => {
+  // Software-rendered CI includes shader startup and checks every link in both orientations.
+  test.setTimeout(90_000);
   for (const viewport of [{ width: 320, height: 568 }, { width: 812, height: 375 }]) {
     await page.setViewportSize(viewport);
     const navigation = page.locator('nav.nav');
@@ -142,6 +144,8 @@ test('portrait and landscape navigation links remain reachable without horizonta
 });
 
 test('crossing the responsive breakpoint preserves theme and public-shell controls', async ({ page }) => {
+  // Four viewport changes also resize the live canvas under software rendering.
+  test.setTimeout(90_000);
   await toggleTheme(page, { tap: true });
   const theme = await page.locator('html').getAttribute('data-theme');
   for (const viewport of [
