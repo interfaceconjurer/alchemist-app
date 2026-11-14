@@ -4,8 +4,10 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { CrystalLoader, CrystalLoaderFrame, useCrystalLoader, FADE_MS, FRAMES, FRAME_MS, MIN_CYCLES, MIN_VISIBLE_MS, SHOW_AFTER_MS } from './CrystalLoader';
 import { GraphicsBoundary } from './GraphicsBoundary';
 
+// `loading`: the crystal hasn't drawn yet. Turning it false reports the first frame.
 function Slot({ loading }) {
-  const { visible, holding } = useCrystalLoader(loading);
+  const { visible, holding, markDrawn } = useCrystalLoader(true);
+  React.useEffect(() => { if (!loading) markDrawn(); }, [loading, markDrawn]);
   return <div data-holding={holding}><CrystalLoader visible={visible} /></div>;
 }
 const holding = () => document.querySelector('[data-holding]').getAttribute('data-holding');
@@ -59,6 +61,24 @@ it('holds the crystal back from the moment the loader appears until it has faded
   expect(holding()).toBe('true');
   advance(FADE_MS);
   expect(holding()).toBe('false'); // now the crystal can start
+});
+
+it('never appears once the crystal has drawn, even if the threshold had already passed', () => {
+  // A slow device: the slot mounts after the threshold, so the timer is already due,
+  // and the crystal draws before that timer gets to run.
+  startPageClock();
+  vi.advanceTimersByTime(SHOW_AFTER_MS + 2000);
+  let report;
+  function Late() {
+    const { visible, holding, markDrawn } = useCrystalLoader(true);
+    report = markDrawn;
+    return <div data-holding={holding}><CrystalLoader visible={visible} /></div>;
+  }
+  render(<Late />);
+  report(); // drawn synchronously, before the due timer fires
+  advance(3000);
+  expect(state()).toBe('hidden');
+  expect(holding()).toBe('false');
 });
 
 it('never holds the crystal when the loader never appears', () => {

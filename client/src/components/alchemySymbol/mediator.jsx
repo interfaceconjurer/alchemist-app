@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState, lazy, memo, Suspense } from 'react';
+import React, { useEffect, useRef, lazy, memo, Suspense } from 'react';
 import './view.css';
 import { GraphicsBoundary } from './GraphicsBoundary';
 import { useSymbolVisibility } from './useSymbolVisibility';
@@ -25,9 +25,8 @@ function AlchemySymbol() {
   const renderState = reducedMotion ? 'reduced-motion' : active ? 'active' : 'paused';
   // Loading until the crystal draws its first frame. A graphics failure shows the
   // outline instead, which also ends loading (GraphicsBoundary's onFailure).
-  const [drawn, setDrawn] = useState(false);
-  const markDrawn = useCallback(() => setDrawn(true), []);
-  const loader = useCrystalLoader((started || reducedMotion) && !drawn);
+  const loader = useCrystalLoader(started || reducedMotion);
+  const { markDrawn } = loader;
   // While the loader is up (and fading), the crystal is hidden and paused at its
   // first frame; it starts its intro once the loader has gone.
   const held = loader.holding;

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * A braille spinner shown in the crystal's place while it loads, styled like the
@@ -67,22 +67,34 @@ export function CrystalLoader({ visible }) {
 }
 
 /**
- * The loader's state. `loading`: the crystal hasn't drawn its first frame.
+ * The loader's state. `waiting`: the crystal has been asked to load (it is on
+ * screen). Call `markDrawn` when it has drawn its first frame, or has failed.
  * Shows once the page has been loading SHOW_AFTER_MS; once shown, hides no sooner
  * than MIN_VISIBLE_MS later, so it never blinks.
  *
- * Returns `{ visible, holding }`. `holding` is true from the moment the loader appears
- * until it has finished fading out: the crystal stays hidden and paused meanwhile, so
- * the two are never on screen together and the crystal's intro plays in full after it.
+ * Returns `{ visible, holding, markDrawn }`. `holding` is true from the moment the
+ * loader appears until it has finished fading out: the crystal stays hidden and
+ * paused meanwhile, so the two are never on screen together and the crystal's
+ * intro plays in full after it.
  */
-export function useCrystalLoader(loading) {
+export function useCrystalLoader(waiting) {
+  const [drawn, setDrawn] = useState(false);
+  // Set synchronously, so a timer that was already due (a slow device can be past
+  // the threshold when the slot mounts) never shows the loader over a drawn crystal.
+  const drawnNow = useRef(false);
+  const markDrawn = useCallback(() => { drawnNow.current = true; setDrawn(true); }, []);
+  const loading = waiting && !drawn;
   const [shownAt, setShownAt] = useState(null);
   const [visible, setVisible] = useState(false);
   const [faded, setFaded] = useState(false);
   useEffect(() => {
     if (!loading || shownAt !== null) return undefined;
     // Measured from the start of the page load, not from when the slot mounted.
-    const id = setTimeout(() => { setShownAt(performance.now()); setVisible(true); }, Math.max(0, SHOW_AFTER_MS - performance.now()));
+    const id = setTimeout(() => {
+      if (drawnNow.current) return;
+      setShownAt(performance.now());
+      setVisible(true);
+    }, Math.max(0, SHOW_AFTER_MS - performance.now()));
     return () => clearTimeout(id);
   }, [loading, shownAt]);
   useEffect(() => {
@@ -96,5 +108,5 @@ export function useCrystalLoader(loading) {
     const id = setTimeout(() => setFaded(true), FADE_MS);
     return () => clearTimeout(id);
   }, [visible, shownAt, faded]);
-  return { visible, holding: shownAt !== null && !faded };
+  return { visible, holding: shownAt !== null && !faded, markDrawn };
 }
