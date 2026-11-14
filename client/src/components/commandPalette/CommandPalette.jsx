@@ -28,12 +28,11 @@ function buildItemList() {
   return items;
 }
 
-function CommandPalette({ isOpen, onClose, onSelectItem, onAction, openTabIds }) {
+function CommandPalette({ isOpen, onClose, onSelectItem, onAction }) {
   const [query, setQuery] = useState("");
   const [highlightIndex, setHighlightIndex] = useState(0);
   const inputRef = useRef(null);
   const listId = useId();
-  const listRef = useRef(null);
   const itemRefs = useRef([]);
   const { toggleTheme } = useTheme();
 
@@ -146,7 +145,7 @@ function CommandPalette({ isOpen, onClose, onSelectItem, onAction, openTabIds })
           spellCheck={false}
           autoComplete="off"
         />
-        <div className="command-palette-list" ref={listRef} id={listId} role="listbox" aria-label="Search results">
+        <div className="command-palette-list" id={listId} role="listbox" aria-label="Search results">
           {filtered.length === 0 && (
             <div className="command-palette-empty">No results found</div>
           )}
@@ -172,9 +171,6 @@ function CommandPalette({ isOpen, onClose, onSelectItem, onAction, openTabIds })
                     <span className="command-palette-item-section">{entry.sectionLabel}</span>
                   )}
                 </div>
-                {isAction && entry.hint && (
-                  <kbd className="command-palette-item-hint">{entry.hint}</kbd>
-                )}
                 {!isAction && entry.date && (
                   <span className="command-palette-item-date">{entry.date}</span>
                 )}

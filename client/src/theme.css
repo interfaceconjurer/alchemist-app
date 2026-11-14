@@ -57,11 +57,7 @@
   --resize-handle-accent: rgba(var(--accent-rgb), 0.15);
   --resize-handle-accent-active: rgba(var(--accent-rgb), 0.25);
 
-  /* Stage tab drop indicator */
-  --stage-tab-drop-indicator: rgba(var(--accent-rgb), 0.6);
   --stage-tab-inactive-active-border: rgba(var(--accent-rgb), 0.3);
-
-  /* Stage empty content background */
 
   /* Drop zone */
   --drop-zone-bg: rgba(var(--accent-rgb), 0.1);
@@ -127,11 +123,7 @@
   --resize-handle-accent: rgba(var(--accent-rgb), 0.2);
   --resize-handle-accent-active: rgba(var(--accent-rgb), 0.3);
 
-  /* Stage tab drop indicator */
-  --stage-tab-drop-indicator: rgba(var(--accent-rgb), 0.6);
   --stage-tab-inactive-active-border: rgba(var(--accent-rgb), 0.3);
-
-  /* Stage empty content background */
 
   /* Drop zone */
   --drop-zone-bg: rgba(var(--accent-rgb), 0.12);

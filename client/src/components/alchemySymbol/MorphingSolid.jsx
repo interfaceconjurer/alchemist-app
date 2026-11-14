@@ -44,7 +44,7 @@ const GROW_MS = BASE_MS + RISE_MS - RISE_OVERLAP_MS;
 // Turned about 15° to the viewer's left of edge-on, so every solid shows its depth
 // (an edge pointing straight at the camera reads flat). The no-graphics outline
 // in GraphicsBoundary is drawn at the same angle.
-export const REST_ROTATION = Math.PI / 4 - 0.26;
+const REST_ROTATION = Math.PI / 4 - 0.26;
 const CALM_HOLD_MS = 12000;
 const CALM_FADE_MS = 1200; // each way: fade out, swap the solid, fade in
 
@@ -83,7 +83,6 @@ function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dorman
   const spinRef = useRef();
   const growElapsed = useRef(0);
   const pyramidGrow = useMemo(() => createPyramidGrow(restingSolids[0]), []);
-  const meshRef = useRef();
   const edgesRef = useRef();
   const jointsRef = useRef();
   const polyRef = useRef(null);
@@ -277,8 +276,6 @@ function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dorman
     c.elapsed += delta * 1000;
     if (c.elapsed < HOLD_MS) return;
 
-    const A = SEQUENCE[c.index];
-    const B = SEQUENCE[(c.index + 1) % SEQUENCE.length];
     const t = Math.min(1, (c.elapsed - HOLD_MS) / MORPH_MS);
     progress = t;
 
@@ -336,7 +333,7 @@ function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dorman
       </mesh>
       <group ref={spinRef}>
         <mesh geometry={geometry} material={innerMaterial} frustumCulled={false} renderOrder={0} />
-        <mesh ref={meshRef} geometry={geometry} material={material} frustumCulled={false} renderOrder={1} />
+        <mesh geometry={geometry} material={material} frustumCulled={false} renderOrder={1} />
         <instancedMesh ref={edgesRef} args={[edgeGeometry, filament, MAX_EDGES]} frustumCulled={false} />
         <instancedMesh ref={jointsRef} args={[jointGeometry, filament, MAX_JOINTS]} frustumCulled={false} />
         {/* Calm mode: bubbles twinkle in place instead of rising. */}

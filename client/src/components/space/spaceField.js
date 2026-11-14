@@ -25,7 +25,7 @@ export function mulberry32(seed) {
 }
 
 /** Same palette as crystal/backlight.js so nebula and backlight read as one light. */
-export const NEBULA_PALETTE = [
+const NEBULA_PALETTE = [
   [109, 77, 255], // violet  #6d4dff
   [25, 195, 255], // cyan    #19c3ff
   [255, 61, 139], // rose    #ff3d8b
