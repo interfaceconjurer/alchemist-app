@@ -163,3 +163,37 @@ test('crossing the responsive breakpoint preserves theme and public-shell contro
     await expect(page.locator('.command-palette')).toHaveCount(0);
   }
 });
+
+test('the artifact viewer fills a landscape phone with its controls beside the artifact', async ({ page }) => {
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 812, height: 375 });
+  const viewer = page.locator('.artifact-viewer');
+  const box = locator => locator.boundingBox();
+  const overlaps = (a, b) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+
+  for (const [id, media] of [['apollo-portfolio-review', '.artifact-viewer-embed'], ['fine-tunes', '.artifact-viewer-image']]) {
+    await page.locator(`[data-work-item-id="${id}"]`).tap();
+    const open = page.locator('.work-content-viewable').first();
+    await open.scrollIntoViewIfNeeded();
+    await open.tap();
+    await expect(viewer).toBeVisible();
+
+    const artifact = viewer.locator(media);
+    const controls = [viewer.getByRole('button', { name: 'Close' }), viewer.locator('.artifact-viewer-caption')];
+    if (id === 'fine-tunes') controls.push(viewer.getByRole('button', { name: 'Previous' }), viewer.getByRole('button', { name: 'Next' }));
+    await expectWithinViewport(page, artifact, { vertical: true });
+    // Height is the scarce dimension: the artifact gets nearly all of it.
+    expect((await box(artifact)).height).toBeGreaterThanOrEqual(375 * 0.75);
+    for (const control of controls) {
+      await expectWithinViewport(page, control, { vertical: true });
+      expect(overlaps(await box(artifact), await box(control))).toBe(false);
+    }
+    if (id === 'fine-tunes') {
+      await viewer.getByRole('button', { name: 'Next' }).tap();
+      await expect(viewer.locator('.artifact-viewer-count')).toHaveText(/^2 \//);
+    }
+    await viewer.getByRole('button', { name: 'Close' }).tap();
+    await expect(viewer).not.toBeVisible();
+    await page.getByRole('button', { name: 'Back' }).tap();
+  }
+});
