@@ -110,6 +110,21 @@ The portfolio site has a theme toggle (light/dark). When a README uses `<picture
 - `"code"` — styled code block. Uses `code` field instead of `src`. Use sparingly — only for the signature CLI interface or key API.
 - `"embed"` — a self-contained HTML document (e.g. a slide deck) served from `client/public/work/<id>/`, shown in a 16:9 frame. Optional `download: { href, label }`.
 
+Diagrams take optional `width`/`height` (the image's intrinsic size, so the frame is reserved before it loads) and `padding` (a percentage of the frame's width) when an edge-to-edge logo needs room to breathe.
+
+### Grouped outcome galleries
+
+When a README's gallery has sections, `outcome` can hold groups instead of flat images. Each group has a title, an optional description, and `rows` of images; images in a row share one height and fill the width, so give each its intrinsic `width`/`height`. A good shape is two highlights, then three more:
+
+```json
+"outcome": [
+  { "title": "Space", "description": "One line on the section.", "rows": [
+    [{ "src": "...", "width": 715, "height": 713, "alt": "...", "caption": "..." }, { "...": "..." }],
+    [{ "...": "..." }, { "...": "..." }, { "...": "..." }]
+  ] }
+]
+```
+
 Images, diagrams, embeds and outcome images open in a full-screen viewer when clicked, with their label/caption and description. Set `"viewable": false` on an artifact that gains nothing from a larger view (e.g. a small informational diagram) to leave it as plain media.
 
 ### Editorial guidelines

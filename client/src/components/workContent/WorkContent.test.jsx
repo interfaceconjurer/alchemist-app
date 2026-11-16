@@ -101,3 +101,25 @@ it('gives an image card with no image neighbour the full row, and lets adjacent 
   expect(card('Pair two')).not.toHaveClass('work-content-artifact--solo');
   expect(card('Last image')).toHaveClass('work-content-artifact--solo'); // last in the list
 });
+
+it('lays out grouped outcome images in titled rows that page through the viewer in order', () => {
+  const image = (name, width, height) => ({ src: `/${name}.svg`, alt: name, caption: name, width, height });
+  render(<ThemeProvider><WorkContent content={{ outcome: [
+    { title: 'Old Masters', description: 'Circles.', rows: [[image('a', 700, 800), image('b', 700, 1000)], [image('c', 800, 400), image('d', 600, 600), image('e', 650, 650)]] },
+    { title: 'Space', rows: [[image('f', 500, 500), image('g', 500, 500)]] },
+  ] }} /></ThemeProvider>);
+  expect(screen.getByRole('heading', { name: 'Old Masters' })).toBeInTheDocument();
+  expect(screen.getByText('Circles.')).toBeInTheDocument();
+  const rows = document.querySelectorAll('.work-content-gallery-row');
+  expect([...rows].map((row) => row.children.length)).toEqual([2, 3, 2]);
+  // Each figure grows by its aspect ratio, so a row shares one height.
+  expect(screen.getByRole('img', { name: 'c' }).closest('figure').style.flex).toBe('2 1 0px');
+  expect(screen.getByRole('img', { name: 'c' }).parentElement.style.aspectRatio).toBe('800 / 400');
+  fireEvent.click(screen.getByRole('button', { name: 'View f larger' }));
+  expect(within(document.querySelector('dialog')).getByText('6 / 7')).toBeInTheDocument();
+});
+
+it('pads a diagram inside its frame when asked, so it has room to breathe', () => {
+  render(<ThemeProvider><WorkContent content={{ artifacts: [{ type: 'diagram', src: '/logo.svg', alt: 'Logo', width: 880, height: 657, padding: 8 }] }} /></ThemeProvider>);
+  expect(screen.getByRole('img', { name: 'Logo' }).parentElement.style.padding).toBe('8%');
+});

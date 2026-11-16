@@ -106,6 +106,17 @@
   min-width: 0;
 }
 
+/* Grouped outcome: rows of images that share one height and fill the width. */
+.work-content-gallery + .work-content-gallery {
+  margin-top: 2rem;
+}
+
+.work-content-gallery-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
 /* Shared image styles */
 .work-content-image-placeholder {
   background-color: rgba(255, 255, 255, 0.3);

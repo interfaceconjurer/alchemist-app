@@ -5,7 +5,13 @@
   "title": "PeachPy",
   "description": "Any image, rebuilt from glyphs. Terminal, HTML or SVG.",
   "date": "Nov 2026",
-  "tags": ["Python", "CLI", "Pillow", "SVG", "Generative Art"],
+  "tags": [
+    "Python",
+    "CLI",
+    "Pillow",
+    "SVG",
+    "Generative Art"
+  ],
   "repo": "https://github.com/interfaceconjurer/ascii-image-generator",
   "content": {
     "context": "ASCII art is usually a novelty: a gray block of characters stuck in a terminal. PeachPy treats it as a medium. It's a small Python CLI that rebuilds any image from glyphs and keeps each one's color, then writes the result as truecolor terminal output, a self-contained HTML page, or a scalable SVG you can drop into a README. The glyph ramp is an artistic choice, not a fixed setting. Saturn can be drawn in rings, the Moon in moon phases, and a Vermeer in circles that swell with the light. What began as a weekend extension of a tutorial grew into a gallery of thirty pieces and a hardened, well-tested tool.",
@@ -28,7 +34,8 @@
         },
         "alt": "PeachPy: a peach above bubble lettering, rendered in blossom glyphs",
         "label": "Project Identity",
-        "description": "The logo is made with the tool itself. A 3D peach emoji and Modak lettering are rendered in the blossom ramp ⁖⁘⁙❁✿, with light and dark versions that follow the theme."
+        "description": "The logo is made with the tool itself. A 3D peach emoji and Modak lettering are rendered in the blossom ramp ⁖⁘⁙❁✿, with light and dark versions that follow the theme.",
+        "padding": 8
       },
       {
         "type": "code",
@@ -53,15 +60,51 @@
       }
     ],
     "outcome": [
-      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/pearl-earring.svg", "alt": "Girl with a Pearl Earring by Vermeer, rendered in circles that grow with brightness", "caption": "Girl with a Pearl Earring, Vermeer" },
-      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/rembrandt-self-portrait.svg", "alt": "Rembrandt's 1659 self-portrait, rendered in circles that grow with brightness", "caption": "Self-Portrait, Rembrandt" },
-      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/david-goliath.svg", "alt": "Caravaggio's David with the Head of Goliath, rendered in circle glyphs against deep shadow", "caption": "David with the Head of Goliath, Caravaggio" },
-      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/saturn.svg", "alt": "Saturn and its rings, rendered in ring-shaped glyphs", "caption": "Saturn, in rings" },
-      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/pleiades.svg", "alt": "The Pleiades star cluster, rendered in dot, plus and star glyphs", "caption": "The Pleiades, in stars" },
-      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/m87.svg", "alt": "The M87 black hole's glowing ring, rendered in concentric ring glyphs", "caption": "M87* black hole, in rings" },
-      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/migrant-mother.svg", "alt": "Dorothea Lange's Migrant Mother, rendered as single-ink cream halftone dots", "caption": "Migrant Mother, Dorothea Lange" },
-      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/einstein-pop.svg", "alt": "Einstein portrait in halftone dots with a magenta to amber gradient", "caption": "Einstein, pop (magenta → amber)" },
-      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/marilyn-pop-a.svg", "alt": "Marilyn Monroe portrait in halftone dots with a yellow to magenta gradient", "caption": "Marilyn, pop (yellow → magenta)" }
+      {
+        "title": "Old Masters in Light",
+        "description": "Circles grow with brightness, so the painting's light falls in rings of · ∘ ○ ◯ ●.",
+        "rows": [
+          [
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/pearl-earring.svg", "width": 715, "height": 842, "alt": "Girl with a Pearl Earring by Vermeer, rendered in circles that grow with brightness", "caption": "Girl with a Pearl Earring, Vermeer" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/virgin-annunciate.svg", "width": 715, "height": 946, "alt": "Antonello da Messina's Virgin Annunciate, rendered in circle glyphs against a dark ground", "caption": "Virgin Annunciate, Antonello da Messina" }
+          ],
+          [
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/rembrandt-self-portrait.svg", "width": 715, "height": 905, "alt": "Rembrandt's 1659 self-portrait, rendered in circles that grow with brightness", "caption": "Self-Portrait, Rembrandt" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/magdalene-smoking-flame.svg", "width": 715, "height": 988, "alt": "Georges de La Tour's Magdalene with the Smoking Flame, lit by a single candle in circle glyphs", "caption": "Magdalene with the Smoking Flame, de La Tour" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/mona-lisa.svg", "width": 715, "height": 1061, "alt": "Leonardo's Mona Lisa, rendered in circle glyphs", "caption": "Mona Lisa, Leonardo" }
+          ]
+        ]
+      },
+      {
+        "title": "Space",
+        "description": "NASA and ESA imagery. Where it fits, the ramp matches the subject: Saturn in rings, the Pleiades in stars.",
+        "rows": [
+          [
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/whirlpool-galaxy.svg", "width": 715, "height": 713, "alt": "The Whirlpool Galaxy's spiral arms, rendered in circle glyphs", "caption": "Whirlpool Galaxy (M51)" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/ring-nebula.svg", "width": 720, "height": 720, "alt": "JWST's Ring Nebula, rendered in circle glyphs", "caption": "Ring Nebula (M57), JWST" }
+          ],
+          [
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/saturn.svg", "width": 800, "height": 384, "alt": "Saturn and its rings, rendered in ring-shaped glyphs", "caption": "Saturn, in rings" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/pleiades.svg", "width": 845, "height": 634, "alt": "The Pleiades star cluster, rendered in dot, plus and star glyphs", "caption": "The Pleiades, in stars" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/m87.svg", "width": 650, "height": 645, "alt": "The M87 black hole's glowing ring, rendered in concentric ring glyphs", "caption": "M87* black hole, in rings" }
+          ]
+        ]
+      },
+      {
+        "title": "Iconic Photography",
+        "description": "Halftone dots in a single cream ink, plus pop-art color variants.",
+        "rows": [
+          [
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/baldwin-iv.svg", "width": 845, "height": 967, "alt": "Baldwin IV, the masked Leper King from Kingdom of Heaven, rendered in halftone dots", "caption": "Baldwin IV, the Leper King" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/migrant-mother.svg", "width": 840, "height": 1089, "alt": "Dorothea Lange's Migrant Mother, rendered as single-ink cream halftone dots", "caption": "Migrant Mother, Dorothea Lange" }
+          ],
+          [
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/abraham-lincoln.svg", "width": 715, "height": 884, "alt": "Abraham Lincoln's 1863 portrait, rendered as cream halftone dots", "caption": "Abraham Lincoln, Alexander Gardner" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/einstein-pop.svg", "width": 770, "height": 952, "alt": "Einstein portrait in halftone dots with a magenta to amber gradient", "caption": "Einstein, pop (magenta → amber)" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/marilyn-pop-a.svg", "width": 840, "height": 1042, "alt": "Marilyn Monroe portrait in halftone dots with a yellow to magenta gradient", "caption": "Marilyn, pop (yellow → magenta)" }
+          ]
+        ]
+      }
     ],
     "whatsNext": "Next is source prep. Many gallery pieces depend on ImageMagick levels, gamma and contrast applied before conversion, and folding those into PeachPy would make the README commands fully reproducible. After that, wide-glyph and emoji alignment needs to work consistently across terminals."
   }

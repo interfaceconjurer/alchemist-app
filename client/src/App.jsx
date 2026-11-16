@@ -2,7 +2,7 @@ import React, { useReducer, useEffect, useRef, useMemo } from "react";
 import "./App.css";
 import Icon from "./components/icon/view";
 import { icons } from "./components/iconList/iconList";
-import { workSections, feedItems, getSectionForItem, getSectionIconForItem } from "./components/workList/workList";
+import { workSections, feedItems, getSectionForItem, ENTRY_ICON } from "./components/workList/workList";
 import AlchemySymbol from "./components/alchemySymbol/mediator";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import SpaceBackground from "./components/space/SpaceBackground";
@@ -216,7 +216,7 @@ function App() {
             </section>
             {feedItems.length > 0 && (
             <section className="work-feed" aria-labelledby="work-feed-title">
-              <h2 className="work-feed-title" id="work-feed-title">Cross section of recent work and thoughts</h2>
+              <h2 className="work-feed-title" id="work-feed-title"><span aria-hidden="true">📓 </span>Lab sketches</h2>
               {feedItems.map((item) => (
                 <button key={item.id} type="button"
                   data-work-item-id={item.id}
@@ -225,7 +225,7 @@ function App() {
                   onClick={() => tabActions.openWorkItem(item)}
                   onMouseDown={(e) => !isMobile && e.button === 0 && handleWorkItemMouseDown(e, item)}
                 >
-                  <span className="work-feed-item-icon" aria-hidden="true">{getSectionIconForItem(item.id)}</span>
+                  <span className="work-feed-item-icon" aria-hidden="true">{ENTRY_ICON}</span>
                   <span className="work-feed-item-body">
                     <span className="work-item-title">{item.title}</span>
                     <span className="work-item-meta">

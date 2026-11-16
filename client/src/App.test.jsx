@@ -40,7 +40,7 @@ it('lists typed work under the profile links and opens it in the stage', async (
   vi.stubGlobal('localStorage', { getItem: () => null, setItem: vi.fn() });
   await act(async () => { render(<App />); });
   expect(document.querySelector('.main')).toHaveClass('main--stage-hidden');
-  expect(screen.getByRole('region', { name: 'Cross section of recent work and thoughts' })).toBeInTheDocument();
+  expect(screen.getByRole('region', { name: 'Lab sketches' })).toBeInTheDocument();
   // Newest first: the Nov 2026 tool, the Oct 2026 presentation, then the Mar 2026 tool.
   const feed = [...document.querySelectorAll('.work-feed-item')].map((el) => el.dataset.workItemId);
   expect(feed).toEqual(['ascii-image-generator', 'apollo-portfolio-review', 'fine-tunes']);

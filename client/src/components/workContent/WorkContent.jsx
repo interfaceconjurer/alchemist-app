@@ -43,10 +43,13 @@ function ArtifactRenderer({ artifact, viewerItem, onOpen, solo = false }) {
     const src = artifact.sources?.[theme] || artifact.src;
     const width = dimension(artifact.width, 16);
     const height = dimension(artifact.height, 10);
+    // Optional breathing room inside the frame, as a percentage of its width.
+    const padding = dimension(artifact.padding, 0);
+    const style = { aspectRatio: `${width} / ${height}`, ...(padding && { padding: `${padding}%`, boxSizing: 'border-box' }) };
     return (
       <div className="work-content-artifact work-content-artifact--diagram">
         {heading}
-        <Viewable item={viewerItem} onOpen={onOpen} className="work-content-image-placeholder" style={{ aspectRatio: `${width} / ${height}` }}>
+        <Viewable item={viewerItem} onOpen={onOpen} className="work-content-image-placeholder" style={style}>
           <img src={src} alt={artifact.alt} width={width} height={height} loading="lazy" decoding="async" />
         </Viewable>
       </div>
@@ -90,6 +93,22 @@ function ArtifactRenderer({ artifact, viewerItem, onOpen, solo = false }) {
   );
 }
 
+/** Outcome entries are either images, or groups (`{ title, description, rows: [[image, ...], ...] }`). */
+const isGroup = (entry) => Array.isArray(entry?.rows);
+const outcomeImages = (outcome = []) => outcome.flatMap((entry) => (isGroup(entry) ? entry.rows.flat() : [entry]));
+
+function OutcomeFigure({ item, viewerItem, onOpen, style, className = "work-content-outcome-item" }) {
+  return (
+    <figure className={className} style={style}>
+      <Viewable item={viewerItem} onOpen={onOpen} className="work-content-image-placeholder"
+        style={item.width && item.height ? { aspectRatio: `${item.width} / ${item.height}` } : undefined}>
+        <img src={item.src} alt={item.alt} width={item.width} height={item.height} loading="lazy" decoding="async" />
+      </Viewable>
+      {item.caption && <figcaption className="work-content-caption">{item.caption}</figcaption>}
+    </figure>
+  );
+}
+
 function WorkContent({ content }) {
   if (!content) {
     return <p className="stage-content-placeholder">Content for this work item will go here.</p>;
@@ -119,9 +138,9 @@ function WorkContentBody({ content }) {
         width: artifact.width, height: artifact.height,
       });
     });
-    (content.outcome ?? []).forEach((item, i) => {
-      outcomeIndex.set(i, items.length);
-      items.push({ kind: 'image', src: item.src, alt: item.alt, label: item.caption });
+    outcomeImages(content.outcome).forEach((item) => {
+      outcomeIndex.set(item, items.length);
+      items.push({ kind: 'image', src: item.src, alt: item.alt, label: item.caption, width: item.width, height: item.height });
     });
     return { viewerItems: items, artifactIndex, outcomeIndex };
   }, [content, theme]);
@@ -162,18 +181,31 @@ function WorkContentBody({ content }) {
       {content.outcome && content.outcome.length > 0 && (
         <section className="work-content-section">
           <h3 className="work-content-heading">Outcome</h3>
-          <div className="work-content-outcome-grid">
-            {content.outcome.map((item, i) => (
-              <figure key={i} className="work-content-outcome-item">
-                <Viewable item={viewerItems[outcomeIndex.get(i)]} onOpen={() => setViewing(outcomeIndex.get(i))} className="work-content-image-placeholder">
-                  <img src={item.src} alt={item.alt} loading="lazy" />
-                </Viewable>
-                {item.caption && (
-                  <figcaption className="work-content-caption">{item.caption}</figcaption>
-                )}
-              </figure>
-            ))}
-          </div>
+          {content.outcome.some(isGroup) ? (
+            content.outcome.filter(isGroup).map((group, g) => (
+              <div key={g} className="work-content-gallery">
+                {group.title && <h4 className="work-content-artifact-label">{group.title}</h4>}
+                {group.description && <p className="work-content-artifact-description">{group.description}</p>}
+                {group.rows.map((row, r) => (
+                  // Each image grows in proportion to its aspect ratio, so a row is one
+                  // height and fills the full width.
+                  <div key={r} className="work-content-gallery-row">
+                    {row.map((item, i) => (
+                      <OutcomeFigure key={i} item={item} viewerItem={viewerItems[outcomeIndex.get(item)]}
+                        onOpen={() => setViewing(outcomeIndex.get(item))}
+                        style={{ flex: `${dimension(item.width, 1) / dimension(item.height, 1)} 1 0` }} />
+                    ))}
+                  </div>
+                ))}
+              </div>
+            ))
+          ) : (
+            <div className="work-content-outcome-grid">
+              {content.outcome.map((item, i) => (
+                <OutcomeFigure key={i} item={item} viewerItem={viewerItems[outcomeIndex.get(item)]} onOpen={() => setViewing(outcomeIndex.get(item))} />
+              ))}
+            </div>
+          )}
         </section>
       )}
 

@@ -571,7 +571,7 @@ a:active {
   text-align: left;
 }
 
-/* The section's emoji, as on the item's stage tab. */
+/* The shared entry icon, as on the item's stage tab. */
 .work-feed-item-icon {
   flex-shrink: 0;
   width: 1.25rem;
