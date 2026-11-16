@@ -1,0 +1,68 @@
+{
+  "id": "ascii-image-generator",
+  "section": "sidequests",
+  "type": "Tool",
+  "title": "PeachPy",
+  "description": "Any image, rebuilt from glyphs. Terminal, HTML or SVG.",
+  "date": "Nov 2026",
+  "tags": ["Python", "CLI", "Pillow", "SVG", "Generative Art"],
+  "repo": "https://github.com/interfaceconjurer/ascii-image-generator",
+  "content": {
+    "context": "ASCII art is usually a novelty: a gray block of characters stuck in a terminal. PeachPy treats it as a medium. It's a small Python CLI that rebuilds any image from glyphs and keeps each one's color, then writes the result as truecolor terminal output, a self-contained HTML page, or a scalable SVG you can drop into a README. The glyph ramp is an artistic choice, not a fixed setting. Saturn can be drawn in rings, the Moon in moon phases, and a Vermeer in circles that swell with the light. What began as a weekend extension of a tutorial grew into a gallery of thirty pieces and a hardened, well-tested tool.",
+    "goals": [
+      "Turn any image into text art with one command and no setup, via uvx",
+      "Output plain text, ANSI truecolor, HTML, or SVG from one shared pipeline",
+      "Make the glyph ramp, gradient, and density the creative controls",
+      "Harden the tool for scripts and agents: atomic writes, source protection, clear exit codes",
+      "Prove the range with a gallery of old masters, space imagery, and iconic photography"
+    ],
+    "artifacts": [
+      {
+        "type": "diagram",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/hero_dark.svg",
+        "width": 880,
+        "height": 657,
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/hero_light.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/hero_dark.svg"
+        },
+        "alt": "PeachPy: a peach above bubble lettering, rendered in blossom glyphs",
+        "label": "Project Identity",
+        "description": "The logo is made with the tool itself. A 3D peach emoji and Modak lettering are rendered in the blossom ramp ⁖⁘⁙❁✿, with light and dark versions that follow the theme."
+      },
+      {
+        "type": "code",
+        "code": "image ─▶ resize ─▶ grayscale ─▶ glyph ramp ─▶ color ─▶ text · ANSI · HTML · SVG\n\n# Try it without installing\nuvx --from git+https://github.com/interfaceconjurer/ascii-image-generator peachpy photo.jpg\n\n# One command, end to end\npeachpy photo.jpg -m svg -w 110 -c \" ·∘○◯●\" -o photo.svg",
+        "alt": "PeachPy pipeline and CLI usage",
+        "label": "One Pipeline, Four Outputs",
+        "description": "Each cell is resized to the shape of a character, mapped from brightness to a glyph in the ramp, then colored by its source pixel, a diagonal gradient, or a rainbow. Every renderer reads the same color grid."
+      },
+      {
+        "type": "image",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/moon.svg",
+        "alt": "The Moon rendered in moon-phase emoji, from new moon in the shadows to full moon on the lit face",
+        "label": "The Ramp Is the Idea",
+        "description": "A ramp is any sequence of glyphs ordered dark to light, including emoji. Here the Moon is drawn in its own phases: 🌑🌒🌓🌔🌕."
+      },
+      {
+        "type": "image",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/jupiter.svg",
+        "alt": "Jupiter rendered in horizontal dash and triple-bar glyphs that follow its cloud bands",
+        "label": "Glyphs That Match the Subject",
+        "description": "Jupiter drawn in -=≡, so the strokes run with its cloud bands. In SVG the glyph size stays fixed and --pixel-width sets only the spacing, so dense layouts merge into texture."
+      }
+    ],
+    "outcome": [
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/pearl-earring.svg", "alt": "Girl with a Pearl Earring by Vermeer, rendered in circles that grow with brightness", "caption": "Girl with a Pearl Earring, Vermeer" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/rembrandt-self-portrait.svg", "alt": "Rembrandt's 1659 self-portrait, rendered in circles that grow with brightness", "caption": "Self-Portrait, Rembrandt" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/david-goliath.svg", "alt": "Caravaggio's David with the Head of Goliath, rendered in circle glyphs against deep shadow", "caption": "David with the Head of Goliath, Caravaggio" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/saturn.svg", "alt": "Saturn and its rings, rendered in ring-shaped glyphs", "caption": "Saturn, in rings" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/pleiades.svg", "alt": "The Pleiades star cluster, rendered in dot, plus and star glyphs", "caption": "The Pleiades, in stars" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/m87.svg", "alt": "The M87 black hole's glowing ring, rendered in concentric ring glyphs", "caption": "M87* black hole, in rings" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/migrant-mother.svg", "alt": "Dorothea Lange's Migrant Mother, rendered as single-ink cream halftone dots", "caption": "Migrant Mother, Dorothea Lange" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/einstein-pop.svg", "alt": "Einstein portrait in halftone dots with a magenta to amber gradient", "caption": "Einstein, pop (magenta → amber)" },
+      { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/marilyn-pop-a.svg", "alt": "Marilyn Monroe portrait in halftone dots with a yellow to magenta gradient", "caption": "Marilyn, pop (yellow → magenta)" }
+    ],
+    "whatsNext": "Next is source prep. Many gallery pieces depend on ImageMagick levels, gamma and contrast applied before conversion, and folding those into PeachPy would make the README commands fully reproducible. After that, wide-glyph and emoji alignment needs to work consistently across terminals."
+  }
+}

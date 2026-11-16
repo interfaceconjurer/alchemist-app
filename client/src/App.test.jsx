@@ -41,9 +41,9 @@ it('lists typed work under the profile links and opens it in the stage', async (
   await act(async () => { render(<App />); });
   expect(document.querySelector('.main')).toHaveClass('main--stage-hidden');
   expect(screen.getByRole('region', { name: 'Cross section of recent work and thoughts' })).toBeInTheDocument();
-  // Newest first: the Oct 2026 presentation above the Mar 2026 tool.
+  // Newest first: the Nov 2026 tool, the Oct 2026 presentation, then the Mar 2026 tool.
   const feed = [...document.querySelectorAll('.work-feed-item')].map((el) => el.dataset.workItemId);
-  expect(feed).toEqual(['apollo-portfolio-review', 'fine-tunes']);
+  expect(feed).toEqual(['ascii-image-generator', 'apollo-portfolio-review', 'fine-tunes']);
   const item = screen.getByRole('button', { name: /Portfolio review with Apollo/ });
   expect(item).toHaveTextContent('Presentation');
   expect(item).toHaveTextContent('Oct 21, 2026');
