@@ -217,7 +217,7 @@ function App() {
             </section>
             {feedItems.length > 0 && (
             <section className="work-feed" aria-labelledby="work-feed-title">
-              <h2 className="work-feed-title" id="work-feed-title"><SketchbookIcon size={17} />Lab sketches</h2>
+              <h2 className="work-feed-title" id="work-feed-title"><SketchbookIcon size={20} />Lab sketches</h2>
               {feedItems.map((item) => (
                 <button key={item.id} type="button"
                   data-work-item-id={item.id}
@@ -226,7 +226,7 @@ function App() {
                   onClick={() => tabActions.openWorkItem(item)}
                   onMouseDown={(e) => !isMobile && e.button === 0 && handleWorkItemMouseDown(e, item)}
                 >
-                  <EntryIcon className="work-feed-item-icon" size={17} />
+                  <EntryIcon className="work-feed-item-icon" size={16} />
                   <span className="work-feed-item-body">
                     <span className="work-item-title">{item.title}</span>
                     <span className="work-item-meta">
