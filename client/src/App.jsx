@@ -217,7 +217,7 @@ function App() {
             </section>
             {feedItems.length > 0 && (
             <section className="work-feed" aria-labelledby="work-feed-title">
-              <h2 className="work-feed-title" id="work-feed-title"><SketchbookIcon size={20} />Lab sketches</h2>
+              <h2 className="work-feed-title" id="work-feed-title"><SketchbookIcon size={20} />Laboratory sketchbook</h2>
               {feedItems.map((item) => (
                 <button key={item.id} type="button"
                   data-work-item-id={item.id}
