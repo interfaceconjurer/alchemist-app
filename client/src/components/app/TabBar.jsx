@@ -1,5 +1,5 @@
 import React from 'react';
-import { ENTRY_ICON } from '../workList/workList';
+import { EntryIcon } from '../icon/sketchbookIcons';
 
 const TabBar = ({
   // While the active tab's loader plays, the bar is hidden; it fades in with the content.
@@ -47,7 +47,7 @@ const TabBar = ({
             onDoubleClick={() => onTabDoubleClick(tab.id)}
             onMouseDown={(e) => onTabMouseDown(e, tab.id)}
           >
-            <span className="stage-tab-icon" aria-hidden="true">{ENTRY_ICON}</span>
+            <EntryIcon className="stage-tab-icon" size={14} />
             <span className="stage-tab-title">{tab.title}</span>
             <button
               type="button"

@@ -14,8 +14,6 @@ const SECTIONS = [
   { id: "sidequests", name: "Side quests", tagline: "Tinkering, learning, and following curiosity." },
 ].map(section => ({ ...section, label: section.name }));
 
-/** Every item shares one icon (a pencil: an entry made in the sketchbook), on its feed card and stage tab. */
-export const ENTRY_ICON = "\u270F\uFE0F";
 
 export const workSections = SECTIONS.map(section => ({
   ...section,

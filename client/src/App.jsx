@@ -2,7 +2,7 @@ import React, { useReducer, useEffect, useRef, useMemo } from "react";
 import "./App.css";
 import Icon from "./components/icon/view";
 import { icons } from "./components/iconList/iconList";
-import { workSections, feedItems, getSectionForItem, ENTRY_ICON } from "./components/workList/workList";
+import { workSections, feedItems, getSectionForItem } from "./components/workList/workList";
 import AlchemySymbol from "./components/alchemySymbol/mediator";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import SpaceBackground from "./components/space/SpaceBackground";
@@ -10,6 +10,7 @@ import ThemeToggle from "./components/ThemeToggle/ThemeToggle";
 import { loadState, createDebouncedSave } from "./workspacePersistence";
 import { resolveWorkItemsByIds } from "./resolveWorkItems";
 import StatusBar from "./components/statusBar/StatusBar";
+import { SketchbookIcon, EntryIcon } from "./components/icon/sketchbookIcons";
 import CommandPalette from "./components/commandPalette/CommandPalette";
 import TabBar from "./components/app/TabBar";
 import { tabIsLoading } from "./components/terminalLoader/TerminalLoader";
@@ -216,7 +217,7 @@ function App() {
             </section>
             {feedItems.length > 0 && (
             <section className="work-feed" aria-labelledby="work-feed-title">
-              <h2 className="work-feed-title" id="work-feed-title"><span aria-hidden="true">📓 </span>Lab sketches</h2>
+              <h2 className="work-feed-title" id="work-feed-title"><SketchbookIcon size={17} />Lab sketches</h2>
               {feedItems.map((item) => (
                 <button key={item.id} type="button"
                   data-work-item-id={item.id}
@@ -225,7 +226,7 @@ function App() {
                   onClick={() => tabActions.openWorkItem(item)}
                   onMouseDown={(e) => !isMobile && e.button === 0 && handleWorkItemMouseDown(e, item)}
                 >
-                  <span className="work-feed-item-icon" aria-hidden="true">{ENTRY_ICON}</span>
+                  <EntryIcon className="work-feed-item-icon" size={17} />
                   <span className="work-feed-item-body">
                     <span className="work-item-title">{item.title}</span>
                     <span className="work-item-meta">
