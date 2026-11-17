@@ -37,6 +37,7 @@
         "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/00-pipeline.svg",
         "width": 880,
         "height": 1090,
+        "padding": 4,
         "sources": {
           "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/00-pipeline.svg",
           "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/00-pipeline.svg"
@@ -56,6 +57,7 @@
         "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/04-glyph-ramp.svg",
         "width": 880,
         "height": 1301,
+        "padding": 4,
         "sources": {
           "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/04-glyph-ramp.svg",
           "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/04-glyph-ramp.svg"
@@ -68,6 +70,7 @@
         "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/05-color.svg",
         "width": 880,
         "height": 1154,
+        "padding": 4,
         "sources": {
           "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/05-color.svg",
           "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/05-color.svg"
@@ -80,6 +83,7 @@
         "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/06-output.svg",
         "width": 880,
         "height": 887,
+        "padding": 4,
         "sources": {
           "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/06-output.svg",
           "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/06-output.svg"
@@ -92,6 +96,7 @@
         "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/07-choosing-output.svg",
         "width": 880,
         "height": 964,
+        "padding": 4,
         "sources": {
           "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/07-choosing-output.svg",
           "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/07-choosing-output.svg"

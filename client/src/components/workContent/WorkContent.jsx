@@ -9,6 +9,17 @@ const isSoloImage = (artifacts, i) => isImage(artifacts[i]) && !isImage(artifact
 
 const dimension = (value, fallback) => (Number.isFinite(value) && value > 0 ? value : fallback);
 
+/**
+ * The frame around a `width` x `height` image, with optional `padding` (a percentage
+ * of the frame's width) on every side. The aspect ratio includes the padding, so the
+ * image fills the space inside it exactly.
+ */
+const frameStyle = (width, height, padding = 0) => {
+  const inset = dimension(padding, 0) / 100;
+  if (!inset) return { aspectRatio: `${width} / ${height}` };
+  return { aspectRatio: `${width} / ${(1 - 2 * inset) * height + 2 * inset * width}`, padding: `${inset * 100}%`, boxSizing: 'border-box' };
+};
+
 /** The text that accompanies an artifact, for its "open larger" label. */
 const viewLabel = (item) => `View ${item.label || item.title || item.alt || "artifact"} larger`;
 
@@ -43,9 +54,7 @@ function ArtifactRenderer({ artifact, viewerItem, onOpen, solo = false }) {
     const src = artifact.sources?.[theme] || artifact.src;
     const width = dimension(artifact.width, 16);
     const height = dimension(artifact.height, 10);
-    // Optional breathing room inside the frame, as a percentage of its width.
-    const padding = dimension(artifact.padding, 0);
-    const style = { aspectRatio: `${width} / ${height}`, ...(padding && { padding: `${padding}%`, boxSizing: 'border-box' }) };
+    const style = frameStyle(width, height, artifact.padding);
     return (
       <div className="work-content-artifact work-content-artifact--diagram">
         {heading}
@@ -89,7 +98,7 @@ function ArtifactRenderer({ artifact, viewerItem, onOpen, solo = false }) {
     <div className={`work-content-artifact${solo ? ' work-content-artifact--solo' : ''}`}>
       <div className="work-content-artifact-copy">{heading}</div>
       <Viewable item={viewerItem} onOpen={onOpen} className="work-content-image-placeholder"
-        style={hasSize ? { aspectRatio: `${artifact.width} / ${artifact.height}` } : undefined}>
+        style={hasSize ? frameStyle(artifact.width, artifact.height, artifact.padding) : undefined}>
         <img src={artifact.sources?.[theme] || artifact.src} alt={artifact.alt}
           width={hasSize ? artifact.width : undefined} height={hasSize ? artifact.height : undefined} loading="lazy" decoding="async" />
       </Viewable>

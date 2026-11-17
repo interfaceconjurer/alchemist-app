@@ -132,3 +132,11 @@ it('lets an image artifact follow the theme and keep its own shape', () => {
   expect(image.getAttribute('src')).toBe(document.documentElement.dataset.theme === 'light' ? '/light.svg' : '/dark.svg');
   expect(image.parentElement.style.aspectRatio).toBe('880 / 1300');
 });
+
+it('pads an image artifact inside a frame that still fits its shape', () => {
+  render(<ThemeProvider><WorkContent content={{ artifacts: [{ src: '/stage.svg', alt: 'Stage', label: 'Stage', width: 800, height: 1000, padding: 5 }] }} /></ThemeProvider>);
+  const frame = screen.getByRole('img', { name: 'Stage' }).parentElement;
+  expect(frame.style.padding).toBe('5%');
+  // Inside the padding the box is 720 wide, so it needs 900 of height plus 80 of padding.
+  expect(frame.style.aspectRatio).toBe('800 / 980');
+});

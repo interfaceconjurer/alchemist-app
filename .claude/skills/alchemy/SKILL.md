@@ -111,7 +111,7 @@ The portfolio site has a theme toggle (light/dark). When a README uses `<picture
 - `"code"` — styled code block. Uses `code` field instead of `src`. Use sparingly — only for the signature CLI interface or key API.
 - `"embed"` — a self-contained HTML document (e.g. a slide deck) served from `client/public/work/<id>/`, shown in a 16:9 frame. Optional `download: { href, label }`.
 
-Diagrams take optional `width`/`height` (the image's intrinsic size, so the frame is reserved before it loads) and `padding` (a percentage of the frame's width) when an edge-to-edge logo needs room to breathe.
+Diagrams take optional `width`/`height` (the image's intrinsic size, so the frame is reserved before it loads) and `padding` (a percentage of the frame's width, on every side) when an edge-to-edge logo or a diagram with content against its edges needs room to breathe. Image artifacts take `padding` too.
 
 ### Grouped outcome galleries
 
