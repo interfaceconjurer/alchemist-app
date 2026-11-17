@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { SHOW_TOP_BAR, openSearch as openShellSearch, toggleTheme } from './shell-helpers.js';
+import { SHOW_TOP_BAR, SHOW_RESUME, openSearch as openShellSearch, toggleTheme } from './shell-helpers.js';
 
 // These projects exercise engine/device emulation. Physical phone performance
 // and the native software keyboard remain separate release checks.
@@ -128,7 +128,8 @@ test('portrait and landscape navigation links remain reachable without horizonta
     await page.setViewportSize(viewport);
     const navigation = page.locator('nav.nav');
     const links = navigation.getByRole('link');
-    await expect(links).toHaveCount(3);
+    // GitHub and LinkedIn, plus Resume while its flag is on.
+    await expect(links).toHaveCount(SHOW_RESUME ? 3 : 2);
     for (let i = 0; i < await links.count(); i++) {
       const link = links.nth(i);
       await link.scrollIntoViewIfNeeded();
