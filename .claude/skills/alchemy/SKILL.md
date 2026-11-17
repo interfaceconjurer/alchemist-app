@@ -100,6 +100,7 @@ The portfolio site has a theme toggle (light/dark). When a README uses `<picture
 ```
 
 - `sources` is optional. When present, the renderer picks the URL matching the current theme. When absent, it falls back to `src`.
+- `sources` works on `image` artifacts too. Give tall images their intrinsic `width`/`height` so the card keeps their shape instead of cropping to 16:10.
 - `src` should still be set to the dark variant as the default fallback.
 - Look for `<picture><source media="(prefers-color-scheme: ...)">` patterns and paired filenames (Light/Dark, light/dark) in the README to detect variants.
 

@@ -123,3 +123,12 @@ it('pads a diagram inside its frame when asked, so it has room to breathe', () =
   render(<ThemeProvider><WorkContent content={{ artifacts: [{ type: 'diagram', src: '/logo.svg', alt: 'Logo', width: 880, height: 657, padding: 8 }] }} /></ThemeProvider>);
   expect(screen.getByRole('img', { name: 'Logo' }).parentElement.style.padding).toBe('8%');
 });
+
+it('lets an image artifact follow the theme and keep its own shape', () => {
+  render(<ThemeProvider><WorkContent content={{ artifacts: [{
+    src: '/dark.svg', sources: { light: '/light.svg', dark: '/dark.svg' }, width: 880, height: 1300, alt: 'Stage', label: 'Stage',
+  }] }} /></ThemeProvider>);
+  const image = screen.getByRole('img', { name: 'Stage' });
+  expect(image.getAttribute('src')).toBe(document.documentElement.dataset.theme === 'light' ? '/light.svg' : '/dark.svg');
+  expect(image.parentElement.style.aspectRatio).toBe('880 / 1300');
+});

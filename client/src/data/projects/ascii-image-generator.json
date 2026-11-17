@@ -2,23 +2,18 @@
   "id": "ascii-image-generator",
   "section": "sidequests",
   "type": "Tool",
-  "title": "PeachPy",
+  "title": "PyTone",
   "description": "Any image, rebuilt from glyphs. Terminal, HTML or SVG.",
   "date": "Nov 2026",
-  "tags": [
-    "Python",
-    "CLI",
-    "Pillow",
-    "SVG",
-    "Generative Art"
-  ],
+  "tags": ["Python", "CLI", "Pillow", "SVG", "Generative Art"],
   "repo": "https://github.com/interfaceconjurer/ascii-image-generator",
   "content": {
-    "context": "ASCII art is usually a novelty: a gray block of characters stuck in a terminal. PeachPy treats it as a medium. It's a small Python CLI that rebuilds any image from glyphs and keeps each one's color, then writes the result as truecolor terminal output, a self-contained HTML page, or a scalable SVG you can drop into a README. The glyph ramp is an artistic choice, not a fixed setting. Saturn can be drawn in rings, the Moon in moon phases, and a Vermeer in circles that swell with the light. What began as a weekend extension of a tutorial grew into a gallery of thirty pieces and a hardened, well-tested tool.",
+    "context": "ASCII art is usually a novelty: a gray block of characters stuck in a terminal. PyTone treats it as a medium. It's a small Python CLI that rebuilds any image from glyphs and keeps each one's color, then writes the result as truecolor terminal output, a self-contained HTML page, or a scalable SVG you can drop into a README. The glyph ramp is an artistic choice, not a fixed setting. Saturn can be drawn in rings, the Moon in moon phases, and a Vermeer in circles that swell with the light. What began as a weekend extension of a tutorial grew into a hardened, well-tested tool, a gallery of thirty pieces, and a stage-by-stage guide to the pipeline drawn from its own output.",
     "goals": [
       "Turn any image into text art with one command and no setup, via uvx",
       "Output plain text, ANSI truecolor, HTML, or SVG from one shared pipeline",
       "Make the glyph ramp, gradient, and density the creative controls",
+      "Explain each stage of the pipeline with diagrams built from its real output",
       "Harden the tool for scripts and agents: atomic writes, source protection, clear exit codes",
       "Prove the range with a gallery of old masters, space imagery, and iconic photography"
     ],
@@ -27,36 +22,83 @@
         "type": "diagram",
         "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/hero_dark.svg",
         "width": 880,
-        "height": 657,
+        "height": 758,
+        "padding": 4,
         "sources": {
           "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/hero_light.svg",
           "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/hero_dark.svg"
         },
-        "alt": "PeachPy: a peach above bubble lettering, rendered in blossom glyphs",
+        "alt": "PyTone: a snake made of halftone dots crossing a dot screen, above the PyTone wordmark",
         "label": "Project Identity",
-        "description": "The logo is made with the tool itself. A 3D peach emoji and Modak lettering are rendered in the blossom ramp ⁖⁘⁙❁✿, with light and dark versions that follow the theme.",
-        "padding": 8
+        "description": "The logo is made with the tool itself. A snake drawn in halftone dots crosses a dot screen above a Space Grotesk wordmark, rendered in the circles ramp · ∘ ○ ◯ ● with a gradient in the Python logo's blue and gold."
+      },
+      {
+        "type": "diagram",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/00-pipeline.svg",
+        "width": 880,
+        "height": 1090,
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/00-pipeline.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/00-pipeline.svg"
+        },
+        "alt": "The PyTone pipeline in six stages: image, resize, grayscale, glyph ramp, color and output, each showing its real result on a photo of Jupiter with the flags that control it",
+        "label": "From Picture to Glyphs",
+        "description": "Six small stages, each with one job and its own flags. Every picture in the diagram is the real output of that stage on a photo of Jupiter, and one command runs them all."
       },
       {
         "type": "code",
-        "code": "image ─▶ resize ─▶ grayscale ─▶ glyph ramp ─▶ color ─▶ text · ANSI · HTML · SVG\n\n# Try it without installing\nuvx --from git+https://github.com/interfaceconjurer/ascii-image-generator peachpy photo.jpg\n\n# One command, end to end\npeachpy photo.jpg -m svg -w 110 -c \" ·∘○◯●\" -o photo.svg",
-        "alt": "PeachPy pipeline and CLI usage",
-        "label": "One Pipeline, Four Outputs",
-        "description": "Each cell is resized to the shape of a character, mapped from brightness to a glyph in the ramp, then colored by its source pixel, a diagonal gradient, or a rainbow. Every renderer reads the same color grid."
+        "code": "# Try it without installing\nuvx --from git+https://github.com/interfaceconjurer/ascii-image-generator pytone photo.jpg\n\n# One command, every stage\npytone jupiter.jpg -w 110 -c \" ·∘○◯●\" --gradient \"#3D1A4D,#FFD700\" -m svg -o jupiter.svg",
+        "alt": "PyTone CLI usage",
+        "label": "One Command",
+        "description": "No install needed to try it. The full command maps onto the stages: the source image, -w for the resize, -c for the ramp, --gradient for color, and -m and -o for the output."
       },
       {
-        "type": "image",
-        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/moon.svg",
-        "alt": "The Moon rendered in moon-phase emoji, from new moon in the shadows to full moon on the lit face",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/04-glyph-ramp.svg",
+        "width": 880,
+        "height": 1301,
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/04-glyph-ramp.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/04-glyph-ramp.svg"
+        },
+        "alt": "Step 4, Glyph ramp: a brightness histogram split into one bucket per glyph, and the same picture drawn in classic, circle, block and star ramps",
         "label": "The Ramp Is the Idea",
-        "description": "A ramp is any sequence of glyphs ordered dark to light, including emoji. Here the Moon is drawn in its own phases: 🌑🌒🌓🌔🌕."
+        "description": "Each brightness falls into one bucket per character, ordered dark to light. The same grid drawn in four ramps shows that only the characters change, and with them the texture."
       },
       {
-        "type": "image",
-        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/jupiter.svg",
-        "alt": "Jupiter rendered in horizontal dash and triple-bar glyphs that follow its cloud bands",
-        "label": "Glyphs That Match the Subject",
-        "description": "Jupiter drawn in -=≡, so the strokes run with its cloud bands. In SVG the glyph size stays fixed and --pixel-width sets only the spacing, so dense layouts merge into texture."
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/05-color.svg",
+        "width": 880,
+        "height": 1154,
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/05-color.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/05-color.svg"
+        },
+        "alt": "Step 5, Color: glyphs keep their source color, or take a diagonal gradient or a horizontal rainbow, then saturation and brightness multipliers",
+        "label": "Color That Keeps the Shape",
+        "description": "Glyphs keep their source color or take a gradient or rainbow. Both are modulated by brightness, so the subject still reads."
+      },
+      {
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/06-output.svg",
+        "width": 880,
+        "height": 887,
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/06-output.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/06-output.svg"
+        },
+        "alt": "Step 6, Output: the same glyph grid as plain text, ANSI, HTML and SVG, with the trade-offs and file size of each",
+        "label": "Four Outputs",
+        "description": "The same glyph grid written as plain text, ANSI, HTML or SVG, with the strengths, trade-offs and real file size of each."
+      },
+      {
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/07-choosing-output.svg",
+        "width": 880,
+        "height": 964,
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/07-choosing-output.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/07-choosing-output.svg"
+        },
+        "alt": "A decision guide for picking an output: ANSI for the terminal, text for pasting, HTML for sending a file, SVG for READMEs and docs",
+        "label": "Choosing an Output",
+        "description": "A decision guide: ANSI for the terminal, text for pasting, HTML for sending a file, and SVG for READMEs and docs."
       }
     ],
     "outcome": [
@@ -106,6 +148,6 @@
         ]
       }
     ],
-    "whatsNext": "Next is source prep. Many gallery pieces depend on ImageMagick levels, gamma and contrast applied before conversion, and folding those into PeachPy would make the README commands fully reproducible. After that, wide-glyph and emoji alignment needs to work consistently across terminals."
+    "whatsNext": "Next is source prep. Many gallery pieces depend on ImageMagick levels, gamma and contrast applied before conversion, and folding those into PyTone would make the README commands fully reproducible. After that, wide-glyph and emoji alignment needs to work consistently across terminals."
   }
 }

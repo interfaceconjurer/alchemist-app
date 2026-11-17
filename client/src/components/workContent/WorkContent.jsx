@@ -83,11 +83,15 @@ function ArtifactRenderer({ artifact, viewerItem, onOpen, solo = false }) {
     );
   }
 
+  // Like diagrams, an image may follow the theme (`sources`) and keep its own shape (`width`/`height`).
+  const hasSize = Number.isFinite(artifact.width) && Number.isFinite(artifact.height);
   return (
     <div className={`work-content-artifact${solo ? ' work-content-artifact--solo' : ''}`}>
       <div className="work-content-artifact-copy">{heading}</div>
-      <Viewable item={viewerItem} onOpen={onOpen} className="work-content-image-placeholder">
-        <img src={artifact.src} alt={artifact.alt} loading="lazy" />
+      <Viewable item={viewerItem} onOpen={onOpen} className="work-content-image-placeholder"
+        style={hasSize ? { aspectRatio: `${artifact.width} / ${artifact.height}` } : undefined}>
+        <img src={artifact.sources?.[theme] || artifact.src} alt={artifact.alt}
+          width={hasSize ? artifact.width : undefined} height={hasSize ? artifact.height : undefined} loading="lazy" decoding="async" />
       </Viewable>
     </div>
   );
@@ -133,7 +137,7 @@ function WorkContentBody({ content }) {
       artifactIndex.set(i, items.length);
       items.push({
         kind: type === 'embed' ? 'embed' : 'image',
-        src: type === 'diagram' ? artifact.sources?.[theme] || artifact.src : artifact.src,
+        src: artifact.sources?.[theme] || artifact.src,
         alt: artifact.alt, title: artifact.title, label: artifact.label, description: artifact.description,
         width: artifact.width, height: artifact.height,
       });
