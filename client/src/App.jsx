@@ -26,7 +26,7 @@ import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useSwipeBack } from "./hooks/useSwipeBack";
 import { useStageReveal } from "./hooks/useStageReveal";
-import { SHOW_STAGE, SHOW_WORK_LIST, SHOW_TOP_BAR } from "./featureFlags";
+import { SHOW_STAGE, SHOW_WORK_LIST, SHOW_TOP_BAR, SHOW_RESUME } from "./featureFlags";
 
 // While the stage flag is off, an opened stage splits the row 40 / 60 with the panel.
 const PANEL_FRACTION = 0.4;
@@ -204,15 +204,17 @@ function App() {
                 </p>
               </header>
               <nav className="nav">
-                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/jordan-l-wright-91b17321">
-                  <Icon title="Out-Bound Link" icon={icons.linkedin} assistiveText="Out-Bound Link" /><span>LinkedIn</span>
-                </a>
-                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://github.com/interfaceconjurer/resume">
-                  <Icon title="Out-Bound Link" icon={icons.resume} assistiveText="Out-Bound Link" /><span>Resume</span>
-                </a>
                 <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://github.com/interfaceconjurer">
                   <Icon title="Out-Bound Link" icon={icons.github} assistiveText="Out-Bound Link" /><span>GitHub</span>
                 </a>
+                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/jordan-l-wright-91b17321">
+                  <Icon title="Out-Bound Link" icon={icons.linkedin} assistiveText="Out-Bound Link" /><span>LinkedIn</span>
+                </a>
+                {SHOW_RESUME && (
+                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://github.com/interfaceconjurer/resume">
+                  <Icon title="Out-Bound Link" icon={icons.resume} assistiveText="Out-Bound Link" /><span>Resume</span>
+                </a>
+                )}
               </nav>
             </section>
             {feedItems.length > 0 && (
