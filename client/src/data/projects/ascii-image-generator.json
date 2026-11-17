@@ -61,7 +61,7 @@
           "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/04-glyph-ramp.svg"
         },
         "alt": "Step 4, Glyph ramp: a brightness histogram split into one bucket per glyph, and the same picture drawn in classic, circle, block and star ramps",
-        "label": "The Ramp Is the Idea",
+        "label": "The Ramp Is the Brush Stroke",
         "description": "Each brightness falls into one bucket per character, ordered dark to light. The same grid drawn in four ramps shows that only the characters change, and with them the texture."
       },
       {
