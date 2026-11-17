@@ -9,10 +9,11 @@ const projectModules = import.meta.glob('../../data/projects/*.json', { eager: t
 const projects = Object.values(projectModules).map(m => m.default || m);
 
 const SECTIONS = [
-  { id: "trenches", icon: "\u26CF\uFE0F", name: "In the trenches", tagline: "How I think, work, and ship day to day." },
-  { id: "direction", icon: "\uD83D\uDD2E", name: "Direction", tagline: "Where I'm aiming and what I'm building toward." },
-  { id: "sidequests", icon: "\uD83C\uDFB2", name: "Side quests", tagline: "Tinkering, learning, and following curiosity." },
-].map(section => ({ ...section, label: `${section.icon} ${section.name}` }));
+  { id: "trenches", name: "In the trenches", tagline: "How I think, work, and ship day to day." },
+  { id: "direction", name: "Direction", tagline: "Where I'm aiming and what I'm building toward." },
+  { id: "sidequests", name: "Side quests", tagline: "Tinkering, learning, and following curiosity." },
+].map(section => ({ ...section, label: section.name }));
+
 
 export const workSections = SECTIONS.map(section => ({
   ...section,
@@ -38,8 +39,3 @@ export const feedItems = workSections
   .flatMap(section => section.items)
   .filter(item => item.type)
   .sort((a, b) => new Date(b.date) - new Date(a.date));
-
-/** The emoji of the section an item belongs to (used as its tab icon). */
-export function getSectionIconForItem(itemId) {
-  return workSections.find((section) => section.items.some((item) => item.id === itemId))?.icon ?? null;
-}

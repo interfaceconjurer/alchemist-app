@@ -9,3 +9,5 @@ export const SHOW_WORK_LIST = false;
 // Hide the top action bar (search button + theme toggle). Theme follows the
 // system color scheme; search stays available through Cmd/Ctrl+K.
 export const SHOW_TOP_BAR = false;
+// Hide the Resume link in the profile links.
+export const SHOW_RESUME = false;

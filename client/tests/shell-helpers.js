@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test';
-import { SHOW_TOP_BAR } from '../src/featureFlags.js';
+import { SHOW_TOP_BAR, SHOW_RESUME } from '../src/featureFlags.js';
 
-export { SHOW_TOP_BAR };
+export { SHOW_TOP_BAR, SHOW_RESUME };
 
 const SEARCH_PLACEHOLDER = 'Search work items and actions...';
 

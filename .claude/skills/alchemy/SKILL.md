@@ -100,6 +100,7 @@ The portfolio site has a theme toggle (light/dark). When a README uses `<picture
 ```
 
 - `sources` is optional. When present, the renderer picks the URL matching the current theme. When absent, it falls back to `src`.
+- `sources` works on `image` artifacts too. Give tall images their intrinsic `width`/`height` so the card keeps their shape instead of cropping to 16:10.
 - `src` should still be set to the dark variant as the default fallback.
 - Look for `<picture><source media="(prefers-color-scheme: ...)">` patterns and paired filenames (Light/Dark, light/dark) in the README to detect variants.
 
@@ -109,6 +110,21 @@ The portfolio site has a theme toggle (light/dark). When a README uses `<picture
 - `"diagram"` — full-width image, typically architectural/flow diagrams. Use for SVG diagrams, pipeline visualizations, and project logos/identity images that benefit from full-width display.
 - `"code"` — styled code block. Uses `code` field instead of `src`. Use sparingly — only for the signature CLI interface or key API.
 - `"embed"` — a self-contained HTML document (e.g. a slide deck) served from `client/public/work/<id>/`, shown in a 16:9 frame. Optional `download: { href, label }`.
+
+Diagrams take optional `width`/`height` (the image's intrinsic size, so the frame is reserved before it loads) and `padding` (a percentage of the frame's width, on every side) when an edge-to-edge logo or a diagram with content against its edges needs room to breathe. Image artifacts take `padding` too.
+
+### Grouped outcome galleries
+
+When a README's gallery has sections, `outcome` can hold groups instead of flat images. Each group has a title, an optional description, and `rows` of images; images in a row share one height and fill the width, so give each its intrinsic `width`/`height`. A good shape is two highlights, then three more:
+
+```json
+"outcome": [
+  { "title": "Space", "description": "One line on the section.", "rows": [
+    [{ "src": "...", "width": 715, "height": 713, "alt": "...", "caption": "..." }, { "...": "..." }],
+    [{ "...": "..." }, { "...": "..." }, { "...": "..." }]
+  ] }
+]
+```
 
 Images, diagrams, embeds and outcome images open in a full-screen viewer when clicked, with their label/caption and description. Set `"viewable": false` on an artifact that gains nothing from a larger view (e.g. a small informational diagram) to leave it as plain media.
 

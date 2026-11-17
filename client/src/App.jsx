@@ -2,7 +2,7 @@ import React, { useReducer, useEffect, useRef, useMemo } from "react";
 import "./App.css";
 import Icon from "./components/icon/view";
 import { icons } from "./components/iconList/iconList";
-import { workSections, feedItems, getSectionForItem, getSectionIconForItem } from "./components/workList/workList";
+import { workSections, feedItems, getSectionForItem } from "./components/workList/workList";
 import AlchemySymbol from "./components/alchemySymbol/mediator";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import SpaceBackground from "./components/space/SpaceBackground";
@@ -10,6 +10,7 @@ import ThemeToggle from "./components/ThemeToggle/ThemeToggle";
 import { loadState, createDebouncedSave } from "./workspacePersistence";
 import { resolveWorkItemsByIds } from "./resolveWorkItems";
 import StatusBar from "./components/statusBar/StatusBar";
+import { SketchbookIcon, EntryIcon } from "./components/icon/sketchbookIcons";
 import CommandPalette from "./components/commandPalette/CommandPalette";
 import TabBar from "./components/app/TabBar";
 import { tabIsLoading } from "./components/terminalLoader/TerminalLoader";
@@ -25,7 +26,7 @@ import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useSwipeBack } from "./hooks/useSwipeBack";
 import { useStageReveal } from "./hooks/useStageReveal";
-import { SHOW_STAGE, SHOW_WORK_LIST, SHOW_TOP_BAR } from "./featureFlags";
+import { SHOW_STAGE, SHOW_WORK_LIST, SHOW_TOP_BAR, SHOW_RESUME } from "./featureFlags";
 
 // While the stage flag is off, an opened stage splits the row 40 / 60 with the panel.
 const PANEL_FRACTION = 0.4;
@@ -203,20 +204,22 @@ function App() {
                 </p>
               </header>
               <nav className="nav">
-                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/jordan-l-wright-91b17321">
-                  <Icon title="Out-Bound Link" icon={icons.linkedin} assistiveText="Out-Bound Link" /><span>LinkedIn</span>
-                </a>
-                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://github.com/interfaceconjurer/resume">
-                  <Icon title="Out-Bound Link" icon={icons.resume} assistiveText="Out-Bound Link" /><span>Resume</span>
-                </a>
                 <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://github.com/interfaceconjurer">
                   <Icon title="Out-Bound Link" icon={icons.github} assistiveText="Out-Bound Link" /><span>GitHub</span>
                 </a>
+                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://www.linkedin.com/in/jordan-l-wright-91b17321">
+                  <Icon title="Out-Bound Link" icon={icons.linkedin} assistiveText="Out-Bound Link" /><span>LinkedIn</span>
+                </a>
+                {SHOW_RESUME && (
+                <a className="out-bound-link" target="_blank" rel="noopener noreferrer" href="https://github.com/interfaceconjurer/resume">
+                  <Icon title="Out-Bound Link" icon={icons.resume} assistiveText="Out-Bound Link" /><span>Resume</span>
+                </a>
+                )}
               </nav>
             </section>
             {feedItems.length > 0 && (
             <section className="work-feed" aria-labelledby="work-feed-title">
-              <h2 className="work-feed-title" id="work-feed-title">Cross section of recent work and thoughts</h2>
+              <h2 className="work-feed-title" id="work-feed-title"><SketchbookIcon size={20} />Laboratory sketchbook</h2>
               {feedItems.map((item) => (
                 <button key={item.id} type="button"
                   data-work-item-id={item.id}
@@ -225,7 +228,7 @@ function App() {
                   onClick={() => tabActions.openWorkItem(item)}
                   onMouseDown={(e) => !isMobile && e.button === 0 && handleWorkItemMouseDown(e, item)}
                 >
-                  <span className="work-feed-item-icon" aria-hidden="true">{getSectionIconForItem(item.id)}</span>
+                  <EntryIcon className="work-feed-item-icon" size={16} />
                   <span className="work-feed-item-body">
                     <span className="work-item-title">{item.title}</span>
                     <span className="work-item-meta">

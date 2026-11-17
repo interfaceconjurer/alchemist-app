@@ -1,0 +1,158 @@
+{
+  "id": "ascii-image-generator",
+  "section": "sidequests",
+  "type": "Tool",
+  "title": "PyTone",
+  "description": "Any image, rebuilt from glyphs. Terminal, HTML or SVG.",
+  "date": "Nov 2026",
+  "tags": ["Python", "CLI", "Pillow", "SVG", "Generative Art"],
+  "repo": "https://github.com/interfaceconjurer/ascii-image-generator",
+  "content": {
+    "context": "ASCII art is usually a novelty: a gray block of characters stuck in a terminal. PyTone treats it as a medium. It's a small Python CLI that rebuilds any image from glyphs and keeps each one's color, then writes the result as truecolor terminal output, a self-contained HTML page, or a scalable SVG you can drop into a README. The glyph ramp is an artistic choice, not a fixed setting. Saturn can be drawn in rings, the Moon in moon phases, and a Vermeer in circles that swell with the light. What began as a weekend extension of a tutorial grew into a hardened, well-tested tool, a gallery of thirty pieces, and a stage-by-stage guide to the pipeline drawn from its own output.",
+    "goals": [
+      "Turn any image into text art with one command and no setup, via uvx",
+      "Output plain text, ANSI truecolor, HTML, or SVG from one shared pipeline",
+      "Make the glyph ramp, gradient, and density the creative controls",
+      "Explain each stage of the pipeline with diagrams built from its real output",
+      "Harden the tool for scripts and agents: atomic writes, source protection, clear exit codes",
+      "Prove the range with a gallery of old masters, space imagery, and iconic photography"
+    ],
+    "artifacts": [
+      {
+        "type": "diagram",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/hero_dark.svg",
+        "width": 880,
+        "height": 758,
+        "padding": 4,
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/hero_light.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/hero_dark.svg"
+        },
+        "alt": "PyTone: a snake made of halftone dots crossing a dot screen, above the PyTone wordmark",
+        "label": "Project Identity",
+        "description": "The logo is made with the tool itself. A snake drawn in halftone dots crosses a dot screen above a Space Grotesk wordmark, rendered in the circles ramp · ∘ ○ ◯ ● with a gradient in the Python logo's blue and gold."
+      },
+      {
+        "type": "diagram",
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/00-pipeline.svg",
+        "width": 880,
+        "height": 1090,
+        "padding": 4,
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/00-pipeline.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/00-pipeline.svg"
+        },
+        "alt": "The PyTone pipeline in six stages: image, resize, grayscale, glyph ramp, color and output, each showing its real result on a photo of Jupiter with the flags that control it",
+        "label": "From Picture to Glyphs",
+        "description": "Six small stages, each with one job and its own flags. Every picture in the diagram is the real output of that stage on a photo of Jupiter, and one command runs them all."
+      },
+      {
+        "type": "code",
+        "code": "# Try it without installing\nuvx --from git+https://github.com/interfaceconjurer/ascii-image-generator pytone photo.jpg\n\n# One command, every stage\npytone jupiter.jpg -w 110 -c \" ·∘○◯●\" --gradient \"#3D1A4D,#FFD700\" -m svg -o jupiter.svg",
+        "alt": "PyTone CLI usage",
+        "label": "One Command",
+        "description": "No install needed to try it. The full command maps onto the stages: the source image, -w for the resize, -c for the ramp, --gradient for color, and -m and -o for the output."
+      },
+      {
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/04-glyph-ramp.svg",
+        "width": 880,
+        "height": 1301,
+        "padding": 4,
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/04-glyph-ramp.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/04-glyph-ramp.svg"
+        },
+        "alt": "Step 4, Glyph ramp: a brightness histogram split into one bucket per glyph, and the same picture drawn in classic, circle, block and star ramps",
+        "label": "The Ramp Is the Brush Stroke",
+        "description": "Each brightness falls into one bucket per character, ordered dark to light. The same grid drawn in four ramps shows that only the characters change, and with them the texture."
+      },
+      {
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/05-color.svg",
+        "width": 880,
+        "height": 1154,
+        "padding": 4,
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/05-color.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/05-color.svg"
+        },
+        "alt": "Step 5, Color: glyphs keep their source color, or take a diagonal gradient or a horizontal rainbow, then saturation and brightness multipliers",
+        "label": "Color That Keeps the Shape",
+        "description": "Glyphs keep their source color or take a gradient or rainbow. Both are modulated by brightness, so the subject still reads."
+      },
+      {
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/06-output.svg",
+        "width": 880,
+        "height": 887,
+        "padding": 4,
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/06-output.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/06-output.svg"
+        },
+        "alt": "Step 6, Output: the same glyph grid as plain text, ANSI, HTML and SVG, with the trade-offs and file size of each",
+        "label": "Four Outputs",
+        "description": "The same glyph grid written as plain text, ANSI, HTML or SVG, with the strengths, trade-offs and real file size of each."
+      },
+      {
+        "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/07-choosing-output.svg",
+        "width": 880,
+        "height": 964,
+        "padding": 4,
+        "sources": {
+          "light": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/light/07-choosing-output.svg",
+          "dark": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/pipeline/07-choosing-output.svg"
+        },
+        "alt": "A decision guide for picking an output: ANSI for the terminal, text for pasting, HTML for sending a file, SVG for READMEs and docs",
+        "label": "Choosing an Output",
+        "description": "A decision guide: ANSI for the terminal, text for pasting, HTML for sending a file, and SVG for READMEs and docs."
+      }
+    ],
+    "outcome": [
+      {
+        "title": "Old Masters in Light",
+        "description": "Circles grow with brightness, so the painting's light falls in rings of · ∘ ○ ◯ ●.",
+        "rows": [
+          [
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/pearl-earring.svg", "width": 715, "height": 842, "alt": "Girl with a Pearl Earring by Vermeer, rendered in circles that grow with brightness", "caption": "Girl with a Pearl Earring, Vermeer" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/virgin-annunciate.svg", "width": 715, "height": 946, "alt": "Antonello da Messina's Virgin Annunciate, rendered in circle glyphs against a dark ground", "caption": "Virgin Annunciate, Antonello da Messina" }
+          ],
+          [
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/rembrandt-self-portrait.svg", "width": 715, "height": 905, "alt": "Rembrandt's 1659 self-portrait, rendered in circles that grow with brightness", "caption": "Self-Portrait, Rembrandt" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/magdalene-smoking-flame.svg", "width": 715, "height": 988, "alt": "Georges de La Tour's Magdalene with the Smoking Flame, lit by a single candle in circle glyphs", "caption": "Magdalene with the Smoking Flame, de La Tour" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/mona-lisa.svg", "width": 715, "height": 1061, "alt": "Leonardo's Mona Lisa, rendered in circle glyphs", "caption": "Mona Lisa, Leonardo" }
+          ]
+        ]
+      },
+      {
+        "title": "Space",
+        "description": "NASA and ESA imagery. Where it fits, the ramp matches the subject: Saturn in rings, the Pleiades in stars.",
+        "rows": [
+          [
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/whirlpool-galaxy.svg", "width": 715, "height": 713, "alt": "The Whirlpool Galaxy's spiral arms, rendered in circle glyphs", "caption": "Whirlpool Galaxy (M51)" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/ring-nebula.svg", "width": 720, "height": 720, "alt": "JWST's Ring Nebula, rendered in circle glyphs", "caption": "Ring Nebula (M57), JWST" }
+          ],
+          [
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/saturn.svg", "width": 800, "height": 384, "alt": "Saturn and its rings, rendered in ring-shaped glyphs", "caption": "Saturn, in rings" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/pleiades.svg", "width": 845, "height": 634, "alt": "The Pleiades star cluster, rendered in dot, plus and star glyphs", "caption": "The Pleiades, in stars" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/m87.svg", "width": 650, "height": 645, "alt": "The M87 black hole's glowing ring, rendered in concentric ring glyphs", "caption": "M87* black hole, in rings" }
+          ]
+        ]
+      },
+      {
+        "title": "Iconic Photography",
+        "description": "Halftone dots in a single cream ink, plus pop-art color variants.",
+        "rows": [
+          [
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/baldwin-iv.svg", "width": 845, "height": 967, "alt": "Baldwin IV, the masked Leper King from Kingdom of Heaven, rendered in halftone dots", "caption": "Baldwin IV, the Leper King" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/migrant-mother.svg", "width": 840, "height": 1089, "alt": "Dorothea Lange's Migrant Mother, rendered as single-ink cream halftone dots", "caption": "Migrant Mother, Dorothea Lange" }
+          ],
+          [
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/abraham-lincoln.svg", "width": 715, "height": 884, "alt": "Abraham Lincoln's 1863 portrait, rendered as cream halftone dots", "caption": "Abraham Lincoln, Alexander Gardner" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/einstein-pop.svg", "width": 770, "height": 952, "alt": "Einstein portrait in halftone dots with a magenta to amber gradient", "caption": "Einstein, pop (magenta → amber)" },
+            { "src": "https://raw.githubusercontent.com/interfaceconjurer/ascii-image-generator/main/docs/gallery/marilyn-pop-a.svg", "width": 840, "height": 1042, "alt": "Marilyn Monroe portrait in halftone dots with a yellow to magenta gradient", "caption": "Marilyn, pop (yellow → magenta)" }
+          ]
+        ]
+      }
+    ],
+    "whatsNext": "Next is source prep. Many gallery pieces depend on ImageMagick levels, gamma and contrast applied before conversion, and folding those into PyTone would make the README commands fully reproducible. After that, wide-glyph and emoji alignment needs to work consistently across terminals."
+  }
+}
