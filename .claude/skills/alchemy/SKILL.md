@@ -50,7 +50,7 @@ The alchemist-app lives at `/Users/j.wright/git-repos/alchemist-app`. Project da
   "section": "trenches|direction|sidequests",
   "title": "Human-readable project title",
   "description": "One-line description for the sidebar",
-  "date": "Month Year or Year",
+  "date": "Mon D, YYYY (a full date, e.g. \"Nov 1, 2026\")",
   "tags": ["Tech1", "Tech2"],
   "repo": "https://github.com/owner/repo",
   "content": {
