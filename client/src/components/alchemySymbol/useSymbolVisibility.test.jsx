@@ -63,3 +63,16 @@ it('suspends rendering while the document is hidden', () => {
     else delete document.visibilityState;
   }
 });
+
+it('pauses while the full-screen viewer covers the page, and resumes after', async () => {
+  const { coverPage } = await import('../../utils/pageCover');
+  render(<Probe />);
+  const probe = screen.getByTestId('policy');
+  expect(probe).toHaveAttribute('data-active', 'true');
+  let uncover;
+  act(() => { uncover = coverPage(); });
+  expect(probe).toHaveAttribute('data-active', 'false');
+  expect(probe).toHaveAttribute('data-visible', 'false');
+  act(() => uncover());
+  expect(probe).toHaveAttribute('data-active', 'true');
+});
