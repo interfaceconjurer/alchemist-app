@@ -2,6 +2,9 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { coverPage } from "../../utils/pageCover";
 import { usePinchZoom } from "./usePinchZoom";
 
+/** How far a finger must travel sideways to page (CSS px). */
+export const SWIPE_PX = 50;
+
 /**
  * Full-screen viewer for a work item's visual artifacts: images, diagrams and
  * embedded documents (the deck). Built on the native modal <dialog>, which
@@ -9,7 +12,8 @@ import { usePinchZoom } from "./usePinchZoom";
  * content. Focus returns to the artifact that opened it.
  *
  * Pinching an image zooms the image alone (see usePinchZoom); double-tap, drag
- * and the + / - / 0 keys do the same without a gesture.
+ * and the + / - / 0 keys do the same without a gesture. Swiping left or right
+ * pages through the gallery, alongside the previous / next buttons and arrow keys.
  *
  * `items`: [{ kind: 'image' | 'embed', src, alt?, title?, label?, description?, width?, height? }]
  * `index`: the open item, or null when closed.
@@ -56,6 +60,37 @@ export default function ArtifactViewer({ items, index, onIndexChange, onClose })
     onIndexChange((index + delta + count) % count);
   }, [open, count, index, onIndexChange]);
 
+  // Swipe to page, so a thumb doesn't have to reach the buttons. One finger,
+  // mostly sideways, anywhere in the viewer; never while the image is zoomed in
+  // (dragging pans it then) or during a pinch. An embedded deck swipes its own
+  // slides inside its frame. Touches report through pointer events, which bubble
+  // here from the image even while it captures the pointer.
+  // `down` holds the fingers on the screen; `swipe` is the swipe being tracked,
+  // dropped by a second finger or a zoomed image. A new one starts only once
+  // every finger has lifted.
+  const down = useRef(new Set());
+  const swipe = useRef(null);
+  const swiped = useRef(false);
+  const onSwipeStart = (e) => {
+    swiped.current = false;
+    if (e.pointerType === "mouse") return;
+    down.current.add(e.pointerId);
+    swipe.current = down.current.size === 1 && count > 1 && !zoom.zoomed
+      ? { id: e.pointerId, x: e.clientX, y: e.clientY }
+      : null;
+  };
+  const onSwipeEnd = (e) => {
+    if (!down.current.delete(e.pointerId)) return;
+    const s = swipe.current;
+    swipe.current = null;
+    if (!s || s.id !== e.pointerId || e.type !== "pointerup") return;
+    const dx = e.clientX - s.x;
+    const dy = e.clientY - s.y;
+    if (Math.abs(dx) < SWIPE_PX || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    swiped.current = true; // the click that follows isn't a tap on the backdrop
+    step(dx < 0 ? 1 : -1);
+  };
+
   const onKeyDown = (e) => {
     // Arrow keys page through a gallery; an embedded deck keeps its own keys
     // because it receives them inside its frame.
@@ -68,6 +103,7 @@ export default function ArtifactViewer({ items, index, onIndexChange, onClose })
 
   // Clicking empty space around the artifact closes; the artifact and controls don't.
   const onClick = (e) => {
+    if (swiped.current) { swiped.current = false; return; }
     if (e.target === e.currentTarget || e.target.classList?.contains("artifact-viewer-frame") || e.target.classList?.contains("artifact-viewer-stage")) onClose();
   };
 
@@ -86,7 +122,7 @@ export default function ArtifactViewer({ items, index, onIndexChange, onClose })
       onClick={onClick}
     >
       {item && (
-        <div className="artifact-viewer-frame">
+        <div className="artifact-viewer-frame" onPointerDown={onSwipeStart} onPointerUp={onSwipeEnd} onPointerCancel={onSwipeEnd}>
           <div className="artifact-viewer-toolbar">
             {count > 1 && <span className="artifact-viewer-count" aria-live="polite">{index + 1} / {count}</span>}
             <button type="button" className="artifact-viewer-close" onClick={onClose} aria-label="Close" autoFocus>×</button>

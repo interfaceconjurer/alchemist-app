@@ -325,6 +325,9 @@ button.work-content-image-placeholder {
 }
 
 .artifact-viewer-frame {
+  /* Sideways finger moves page the gallery (ArtifactViewer); vertical scrolling and
+     pinch-zooming the page still belong to the browser. */
+  touch-action: pan-y pinch-zoom;
   box-sizing: border-box;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;

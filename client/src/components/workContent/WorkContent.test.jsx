@@ -162,3 +162,46 @@ it('zooms the open image from the keyboard as well as by pinching', () => {
   fireEvent.keyDown(dialog, { key: '0' });
   expect(box).not.toHaveAttribute('data-zoomed');
 });
+
+describe('swiping between artifacts in the viewer', () => {
+  const images = { outcome: ['a', 'b', 'c'].map((n) => ({ src: `/${n}.png`, alt: n, caption: n })) };
+  const openViewer = () => {
+    render(<ThemeProvider><WorkContent content={images} /></ThemeProvider>);
+    fireEvent.click(screen.getByRole('button', { name: 'View a larger' }));
+    const dialog = document.querySelector('dialog.artifact-viewer');
+    const box = dialog.querySelector('.artifact-viewer-image');
+    Object.defineProperties(box, { clientWidth: { value: 300 }, clientHeight: { value: 400 } });
+    box.getBoundingClientRect = () => ({ left: 0, top: 0, width: 300, height: 400 });
+    return { dialog, box, count: () => within(dialog).getByText(/^\d+ \/ 3$/).textContent };
+  };
+  const finger = (el, type, id, x, y) => fireEvent[type](el, { pointerId: id, pointerType: 'touch', clientX: x, clientY: y });
+  const swipe = (el, fromX, toX, y = 200, toY = y) => { finger(el, 'pointerDown', 1, fromX, y); finger(el, 'pointerMove', 1, toX, toY); finger(el, 'pointerUp', 1, toX, toY); };
+
+  it('swipes left for the next artifact and right for the previous, anywhere in the viewer', () => {
+    const { dialog, box, count } = openViewer();
+    swipe(box, 250, 100);
+    expect(count()).toBe('2 / 3');
+    swipe(dialog.querySelector('.artifact-viewer-caption'), 100, 250); // on the caption too
+    expect(count()).toBe('1 / 3');
+    expect(dialog).toHaveAttribute('open'); // a swipe that ends off the image doesn't close it
+  });
+
+  it('ignores short, mostly vertical and two-finger gestures', () => {
+    const { box, count } = openViewer();
+    swipe(box, 200, 170); // too short
+    swipe(box, 200, 120, 100, 300); // mostly vertical
+    finger(box, 'pointerDown', 1, 250, 200);
+    finger(box, 'pointerDown', 2, 150, 200); // a pinch
+    finger(box, 'pointerUp', 2, 150, 200);
+    finger(box, 'pointerUp', 1, 60, 200);
+    expect(count()).toBe('1 / 3');
+  });
+
+  it('pans a zoomed-in image instead of paging', () => {
+    const { dialog, box, count } = openViewer();
+    fireEvent.keyDown(dialog, { key: '+' });
+    swipe(box, 250, 100);
+    expect(count()).toBe('1 / 3');
+    expect(box).toHaveAttribute('data-zoomed', 'true');
+  });
+});
