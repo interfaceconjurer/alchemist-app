@@ -140,3 +140,25 @@ it('pads an image artifact inside a frame that still fits its shape', () => {
   // Inside the padding the box is 720 wide, so it needs 900 of height plus 80 of padding.
   expect(frame.style.aspectRatio).toBe('800 / 980');
 });
+
+it('covers the page while the viewer is open, so the crystal behind it pauses', async () => {
+  const { isPageCovered } = await import('../../utils/pageCover');
+  render(<ThemeProvider><WorkContent content={gallery} /></ThemeProvider>);
+  expect(isPageCovered()).toBe(false);
+  fireEvent.click(screen.getByRole('button', { name: 'View The deck larger' }));
+  expect(isPageCovered()).toBe(true);
+  fireEvent.click(within(document.querySelector('dialog')).getByRole('button', { name: 'Close' }));
+  expect(isPageCovered()).toBe(false);
+});
+
+it('zooms the open image from the keyboard as well as by pinching', () => {
+  render(<ThemeProvider><WorkContent content={gallery} /></ThemeProvider>);
+  fireEvent.click(screen.getByRole('button', { name: 'View Atmospheric scale larger' }));
+  const dialog = document.querySelector('dialog.artifact-viewer');
+  const box = dialog.querySelector('.artifact-viewer-image');
+  Object.defineProperties(box, { clientWidth: { value: 400 }, clientHeight: { value: 300 } });
+  fireEvent.keyDown(dialog, { key: '+' });
+  expect(box).toHaveAttribute('data-zoomed', 'true');
+  fireEvent.keyDown(dialog, { key: '0' });
+  expect(box).not.toHaveAttribute('data-zoomed');
+});

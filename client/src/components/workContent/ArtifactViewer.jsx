@@ -1,10 +1,15 @@
 import React, { useCallback, useEffect, useRef } from "react";
+import { coverPage } from "../../utils/pageCover";
+import { usePinchZoom } from "./usePinchZoom";
 
 /**
  * Full-screen viewer for a work item's visual artifacts: images, diagrams and
  * embedded documents (the deck). Built on the native modal <dialog>, which
  * provides the backdrop, focus containment, Escape to close and inert page
  * content. Focus returns to the artifact that opened it.
+ *
+ * Pinching an image zooms the image alone (see usePinchZoom); double-tap, drag
+ * and the + / - / 0 keys do the same without a gesture.
  *
  * `items`: [{ kind: 'image' | 'embed', src, alt?, title?, label?, description?, width?, height? }]
  * `index`: the open item, or null when closed.
@@ -14,6 +19,11 @@ export default function ArtifactViewer({ items, index, onIndexChange, onClose })
   const open = index !== null && index >= 0 && index < items.length;
   const item = open ? items[index] : null;
   const count = items.length;
+
+  const zoom = usePinchZoom(open ? item.src : null);
+
+  // The viewer is opaque and fills the screen: pause what's behind it (the crystal).
+  useEffect(() => (open ? coverPage() : undefined), [open]);
 
   const returnFocus = useRef(null);
   useEffect(() => {
@@ -51,6 +61,9 @@ export default function ArtifactViewer({ items, index, onIndexChange, onClose })
     // because it receives them inside its frame.
     if (e.key === "ArrowRight") { e.preventDefault(); step(1); }
     else if (e.key === "ArrowLeft") { e.preventDefault(); step(-1); }
+    else if (item?.kind !== "embed" && (e.key === "+" || e.key === "=")) { e.preventDefault(); zoom.zoomBy(1.5); }
+    else if (item?.kind !== "embed" && e.key === "-") { e.preventDefault(); zoom.zoomBy(1 / 1.5); }
+    else if (item?.kind !== "embed" && e.key === "0") { e.preventDefault(); zoom.reset(); }
   };
 
   // Clicking empty space around the artifact closes; the artifact and controls don't.
@@ -88,7 +101,10 @@ export default function ArtifactViewer({ items, index, onIndexChange, onClose })
                 <iframe key={item.src} src={item.src} title={item.title || item.label} allow="fullscreen" allowFullScreen onLoad={onEmbedLoad} />
               </div>
             ) : (
-              <img key={item.src} className="artifact-viewer-image" src={item.src} alt={item.alt || ""} decoding="async" />
+              // The box clips the zoomed picture; it keeps the image's place in the layout.
+              <div ref={zoom.ref} className="artifact-viewer-image" data-zoomed={zoom.zoomed || undefined} {...zoom.handlers}>
+                <img key={item.src} src={item.src} alt={item.alt || ""} decoding="async" draggable={false} style={zoom.style} />
+              </div>
             )}
             {count > 1 && (
               <button type="button" className="artifact-viewer-nav artifact-viewer-nav--next" onClick={() => step(1)} aria-label="Next">›</button>
