@@ -10,6 +10,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
  * The cell is drawn as CSS dots from each frame's braille character rather than
  * as text: the site font has no braille glyphs, and system fallbacks vary (some
  * draw empty dots as rings).
+ *
+ * The spin is a CSS animation, not a timer. All ten frames are drawn stacked and
+ * a stepped opacity animation shows one at a time (see view.css). Opacity runs on
+ * the browser's compositor, so the spinner keeps turning while the main thread
+ * is busy, which is exactly when it is on screen: the crystal is loading.
  */
 export const SHOW_AFTER_MS = 1000; // into the page load (fast desktops draw by ~0.6–0.9 s)
 export const MIN_CYCLES = 2; // once shown, it plays at least this many full cycles
@@ -31,8 +36,6 @@ export const previewDelayMs = () => (import.meta.env.DEV
   ? Math.min(10000, Math.max(0, Number(new URLSearchParams(window.location.search).get('crystal-delay')) || 0))
   : 0);
 
-const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
-
 // Unicode braille: U+2800 + one bit per dot. Dots 1–3 run down the left column,
 // 4–6 down the right; listed a row at a time.
 const DOT_BITS = [0, 3, 1, 4, 2, 5];
@@ -47,21 +50,20 @@ export function CrystalLoaderFrame({ char }) {
   );
 }
 
-/** `visible`: the crystal is still loading and the threshold has passed (see useCrystalLoader). */
+/**
+ * `visible`: the crystal is still loading and the threshold has passed (see useCrystalLoader).
+ * The frames only animate while visible, so each showing starts from the first
+ * frame and the minimum run is whole cycles. Reduced motion holds the first frame
+ * (the animation is off; see view.css).
+ */
 export function CrystalLoader({ visible }) {
-  const [frame, setFrame] = useState(0);
-  useEffect(() => {
-    // Only spin while showing, always from the first frame, so the minimum run is
-    // whole cycles. Reduced motion holds the first frame.
-    if (!visible) return undefined;
-    setFrame(0);
-    if (prefersReducedMotion()) return undefined;
-    const id = setInterval(() => setFrame((f) => (f + 1) % FRAMES.length), FRAME_MS);
-    return () => clearInterval(id);
-  }, [visible]);
   return (
     <div className={`crystal-loader${visible ? ' crystal-loader--visible' : ''}`} aria-hidden="true" data-crystal-loader={visible ? 'visible' : 'hidden'}>
-      <CrystalLoaderFrame char={FRAMES[frame]} />
+      <span className="crystal-loader-frames" style={{ '--frame-count': FRAMES.length, '--frame-ms': `${FRAME_MS}ms` }}>
+        {FRAMES.map((char, i) => (
+          <span key={char} className="crystal-loader-frame" style={{ '--frame': i }}><CrystalLoaderFrame char={char} /></span>
+        ))}
+      </span>
     </div>
   );
 }

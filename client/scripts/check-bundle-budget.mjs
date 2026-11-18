@@ -7,7 +7,7 @@ const limits = {
   entryGzip: 105_000,
   runtimeGzip: 580_000,
   runtimeRaw: 2_100_000,
-  stylesheetRaw: 35_000,
+  stylesheetRaw: 36_000,
 };
 const assets = new URL('../dist/assets/', import.meta.url);
 let names;
