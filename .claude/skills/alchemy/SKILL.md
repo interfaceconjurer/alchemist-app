@@ -36,9 +36,11 @@ The alchemist-app lives at `/Users/j.wright/git-repos/alchemist-app`. Project da
    - `direction` — "Direction" (vision, strategy, north star work)
    - `sidequests` — "Side quests" (tinkering, experiments, curiosity-driven)
 
-5. **Generate the project JSON** following the template at `.claude/skills/alchemy/template.json`. Read the template first — it defines the tone, structure, and level of detail expected. Write the result to `client/src/data/projects/<repo-name>.json`.
+5. **Add it to the sitemap.** Each item lives at `/sketch/<title>`, with the title lowercased and hyphenated (`Fine Tunes` → `/sketch/fine-tunes`). Add `https://jordanwright.codes/sketch/<slug>` to `client/public/sitemap.xml`; a test fails if the sitemap and the projects disagree. Retitling an item changes its address, so set `"slug"` to the old one to keep existing links working.
 
-6. **Present what you created** — show the user the full JSON in a readable format so they can see what they got.
+6. **Generate the project JSON** following the template at `.claude/skills/alchemy/template.json`. Read the template first — it defines the tone, structure, and level of detail expected. Write the result to `client/src/data/projects/<repo-name>.json`.
+
+7. **Present what you created** — show the user the full JSON in a readable format so they can see what they got.
 
 ### Project JSON schema
 
