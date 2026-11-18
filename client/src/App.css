@@ -874,7 +874,6 @@ body.is-dragging iframe {
     position: absolute;
     inset: 0;
     z-index: 20;
-    background: var(--panel-bg);
   }
 
   .stage--hidden {
@@ -908,15 +907,6 @@ body.is-dragging iframe {
   .symbolContainer {
     height: 400px;
     margin-bottom: -48px;
-  }
-}
-
-@media (max-width: 550px) {
-  .App-header {
-    top: 1rem;
-    left: 1rem;
-    right: 1rem;
-    max-width: none;
   }
 }
 
