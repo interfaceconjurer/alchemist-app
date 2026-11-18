@@ -352,13 +352,6 @@ function MorphShape({ isDark, animationTime, uVitality, bubbleVisibility, dorman
   );
 }
 
-/** Reports once, after the first frame has been rendered (Bloom renders at priority 1). */
-function FirstFrame({ onFirstFrame }) {
-  const reported = useRef(false);
-  useFrame(() => { if (!reported.current) { reported.current = true; onFirstFrame?.(); } }, 2);
-  return null;
-}
-
 /**
  * One persistent canvas; the solid carves itself into the next instead of cross-fading.
  * `calm` (reduced motion): fade in at rest, then only the light changes, with an
@@ -397,7 +390,6 @@ export default function MorphingSolid({ active = true, calm = false, held = fals
       {...handlers}
     >
       <Canvas gl={createRenderer} dpr={dpr} frameloop={active ? 'always' : 'never'} camera={{ position: [0, 1.2, 7.5], fov: 60 }} style={{ background: 'transparent' }}>
-        <FirstFrame onFirstFrame={onFirstFrame} />
         <DormancyController
           active={running}
           dormancy={dormancy}
@@ -409,7 +401,9 @@ export default function MorphingSolid({ active = true, calm = false, held = fals
         />
         <RenderPolicyController active={running} lowerDpr={lowerDpr} animationTime={animationTime} timeScale={timeScale} />
         <MorphShape calm={calm} isDark={isDark} animationTime={animationTime} uVitality={uVitality} bubbleVisibility={bubbleVisibility} dormancy={dormancy} timeScale={timeScale} />
-        <Bloom strength={bloom} gain={bloomGain} />
+        {/* Bloom owns rendering, so it reports the first frame it draws: only
+            once the shaders are compiled (see Bloom). */}
+        <Bloom strength={bloom} gain={bloomGain} onFirstFrame={onFirstFrame} />
       </Canvas>
     </div>
   );

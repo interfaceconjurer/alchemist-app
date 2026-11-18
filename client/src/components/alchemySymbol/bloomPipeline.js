@@ -18,6 +18,14 @@ export function createBloomPipeline(renderer, scene, camera) {
       glow.threshold.value = threshold;
     },
     render() { pipeline.render(); },
+    /**
+     * Compile the scene's shaders ahead of the first draw. Without this the first
+     * render builds every material's pipeline synchronously and the page freezes
+     * for seconds on a slow phone; precompiling yields to the browser between
+     * items, so the loader keeps running. The post-processing pass (bloom) still
+     * compiles on the first render, which is the brief remainder.
+     */
+    compile() { return scenePass.compileAsync(renderer); },
     dispose() {
       if (disposed) return;
       disposed = true;
