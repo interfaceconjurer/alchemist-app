@@ -1,7 +1,7 @@
 {
   "name": "Jordan L. Wright",
   "short_name": "Jordan Wright",
-  "description": "Jordan L. Wright is an AI native designer and engineer. This is a cross section of his recent work and thoughts, from case studies to the tools he builds.",
+  "description": "Poised at the intersection between science and art, Jordan L. Wright is an AI native designer and engineer. This brief crosssection of work contains some small moments captured in the lab.",
   "icons": [
     { "src": "/favicon.ico", "sizes": "32x32", "type": "image/x-icon" },
     { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
