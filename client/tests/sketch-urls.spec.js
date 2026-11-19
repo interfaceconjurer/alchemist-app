@@ -78,8 +78,8 @@ test('phone Back reopens the sketch replaced by a command palette selection', as
 test('a new selection wins when a close has just been requested', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 850 });
   await page.locator('[data-work-item-id="fine-tunes"]').click();
-  await page.evaluate(() => {
-    document.querySelector('[aria-label="Close Fine Tunes"]').click();
+  await page.getByRole('button', { name: 'Close Fine Tunes' }).evaluate((closeButton) => {
+    closeButton.click();
     queueMicrotask(() => document.querySelector('[data-work-item-id="ascii-image-generator"]').click());
   });
   await expect(page).toHaveURL(/\/sketch\/pytone$/);
@@ -94,8 +94,8 @@ test('a simultaneous browser Back and close return to home once', async ({ page 
   await page.goto('/');
   await page.setViewportSize({ width: 1280, height: 850 });
   await page.locator('[data-work-item-id="fine-tunes"]').click();
-  await page.evaluate(() => {
-    document.querySelector('[aria-label="Close Fine Tunes"]').click();
+  await page.getByRole('button', { name: 'Close Fine Tunes' }).evaluate((closeButton) => {
+    closeButton.click();
     queueMicrotask(() => history.back());
   });
   await expect(page).toHaveURL(/\/$/);
