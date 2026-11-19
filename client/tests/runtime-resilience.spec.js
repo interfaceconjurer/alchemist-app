@@ -87,11 +87,18 @@ test('graphics initialization failure preserves navigation and a static symbol',
     Object.defineProperty(navigator, 'gpu', { value: undefined, configurable: true });
     const getContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function (kind, ...args) {
-      if (['webgl', 'webgl2', 'experimental-webgl'].includes(kind)) return null;
+      if (['webgl', 'webgl2', 'experimental-webgl'].includes(kind)) {
+        window.__deniedGraphicsContext = true;
+        return null;
+      }
       return getContext.call(this, kind, ...args);
     };
   });
   await page.goto('/');
+  await page.bringToFront();
+  await page.locator('.symbolContainer').scrollIntoViewIfNeeded();
+  // Initialize the lazy scene before timing the response to the rejected context.
+  await page.waitForFunction(() => window.__deniedGraphicsContext === true);
   await expect(page.locator('[data-symbol-fallback="unavailable"]')).toBeVisible();
   await expectUsableShell(page);
 });
