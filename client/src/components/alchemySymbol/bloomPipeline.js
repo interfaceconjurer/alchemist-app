@@ -25,7 +25,15 @@ export function createBloomPipeline(renderer, scene, camera) {
      * items, so the loader keeps running. The post-processing pass (bloom) still
      * compiles on the first render, which is the brief remainder.
      */
-    compile() { return scenePass.compileAsync(renderer); },
+    async compile() {
+      await scenePass.compileAsync(renderer);
+      if (disposed || !renderer.backend.isWebGPUBackend) return;
+      // In pinned Three r187, WebGPU validation failures resolve compileAsync.
+      // The backend marks the failed pipeline and silently skips its draws.
+      for (const compiled of renderer._pipelines.caches.values()) {
+        if (renderer.backend.get(compiled).error) throw new Error('Crystal GPU pipeline failed to compile');
+      }
+    },
     dispose() {
       if (disposed) return;
       disposed = true;

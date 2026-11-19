@@ -9,6 +9,13 @@ it('keeps the view between fitted and the zoom cap, with the picture covering it
   expect(clampView({ scale: 2, x: -500, y: 30 }, 200, 100)).toEqual({ scale: 2, x: -200, y: 0 });
 });
 
+it('clamps the painted artwork and centers an axis that still fits', () => {
+  const view = clampView({ scale: 4, x: 0, y: 0 }, 380, 684, 648, 264);
+  expect(view.y).toBe(-1026); // the 619px-tall zoomed logo stays centered
+  expect(clampView({ scale: 4, x: 9999, y: -9999 }, 400, 300, 800, 400))
+    .toEqual({ scale: 4, x: 0, y: -700 });
+});
+
 it('zooms about a point, which stays where it is', () => {
   const view = zoomAbout({ scale: 1, x: 0, y: 0 }, 2, 50, 30);
   // The box point (50, 30) maps to the same picture point before and after.
@@ -58,6 +65,7 @@ it('double-taps to zoom in and back out, without a gesture', () => {
   const { box, img } = setup();
   const tap = (t) => { pointer(box, 'pointerDown', 1, 100, 50, { timeStamp: t }); pointer(box, 'pointerUp', 1, 100, 50, { timeStamp: t }); };
   tap(1000); tap(1100);
+  fireEvent.doubleClick(box); // compatibility mouse event after two touch taps
   expect(img.style.transform).toBe(`translate(${100 - 100 * DOUBLE_TAP_ZOOM}px, ${50 - 50 * DOUBLE_TAP_ZOOM}px) scale(${DOUBLE_TAP_ZOOM})`);
   tap(2000); tap(2100);
   expect(img.style.transform).toBe('');

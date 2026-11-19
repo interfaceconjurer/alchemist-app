@@ -18,6 +18,17 @@ it('updates theme uniforms without replacing or disposing the render graph', () 
   graph.dispose();
 });
 
+it('recognizes a WebGPU driver error even when Three resolves compileAsync', async () => {
+  const renderer = {
+    backend: { isWebGPUBackend: true, get: () => ({ error: true }) },
+    _pipelines: { caches: new Map([['shader', {}]]) },
+  };
+  const graph = createBloomPipeline(renderer, new Scene(), new PerspectiveCamera());
+  vi.spyOn(graph.scenePass, 'compileAsync').mockResolvedValue();
+  await expect(graph.compile()).rejects.toThrow('GPU pipeline');
+  graph.dispose();
+});
+
 it('releases the scene and bloom render targets exactly once at teardown', () => {
   const graph = createBloomPipeline({}, new Scene(), new PerspectiveCamera());
   const sceneDisposed = vi.fn();

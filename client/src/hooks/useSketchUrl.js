@@ -1,67 +1,129 @@
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { itemForPath, pathFor } from '../sketchRoutes';
+import { updateSketchMetadata } from '../sketchMetadata';
 
-const BASE_TITLE = document.title;
+function pushSketch(path) {
+  history.pushState({ sketchPrevious: location.pathname }, '', path);
+}
 
-/**
- * Keeps the address bar in step with the active work item: /sketch/<title> while
- * one is shown, / when none is. Showing an item adds a history entry, so the
- * browser's back and forward buttons (and a phone's back gesture) move between
- * items, and going back to / closes them. Closing an item that was opened from
- * home steps back to that home entry rather than adding another one, so Back
- * never lands on a page that looks the same; closing one tab of several moves
- * the address to the next tab in place, so Back doesn't reopen what was closed.
- *
- * On load the address wins: a link to an item opens it (alongside any restored
- * tabs on desktop). An unknown /sketch/ address goes home and becomes /. A plain
- * / with restored tabs takes the restored item's address without a new entry.
- *
- * `ready`: the saved workspace has been restored. `openIds`: the open tabs' ids.
- * `openItem(item)` and `closeAll()`: the app's own open and close actions.
- */
+// Only step back to an adjacent entry created by this app. A long-lived tab
+// can lose its oldest entries, even though their successors still have state.
+function predecessor(path) {
+  if (history.state?.sketchPrevious !== path && !(history.state?.fromHome && path === '/')) return null;
+  const navigation = window.navigation;
+  if (!navigation?.currentEntry) return { path };
+  const entry = navigation.entries()[navigation.currentEntry.index - 1];
+  if (!entry?.sameDocument || !entry.url || new URL(entry.url).pathname !== path) return null;
+  return { path, key: entry.key };
+}
+
+function replacePath(path) {
+  if (location.pathname !== path) history.replaceState(history.state, '', path);
+}
+
 export function useSketchUrl({ ready, activeTab, openIds, openItem, closeAll }) {
-  const synced = useRef(false);
-  const ignoreNextPop = useRef(false);
-  const lastActive = useRef(null);
+  const previous = useRef(null);
+  const poppedBeforeRestore = useRef(false);
+  const closing = useRef(null);
 
-  // The active item changed (or the workspace just loaded): update the address.
-  useEffect(() => {
+  function cancelClose() {
+    const pending = closing.current;
+    if (pending) {
+      clearTimeout(pending.start);
+      clearTimeout(pending.fallback);
+      closing.current = null;
+    }
+    return pending;
+  }
+
+  useLayoutEffect(() => {
+    function onPop() {
+      const pending = cancelClose();
+      if (!ready) { poppedBeforeRestore.current = true; return; }
+      const item = itemForPath(location.pathname);
+      const path = pathFor(item);
+      replacePath(path);
+      // A click received after traverseTo was issued belongs on the destination.
+      if (pending && 'after' in pending && pending.path === path &&
+          (!pending.key || window.navigation.currentEntry.key === pending.key)) {
+        if (pending.after) {
+          if (path !== pathFor(pending.after)) pushSketch(pathFor(pending.after));
+          openItem(pending.after);
+        } else {
+          replacePath('/');
+          closeAll();
+        }
+      } else if (item) openItem(item);
+      else closeAll();
+    }
+    function onNavigate(event) {
+      // A browser Back initiated in the same turn as a close owns the traversal.
+      if (event.navigationType === 'traverse' && !closing.current?.issued) cancelClose();
+    }
+    window.addEventListener('popstate', onPop);
+    window.navigation?.addEventListener('navigate', onNavigate);
+    return () => {
+      window.removeEventListener('popstate', onPop);
+      window.navigation?.removeEventListener('navigate', onNavigate);
+      cancelClose();
+    };
+  }, [ready, openItem, closeAll]);
+
+  useLayoutEffect(() => {
     if (!ready) return;
-    document.title = activeTab ? `${activeTab.title} · ${BASE_TITLE}` : BASE_TITLE;
+    const last = previous.current;
+    previous.current = { id: activeTab?.id, openIds };
+    if (last && last.id === activeTab?.id) return;
+    updateSketchMetadata(document, activeTab);
     const path = pathFor(activeTab);
-    const closed = lastActive.current !== null && !openIds.includes(lastActive.current);
-    lastActive.current = activeTab?.id ?? null;
-    if (!synced.current) {
-      synced.current = true;
-      const linked = itemForPath(window.location.pathname);
-      if (linked && linked.id !== activeTab?.id) { openItem(linked); return; } // next run records it
-      if (window.location.pathname !== path) window.history.replaceState(null, '', path);
+
+    if (!last) {
+      const linked = itemForPath(location.pathname);
+      if (linked) {
+        replacePath(pathFor(linked));
+        if (linked.id !== activeTab?.id) openItem(linked);
+      } else if (linked === null || poppedBeforeRestore.current) {
+        replacePath('/');
+        closeAll();
+      } else replacePath(path);
       return;
     }
-    // Already there: back/forward moved the address first, or nothing changed.
-    if (window.location.pathname === path) return;
-    if (activeTab && closed) {
-      window.history.replaceState(window.history.state, '', path);
-    } else if (activeTab) {
-      window.history.pushState({ fromHome: window.location.pathname === '/' }, '', path);
-    } else if (window.history.state?.fromHome) {
-      ignoreNextPop.current = true; // the app has already closed it
-      window.history.back();
-    } else {
-      window.history.replaceState(null, '', path);
-    }
-  }, [ready, activeTab, openIds, openItem]);
 
-  // Back and forward: show what the address now points to.
-  useEffect(() => {
-    const onPopState = () => {
-      if (ignoreNextPop.current) { ignoreNextPop.current = false; return; }
-      const item = itemForPath(window.location.pathname);
-      if (item) { openItem(item); return; }
-      if (item === null) window.history.replaceState(null, '', '/');
-      closeAll();
-    };
-    window.addEventListener('popstate', onPopState);
-    return () => window.removeEventListener('popstate', onPopState);
-  }, [openItem, closeAll]);
+    const pending = closing.current;
+    if (pending) {
+      if (pending.issued) { pending.after = activeTab; return; }
+      if (pending.path === path) return;
+      cancelClose();
+      replacePath(path);
+      return;
+    }
+    if (location.pathname === path) return;
+
+    // Mobile replaces its sole tab when opening a *new* item. Closing an active
+    // tab can only reveal home or an item that was already in the workspace.
+    const closed = last.id && !openIds.includes(last.id) && (!activeTab || last.openIds.includes(activeTab.id));
+    if (!closed) { pushSketch(path); return; }
+    const target = predecessor(path);
+    if (!target) { replacePath(path); return; }
+
+    closing.current = target;
+    const from = location.href;
+    function fallback() {
+      if (closing.current !== target) return;
+      cancelClose();
+      if (location.href === from) replacePath('after' in target ? pathFor(target.after) : path);
+    }
+    // Give a simultaneous native Back or another workspace action precedence.
+    target.start = setTimeout(() => {
+      if (location.href !== from) { cancelClose(); return; }
+      target.issued = true;
+      if (target.key) {
+        window.navigation.traverseTo(target.key).committed.catch(fallback);
+      } else {
+        // Older engines cannot inspect retained history or report a no-op back.
+        target.fallback = setTimeout(fallback, 500);
+        history.back();
+      }
+    }, 0);
+  }, [ready, activeTab, openIds, openItem, closeAll]);
 }

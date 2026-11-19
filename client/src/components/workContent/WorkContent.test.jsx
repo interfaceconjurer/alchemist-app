@@ -157,6 +157,10 @@ it('zooms the open image from the keyboard as well as by pinching', () => {
   const dialog = document.querySelector('dialog.artifact-viewer');
   const box = dialog.querySelector('.artifact-viewer-image');
   Object.defineProperties(box, { clientWidth: { value: 400 }, clientHeight: { value: 300 } });
+  for (const modifier of ['ctrlKey', 'metaKey', 'altKey']) {
+    expect(fireEvent.keyDown(dialog, { key: '+', [modifier]: true })).toBe(true);
+    expect(box).not.toHaveAttribute('data-zoomed');
+  }
   fireEvent.keyDown(dialog, { key: '+' });
   expect(box).toHaveAttribute('data-zoomed', 'true');
   fireEvent.keyDown(dialog, { key: '0' });

@@ -62,6 +62,67 @@ it('sends an unknown sketch address home', () => {
   expect(api.activeId).toBeNull();
 });
 
+it('honors an unknown sketch even with restored tabs', () => {
+  history.replaceState(null, '', '/sketch/missing');
+  render(<Workspace initial={[a]} />);
+  expect(at()).toBe('/');
+  expect(api.activeId).toBeNull();
+});
+
+it('preserves a home pop received before restoration finishes', () => {
+  history.replaceState(null, '', pathFor(b));
+  const { rerender } = render(<Workspace initial={[a]} ready={false} />);
+  act(() => {
+    history.replaceState(null, '', '/');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  });
+  rerender(<Workspace initial={[a]} ready />);
+  expect(at()).toBe('/');
+  expect(api.activeId).toBeNull();
+});
+
+it('replaces an alias on initial StrictMode mount without pushing a duplicate', () => {
+  history.replaceState(null, '', pathFor(b).toUpperCase().replace('/SKETCH/', '/sketch/') + '/');
+  const length = history.length;
+  render(<React.StrictMode><Workspace /></React.StrictMode>);
+  expect(at()).toBe(pathFor(b));
+  expect(api.activeId).toBe(b.id);
+  expect(history.length).toBe(length);
+});
+
+it('closes in place when the browser has evicted the predecessor, then handles Forward', () => {
+  const navigation = Object.assign(new EventTarget(), { currentEntry: { index: 0 }, entries: () => [] });
+  vi.stubGlobal('navigation', navigation);
+  try {
+    render(<Workspace />);
+    act(() => api.openItem(a));
+    act(() => api.close(a.id));
+    expect(at()).toBe('/');
+    act(() => {
+      history.replaceState(null, '', pathFor(b));
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+    expect(api.activeId).toBe(b.id);
+  } finally { vi.unstubAllGlobals(); }
+});
+
+it('recovers if a legacy browser has evicted the previous history entry', async () => {
+  vi.useFakeTimers();
+  const traversal = vi.spyOn(history, 'back').mockImplementation(() => {});
+  try {
+    render(<Workspace />);
+    act(() => api.openItem(a));
+    act(() => api.close(a.id));
+    await act(async () => vi.advanceTimersByTimeAsync(1000));
+    expect(at()).toBe('/');
+    act(() => {
+      history.replaceState(null, '', pathFor(b));
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+    expect(api.activeId).toBe(b.id);
+  } finally { traversal.mockRestore(); vi.useRealTimers(); }
+});
+
 it('shows a restored item in the address without adding a history entry', () => {
   const length = window.history.length;
   render(<Workspace initial={[a]} />);
@@ -88,12 +149,16 @@ it('closing an item opened from home steps back to home instead of piling up ent
   expect(window.history.length).toBe(afterOpen); // closing stepped back; it added no entry
 });
 
-it('closing one of several tabs moves the address to the next without a new entry', () => {
+it('closing the second tab returns to the preceding first tab, then Back goes home', async () => {
   render(<Workspace />);
   act(() => api.openItem(a));
   act(() => api.openItem(b));
   const length = window.history.length;
   act(() => api.close(b.id));
+  await act(async () => { await settlesAt(pathFor(a)); });
   expect(at()).toBe(pathFor(a));
   expect(window.history.length).toBe(length);
+  await back();
+  expect(at()).toBe('/');
+  expect(api.activeId).toBeNull();
 });

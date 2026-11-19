@@ -27,7 +27,7 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'], viewport: { width: 400, height: 800 }, deviceScaleFactor: 1 } },
     { name: 'android-chromium', testMatch: [runtime, mobile, dormancy, space, sketches], use: { ...devices['Pixel 7'] } },
     { name: 'ios-webkit', testMatch: [runtime, mobile, dormancy, space, sketches], grepInvert: /@chromium-touch/, use: { ...devices['iPhone 13'] } },
-    { name: 'ipad-webkit', testMatch: [mobile, dormancy, space], grepInvert: /@chromium-touch/, use: { ...devices['iPad Mini'] } },
+    { name: 'ipad-webkit', testMatch: [mobile, dormancy, space, sketches], grepInvert: /@chromium-touch/, use: { ...devices['iPad Mini'] } },
   ],
   webServer: {
     command: 'NODE_ENV=production npm run build && NODE_ENV=test node ../server.js',

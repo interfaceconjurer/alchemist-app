@@ -21,13 +21,21 @@ const DOUBLE_TAP_MS = 300;
 const TAP_SLOP = 10; // px a tap may move and still count as a tap
 const FIT = { scale: 1, x: 0, y: 0 };
 
-/** The view, kept within [1, MAX_ZOOM] and with the image always covering the box. */
-export function clampView({ scale, x, y }, width, height) {
+// The transform applies to the full element, including object-fit's centered margins.
+function clampAxis(offset, box, artwork, scale) {
+  if (artwork * scale <= box) return box * (1 - scale) / 2;
+  const margin = (box - artwork) * scale / 2;
+  return Math.min(-margin, Math.max(box - artwork * scale - margin, offset)) || 0;
+}
+
+export function clampView({ scale, x, y }, width, height, naturalWidth = width, naturalHeight = height) {
   const s = Math.min(MAX_ZOOM, Math.max(1, scale));
+  if (s === 1 || !width || !height) return FIT;
+  const fit = Math.min(width / naturalWidth, height / naturalHeight);
   return {
     scale: s,
-    x: Math.min(0, Math.max(width - width * s, x)),
-    y: Math.min(0, Math.max(height - height * s, y)),
+    x: clampAxis(x, width, naturalWidth * fit, s),
+    y: clampAxis(y, height, naturalHeight * fit, s),
   };
 }
 
@@ -45,14 +53,28 @@ export function usePinchZoom(resetKey) {
   const pointers = useRef(new Map());
   const gesture = useRef(null);
   const lastTap = useRef(null);
+  const lastPointerType = useRef(null);
 
   const commit = useCallback((next) => {
     if (!box) return;
-    const clamped = clampView(next, box.clientWidth, box.clientHeight);
+    const img = box.querySelector("img");
+    const clamped = clampView(next, box.clientWidth, box.clientHeight,
+      img?.naturalWidth || box.clientWidth, img?.naturalHeight || box.clientHeight);
     viewRef.current = clamped;
     setView(clamped);
   }, [box]);
-  const reset = useCallback(() => { viewRef.current = FIT; setView(FIT); }, []);
+  const reset = useCallback(() => {
+    for (const id of pointers.current.keys()) {
+      if (box?.hasPointerCapture?.(id)) box.releasePointerCapture(id);
+    }
+    pointers.current.clear();
+    lastPointerType.current = null;
+    gesture.current = null;
+    lastTap.current = null;
+    viewRef.current = FIT;
+    setActive(false);
+    setView(FIT);
+  }, [box]);
 
   const point = useCallback((e) => {
     const r = box.getBoundingClientRect();
@@ -99,17 +121,20 @@ export function usePinchZoom(resetKey) {
     };
   }, [box, commit]);
 
-  const startGesture = () => {
+  const startGesture = (moved = false) => {
     const [a, b] = [...pointers.current.values()];
     gesture.current = b
       ? { type: "pinch", view: viewRef.current, distance: Math.hypot(b.x - a.x, b.y - a.y) || 1, mid: { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 } }
-      : { type: "pan", view: viewRef.current, start: a, moved: false };
+      : { type: "pan", view: viewRef.current, start: a, moved };
   };
 
   const onPointerDown = (e) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
+    if (!box) return;
+    lastPointerType.current = e.pointerType;
     box.setPointerCapture?.(e.pointerId);
     pointers.current.set(e.pointerId, point(e));
+    if (pointers.current.size > 1) lastTap.current = null;
     if (pointers.current.size > 2) return;
     setActive(true);
     startGesture();
@@ -137,33 +162,40 @@ export function usePinchZoom(resetKey) {
   };
 
   const onPointerEnd = (e) => {
+    if (e.type === "lostpointercapture" && box?.hasPointerCapture?.(e.pointerId)) return;
     if (!pointers.current.has(e.pointerId)) return;
     const p = pointers.current.get(e.pointerId);
     pointers.current.delete(e.pointerId);
     const g = gesture.current;
     if (pointers.current.size > 0) {
-      startGesture(); // a pinch that lost a finger carries on as a pan
+      startGesture(true); // a pinch that lost a finger carries on as a pan
       return;
     }
     gesture.current = null;
     setActive(false);
-    // Double-tap (touch and pen; a mouse uses dblclick) toggles the zoom.
-    if (e.type !== "pointerup" || e.pointerType === "mouse" || g?.type !== "pan" || g.moved) return;
+    if (e.type !== "pointerup" || e.pointerType === "mouse" || g?.type !== "pan" || g.moved) {
+      lastTap.current = null;
+      return;
+    }
     const now = e.timeStamp;
     const last = lastTap.current;
-    if (last && now - last.at < DOUBLE_TAP_MS && Math.hypot(p.x - last.x, p.y - last.y) < TAP_SLOP * 3) {
+    if (last && last.type === e.pointerType && now - last.at < DOUBLE_TAP_MS && Math.hypot(p.x - last.x, p.y - last.y) < TAP_SLOP * 3) {
       lastTap.current = null;
       toggleAt(p);
     } else {
-      lastTap.current = { at: now, x: p.x, y: p.y };
+      lastTap.current = { type: e.pointerType, at: now, x: p.x, y: p.y };
     }
   };
 
-  const onDoubleClick = (e) => { if (box) toggleAt(point(e)); };
-
+  // Honor the OS double-click interval for a mouse. Chromium also emits a
+  // compatibility dblclick after a touch double-tap that we already handled.
+  const onDoubleClick = (e) => {
+    if (lastPointerType.current === "mouse") toggleAt(point(e));
+  };
   return {
     ref: setBox,
-    handlers: { onPointerDown, onPointerMove, onPointerUp: onPointerEnd, onPointerCancel: onPointerEnd, onDoubleClick },
+    onImageLoad: () => commit(viewRef.current),
+    handlers: { onPointerDown, onPointerMove, onPointerUp: onPointerEnd, onPointerCancel: onPointerEnd, onLostPointerCapture: onPointerEnd, onDoubleClick },
     // Rasterize as a layer only mid-gesture, so the picture re-renders sharp once it settles.
     style: view.scale === 1 && !active ? undefined : {
       transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`,

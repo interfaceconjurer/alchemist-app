@@ -165,6 +165,37 @@ test('crossing the responsive breakpoint preserves theme and public-shell contro
   }
 });
 
+test('Android double-tap zooms once and a reopened viewer starts a fresh swipe @chromium-touch', async ({ page, context }) => {
+  await page.route('**/fine_tunes_logo_*.svg', route => route.fulfill({
+    contentType: 'image/svg+xml',
+    body: '<svg xmlns="http://www.w3.org/2000/svg" width="648" height="264"><rect width="100%" height="100%"/></svg>',
+  }));
+  await page.locator('[data-work-item-id="fine-tunes"]').tap();
+  const open = page.locator('.work-content-viewable').first();
+  await open.tap();
+  const image = page.locator('dialog[open] .artifact-viewer-image');
+  await image.locator('img').evaluate(img => img.decode());
+  const bounds = await image.boundingBox();
+  const x = Math.round(bounds.x + bounds.width / 2);
+  const y = Math.round(bounds.y + bounds.height / 2);
+  await page.touchscreen.tap(x, y);
+  await page.touchscreen.tap(x, y);
+  await expect(image).toHaveAttribute('data-zoomed', 'true');
+  await page.keyboard.press('0');
+
+  const session = await context.newCDPSession(page);
+  const touch = (type, points) => session.send('Input.dispatchTouchEvent', { type, touchPoints: points });
+  await touch('touchStart', [{ id: 1, x, y }]);
+  await page.keyboard.press('Escape');
+  await touch('touchEnd', []);
+  await open.tap();
+  await touch('touchStart', [{ id: 1, x, y }]);
+  await touch('touchMove', [{ id: 1, x: x - 90, y }]);
+  await touch('touchEnd', []);
+  await expect(page.locator('.artifact-viewer-count')).toHaveText(/^2 \//);
+  await expect(image).not.toHaveAttribute('data-zoomed', 'true');
+});
+
 const overlaps = (a, b) => a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 
 for (const [id, kind, media, gallery] of [

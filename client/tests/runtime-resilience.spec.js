@@ -96,6 +96,37 @@ test('graphics initialization failure preserves navigation and a static symbol',
   await expectUsableShell(page);
 });
 
+test('the CSS loader runs two ordered cycles and holds its first frame for reduced motion', async ({ page }) => {
+  let release;
+  const hold = new Promise(resolve => { release = resolve; });
+  await page.route(/\/assets\/MorphingSolid-[^/]+\.js$/, async route => {
+    await hold;
+    await route.abort();
+  });
+  const loader = page.locator('.crystal-loader');
+  try {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(loader).toHaveAttribute('data-crystal-loader', 'visible');
+    const frames = loader.locator('.crystal-loader-frame');
+    const sequence = await frames.evaluateAll(elements => {
+      const animations = elements.map(el => el.getAnimations()[0]);
+      animations.forEach(animation => animation.pause());
+      return Array.from({ length: 20 }, (_, index) => {
+        animations.forEach(animation => { animation.currentTime = 40 + index * 80; });
+        return elements.flatMap((el, i) => getComputedStyle(el).opacity === '1' ? [i] : []);
+      });
+    });
+    expect(sequence).toEqual(Array.from({ length: 20 }, (_, i) => [i % 10]));
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect(frames.first()).toHaveCSS('opacity', '1');
+    await expect(frames.first()).toHaveCSS('animation-name', 'none');
+    await expect(frames.nth(1)).toHaveCSS('opacity', '0');
+  } finally { release(); }
+  await expect(loader).toHaveAttribute('data-crystal-loader', 'hidden');
+  await expect(page.locator('[data-symbol-fallback]')).toBeVisible();
+});
+
 test('a failed graphics chunk preserves the shell', async ({ page }) => {
   await page.route(/\/assets\/(MorphingSolid|Polyhedron)-[^/]+\.js$/, route => route.abort());
   await page.goto('/');

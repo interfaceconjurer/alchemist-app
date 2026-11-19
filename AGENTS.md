@@ -72,4 +72,4 @@ CI (`.github/workflows/ci.yml`) runs npm audit (high), server and client tests, 
 
 ## Adding a portfolio project
 
-Add `client/src/data/projects/<id>.json`. Set `section` to `trenches`, `direction`, or `sidequests`. Follow the schema and editorial guidelines in `.claude/skills/alchemy/SKILL.md` and `template.json`. Artifact types are `image`, `diagram`, `code`, and `embed`.
+Add `client/src/data/projects/<id>.json`. Give it a permanent, unique `slug` and add its sketch URL to `client/public/sitemap.xml`. Set `section` to `trenches`, `direction`, or `sidequests`. Follow the schema and editorial guidelines in `.claude/skills/alchemy/SKILL.md` and `template.json`. Artifact types are `image`, `diagram`, `code`, and `embed`.

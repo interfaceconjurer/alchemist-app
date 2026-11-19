@@ -3,7 +3,7 @@ import { act, render } from '@testing-library/react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { createBloomPipeline } from './bloomPipeline';
 import { GraphicsBoundary } from './GraphicsBoundary';
-import { Bloom } from './Polyhedron';
+import { Bloom, COMPILE_TIMEOUT_MS } from './Polyhedron';
 
 vi.mock('@react-three/fiber', () => ({ useFrame: vi.fn(), useThree: vi.fn() }));
 vi.mock('./bloomPipeline', () => ({ createBloomPipeline: vi.fn() }));
@@ -37,6 +37,26 @@ it('draws nothing and reports no first frame until the shaders have compiled', a
   expect(onFirstFrame).toHaveBeenCalledTimes(1);
   act(() => { frame(); frame(); });
   expect(onFirstFrame).toHaveBeenCalledTimes(1); // once only
+});
+
+it('applies the latest theme and bloom settings before publishing the graph', async () => {
+  const { rerender } = render(<Bloom strength={0.2} />);
+  rerender(<Bloom strength={0.7} radius={0.8} threshold={0.6} />);
+  await act(async () => finishCompile());
+  expect(graph.update).toHaveBeenLastCalledWith({ strength: 0.7, radius: 0.8, threshold: 0.6 });
+});
+
+it('falls back on a stalled compile and discards late success', async () => {
+  vi.useFakeTimers();
+  try {
+    const failed = vi.fn();
+    render(<GraphicsBoundary onFailure={failed}><Bloom /></GraphicsBoundary>);
+    act(() => vi.advanceTimersByTime(COMPILE_TIMEOUT_MS));
+    expect(failed).toHaveBeenCalledOnce();
+    await act(async () => finishCompile());
+    act(frame);
+    expect(graph.render).not.toHaveBeenCalled();
+  } finally { vi.useRealTimers(); }
 });
 
 it('shows the graphics fallback when shader compilation fails', async () => {

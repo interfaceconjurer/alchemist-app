@@ -68,7 +68,7 @@ jobs:
           fi
           changed=$(git diff --name-only "$BASE" "$HEAD")
           echo "$changed"
-          if echo "$changed" | grep -qE '^(DEPLOYMENT\.md$|server\.js|package(-lock)?\.json|\.nvmrc|\.github/workflows/|client/(index\.html|vite\.config\.js|playwright[^/]*\.config\.js|package(-lock)?\.json|scripts/|tests/|public/(manifest\.json|robots\.txt)$|src/(App|index|theme)\.(jsx?|css)$|src/(featureFlags|workspace[^/]*|resolveWorkItems)\.js$|src/(components|contexts|hooks|utils|graphix)/))'; then
+          if echo "$changed" | grep -qE '^(DEPLOYMENT\.md$|server\.js|package(-lock)?\.json|\.nvmrc|\.github/workflows/|client/(index\.html|vite\.config\.js|playwright[^/]*\.config\.js|package(-lock)?\.json|scripts/|tests/|public/(manifest\.json|robots\.txt)$|src/(App|index|theme)\.(jsx?|css)$|src/(featureFlags|workspace[^/]*|resolveWorkItems|sketchRoutes|sketchPath|sketchMetadata)\.js$|src/(components|contexts|hooks|utils|graphix)/))'; then
             echo "browser=true" >> "$GITHUB_OUTPUT"
           else
             echo "browser=false" >> "$GITHUB_OUTPUT"

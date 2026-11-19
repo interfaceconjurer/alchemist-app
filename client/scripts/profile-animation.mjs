@@ -5,6 +5,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
+import { openSearch, toggleTheme } from '../tests/shell-helpers.js';
 import { summarizeDurations, summarizeWindow, validateCoverage } from './performance-metrics.mjs';
 
 const { values } = parseArgs({ options: {
@@ -113,16 +114,15 @@ try {
     const simulationMs = state.last?.simulationMs ?? 0;
     if (simulationMs > 15_000 && !actions.some(action => action.name === 'theme')) {
       const previousImage = await page.locator('.space-layer').first().evaluate(layer => layer.style.backgroundImage);
-      await page.getByRole('button', { name: /Switch to .* mode/ }).click();
+      await toggleTheme(page);
       try {
         await page.waitForFunction(previous => document.querySelector('.space-layer')?.style.backgroundImage !== previous, previousImage);
         actions.push({ name: 'theme', simulationMs, layers: await verifyBackdrop() });
       } catch (error) { errors.push(`Theme backdrop: ${error.message}`); break; }
     }
     if (simulationMs > 30_000 && !actions.some(action => action.name === 'search')) {
-      await page.getByRole('button', { name: 'Search', exact: true }).click();
-      await page.getByPlaceholder('Search work items and actions...').waitFor();
-      await page.getByPlaceholder('Search work items and actions...').press('Escape');
+      const search = await openSearch(page);
+      await search.press('Escape');
       actions.push({ name: 'search', simulationMs });
     }
     // Verify actual simulation/shader clocks and light, while rendering keeps

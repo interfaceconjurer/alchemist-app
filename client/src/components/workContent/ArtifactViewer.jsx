@@ -71,6 +71,12 @@ export default function ArtifactViewer({ items, index, onIndexChange, onClose })
   const down = useRef(new Set());
   const swipe = useRef(null);
   const swiped = useRef(false);
+  useEffect(() => {
+    down.current.clear();
+    swipe.current = null;
+    if (!open) swiped.current = false;
+  }, [open, index, item?.src]);
+
   const onSwipeStart = (e) => {
     swiped.current = false;
     if (e.pointerType === "mouse") return;
@@ -80,6 +86,7 @@ export default function ArtifactViewer({ items, index, onIndexChange, onClose })
       : null;
   };
   const onSwipeEnd = (e) => {
+    if (e.type === "lostpointercapture" && e.currentTarget.querySelector(".artifact-viewer-image")?.hasPointerCapture?.(e.pointerId)) return;
     if (!down.current.delete(e.pointerId)) return;
     const s = swipe.current;
     swipe.current = null;
@@ -92,6 +99,7 @@ export default function ArtifactViewer({ items, index, onIndexChange, onClose })
   };
 
   const onKeyDown = (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
     // Arrow keys page through a gallery; an embedded deck keeps its own keys
     // because it receives them inside its frame.
     if (e.key === "ArrowRight") { e.preventDefault(); step(1); }
@@ -122,7 +130,7 @@ export default function ArtifactViewer({ items, index, onIndexChange, onClose })
       onClick={onClick}
     >
       {item && (
-        <div className="artifact-viewer-frame" onPointerDown={onSwipeStart} onPointerUp={onSwipeEnd} onPointerCancel={onSwipeEnd}>
+        <div className="artifact-viewer-frame" onPointerDown={onSwipeStart} onPointerUp={onSwipeEnd} onPointerCancel={onSwipeEnd} onLostPointerCapture={onSwipeEnd}>
           <div className="artifact-viewer-toolbar">
             {count > 1 && <span className="artifact-viewer-count" aria-live="polite">{index + 1} / {count}</span>}
             <button type="button" className="artifact-viewer-close" onClick={onClose} aria-label="Close" autoFocus>×</button>
@@ -139,7 +147,7 @@ export default function ArtifactViewer({ items, index, onIndexChange, onClose })
             ) : (
               // The box clips the zoomed picture; it keeps the image's place in the layout.
               <div ref={zoom.ref} className="artifact-viewer-image" data-zoomed={zoom.zoomed || undefined} {...zoom.handlers}>
-                <img key={item.src} src={item.src} alt={item.alt || ""} decoding="async" draggable={false} style={zoom.style} />
+                <img key={item.src} src={item.src} alt={item.alt || ""} decoding="async" draggable={false} onLoad={zoom.onImageLoad} style={zoom.style} />
               </div>
             )}
             {count > 1 && (

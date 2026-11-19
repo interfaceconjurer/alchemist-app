@@ -373,7 +373,13 @@ export default function MorphingSolid({ active = true, calm = false, held = fals
   const bloomGain = useRef(1);
   // 'starting' until the first rendered frame, then awake / changing / dormant.
   const [dormantState, setDormantState] = React.useState('starting');
-  const running = active && !held;
+  const [drawn, setDrawn] = React.useState(false);
+  const onCompileStart = useCallback(() => setDrawn(false), []);
+  const markDrawn = useCallback(() => {
+    setDrawn(true);
+    onFirstFrame?.();
+  }, [onFirstFrame]);
+  const running = active && drawn && !held;
   const { pressed, handlers } = useDormancyInteraction(dormancy);
   const setBloomGain = useCallback((g) => { bloomGain.current = g; }, []);
 
@@ -403,7 +409,7 @@ export default function MorphingSolid({ active = true, calm = false, held = fals
         <MorphShape calm={calm} isDark={isDark} animationTime={animationTime} uVitality={uVitality} bubbleVisibility={bubbleVisibility} dormancy={dormancy} timeScale={timeScale} />
         {/* Bloom owns rendering, so it reports the first frame it draws: only
             once the shaders are compiled (see Bloom). */}
-        <Bloom strength={bloom} gain={bloomGain} onFirstFrame={onFirstFrame} />
+        <Bloom strength={bloom} gain={bloomGain} onCompileStart={onCompileStart} onFirstFrame={markDrawn} />
       </Canvas>
     </div>
   );

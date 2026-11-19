@@ -154,6 +154,12 @@ test('nested navigation receives the shell but missing assets and non-HTML route
     // A sketch page is part of the app, never an embeddable artifact.
     assert.match(navigation.headers['x-frame-options'], /DENY/);
   }
+  for (const route of ['/sketch/missing.v2', '/sketch/%E0%A4%A']) {
+    const html = await get(route, { Accept: 'text/html' });
+    assert.equal(html.status, 200, route);
+    assert.match(html.body.toString(), /Portfolio shell/);
+    assert.equal((await get(route, { Accept: 'application/json' })).status, 404);
+  }
   for (const url of ['/assets/missing.js', '/missing.png', '/favicon.ico']) {
     const response = await get(url, { Accept: 'text/html' });
     assert.equal(response.status, 404);
