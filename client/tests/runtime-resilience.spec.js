@@ -156,7 +156,9 @@ test('reduced motion grows the crystal in, then holds it at rest while the light
   await expect(page.locator('.symbolContainer')).toHaveAttribute('data-render-state', 'reduced-motion');
   await expect(page.locator('.symbolContainer canvas')).toBeVisible();
   await expect(page.locator('[data-symbol-fallback]')).toHaveCount(0);
-  // Wait until the intro is over and the crystal has held for a while.
+  // Software shader compilation can occupy much of the test's startup budget.
+  // Measure the held frames after the intro has actually finished.
+  await page.waitForFunction(() => window.__calmFrames.some(frame => frame.phase === 'hold'));
   await expect.poll(() => page.evaluate(() => window.__calmFrames.filter(f => f.phase === 'hold').length), { timeout: 45_000 }).toBeGreaterThan(20);
   const frames = await page.evaluate(() => window.__calmFrames);
   expect(frames.every(f => f.mode === 'calm')).toBe(true);

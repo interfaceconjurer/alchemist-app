@@ -31,7 +31,8 @@ test.afterEach(async ({ page }) => {
 async function inspectBackdrop(page, mode, previous) {
   const space = page.locator('.space');
   await expect(space).toHaveClass(new RegExp(`space--${mode}`));
-  await expect(space).toHaveClass(/space--ready/);
+  // Startup allows 1.5s to schedule the worker and 10s to generate the layers.
+  await expect(space).toHaveClass(/space--ready/, { timeout: 12_000 });
   await expect(space).toHaveAttribute('data-space-renderer', /^(worker|fallback)$/);
   await expect(space.locator('.space-layer')).toHaveCount(3);
   if (previous?.renderer === 'worker') {
