@@ -14,8 +14,12 @@ export function updateSketchMetadata(doc, item) {
       meta.content = description.content;
     }
   }
+  // Preview cards show og:site_name and the domain beside the title, so the preview
+  // title is just the sketch's name ("PyTone"), or the site's on home. The browser
+  // tab and search keep the full <title>.
   for (const meta of doc.querySelectorAll('meta[property="og:title"], meta[name="twitter:title"]')) {
-    meta.content = doc.title;
+    meta.dataset.home ??= meta.content;
+    meta.content = item ? item.title : meta.dataset.home;
   }
   const canonical = doc.querySelector('link[rel="canonical"]');
   if (canonical) {

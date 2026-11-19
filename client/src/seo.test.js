@@ -27,27 +27,33 @@ describe('site metadata', () => {
   it('points canonical, Open Graph and Twitter at the jordanwright.codes origin', () => {
     expect(doc.querySelector('link[rel="canonical"]').getAttribute('href')).toBe(`${ORIGIN}/`);
     expect(meta('meta[property="og:url"]')).toBe(`${ORIGIN}/`);
-    expect(meta('meta[property="og:image"]')).toBe(`${ORIGIN}/og-image-square.png`);
-    expect(meta('meta[name="twitter:image"]')).toBe(`${ORIGIN}/og-image.png`);
+    expect(meta('meta[property="og:image"]')).toBe(`${ORIGIN}/og-preview.png`);
+    expect(meta('meta[name="twitter:image"]')).toBe(`${ORIGIN}/og-preview.png`);
     expect(meta('meta[name="twitter:card"]')).toBe('summary_large_image');
     expect(meta('meta[property="og:image:alt"]')).toBeTruthy();
   });
 
-  it('ships a 1200x630 preview image and a 180px touch icon', () => {
+  it('ships exactly one 1200x630 preview image and a 180px touch icon', () => {
     const size = (name) => {
       const png = readFileSync(file(`public/${name}`));
       return [png.readUInt32BE(16), png.readUInt32BE(20)];
     };
-    expect(size('og-image.png')).toEqual([1200, 630]);
-    expect(size('og-image-square.png')).toEqual([630, 630]);
-    // The square crystal comes first: Slack shows the first og:image as a square
-    // thumbnail. X keeps the wide card through twitter:image.
+    // One image: Messages tiles every og:image side by side and crops each one.
     expect([...doc.querySelectorAll('meta[property="og:image"]')].map((m) => m.getAttribute('content')))
-      .toEqual([`${ORIGIN}/og-image-square.png`, `${ORIGIN}/og-image.png`]);
-    expect(size('apple-touch-icon.png')).toEqual([180, 180]);
-    expect(meta('meta[property="og:image:width"]')).toBe('630'); // first image's size
+      .toEqual([`${ORIGIN}/og-preview.png`]);
+    expect(size('og-preview.png')).toEqual([1200, 630]); // LinkedIn's 1.91:1; Apple asks for >= 900 wide
+    expect(meta('meta[property="og:image:width"]')).toBe('1200');
     expect(meta('meta[property="og:image:height"]')).toBe('630');
-    expect(meta('meta[name="twitter:image"]')).toBe(`${ORIGIN}/og-image.png`);
+    expect(readFileSync(file('public/og-preview.png')).length).toBeLessThan(1024 * 1024); // well under every app's limit
+    expect(size('apple-touch-icon.png')).toEqual([180, 180]);
+  });
+
+  it('keeps preview titles short and the full title for search', () => {
+    // Apple: don't put branding in og:title; apps show og:site_name beside it.
+    expect(meta('meta[property="og:title"]')).toBe('Jordan L. Wright');
+    expect(meta('meta[name="twitter:title"]')).toBe('Jordan L. Wright');
+    expect(meta('meta[property="og:site_name"]')).toBe('Jordan L. Wright');
+    expect(doc.title).toBe('Jordan L. Wright · AI Native Designer & Engineer');
   });
 
   it('has valid Person structured data and no old branding', () => {
