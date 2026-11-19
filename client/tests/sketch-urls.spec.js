@@ -90,9 +90,9 @@ test('a new selection wins when a close has just been requested', async ({ page 
 });
 
 test('a simultaneous browser Back and close return to home once', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 850 });
   await page.goto('/manifest.json');
   await page.goto('/');
-  await page.setViewportSize({ width: 1280, height: 850 });
   await page.locator('[data-work-item-id="fine-tunes"]').click();
   await page.getByRole('button', { name: 'Close Fine Tunes' }).evaluate((closeButton) => {
     closeButton.click();

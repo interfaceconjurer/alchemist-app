@@ -29,6 +29,17 @@ it('keeps the shell usable and follows the system color scheme when storage is d
   expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
 });
 
+it('shows desktop tabs when the viewport widens before the first media query subscription', async () => {
+  const realMatchMedia = window.matchMedia.bind(window);
+  const mobile = vi.fn()
+    .mockReturnValueOnce({ matches: true })
+    .mockReturnValue({ matches: false, addEventListener() {}, removeEventListener() {} });
+  vi.stubGlobal('matchMedia', query => query === '(max-width: 899px)' ? mobile() : realMatchMedia(query));
+  await act(async () => { render(<App />); });
+  fireEvent.click(screen.getByRole('link', { name: /Fine Tunes/ }));
+  expect(screen.getByRole('button', { name: 'Close Fine Tunes', hidden: true })).toBeInTheDocument();
+});
+
 it('restores safely from structurally malformed workspace data', async () => {
   vi.stubGlobal('localStorage', {
     getItem: key => key === 'workspace-state' ? '{}' : null,
