@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
+import { isPageCovered, onPageCover } from '../../utils/pageCover';
 
 export function useSymbolVisibility(ref) {
   const [pageVisible, setPageVisible] = useState(() => document.visibilityState !== 'hidden');
   const [inView, setInView] = useState(() => typeof IntersectionObserver === 'undefined');
   const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false);
   const [started, setStarted] = useState(false);
+  // Covered by the full-screen artifact viewer: hidden, so it pauses like an offscreen crystal.
+  const [covered, setCovered] = useState(isPageCovered);
+  useEffect(() => onPageCover(setCovered), []);
 
   useEffect(() => {
     const onVisibility = () => setPageVisible(document.visibilityState !== 'hidden');
@@ -28,7 +32,7 @@ export function useSymbolVisibility(ref) {
   }, [ref]);
 
   // `visible`: on screen in a visible page. `active`: visible and allowed to animate fully.
-  const visible = pageVisible && inView;
+  const visible = pageVisible && inView && !covered;
   const active = visible && !reducedMotion;
   useEffect(() => { if (active) setStarted(true); }, [active]);
   return { active, visible, reducedMotion, started };

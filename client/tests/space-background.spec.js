@@ -11,6 +11,11 @@ test.beforeEach(async ({ page }) => {
   errorsByPage.set(page, errors);
   page.on('pageerror', error => errors.push(error.message));
   await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'gpu', { configurable: true, value: undefined });
+    const getContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (kind, ...args) {
+      return ['webgl', 'webgl2', 'experimental-webgl'].includes(kind) ? null : getContext.call(this, kind, ...args);
+    };
     window.__spacePolicyViolations = [];
     document.addEventListener('securitypolicyviolation', event => {
       window.__spacePolicyViolations.push({ directive: event.violatedDirective, blockedURI: event.blockedURI });
@@ -26,7 +31,8 @@ test.afterEach(async ({ page }) => {
 async function inspectBackdrop(page, mode, previous) {
   const space = page.locator('.space');
   await expect(space).toHaveClass(new RegExp(`space--${mode}`));
-  await expect(space).toHaveClass(/space--ready/);
+  // Startup allows 1.5s to schedule the worker and 10s to generate the layers.
+  await expect(space).toHaveClass(/space--ready/, { timeout: 12_000 });
   await expect(space).toHaveAttribute('data-space-renderer', /^(worker|fallback)$/);
   await expect(space.locator('.space-layer')).toHaveCount(3);
   if (previous?.renderer === 'worker') {
@@ -122,12 +128,6 @@ test('a worker failure preserves a static backdrop and working navigation', asyn
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.addInitScript(() => {
     window.Worker = class { constructor() { throw new Error('Worker unavailable for this session'); } };
-    // Isolate the backdrop fallback from graphics availability.
-    Object.defineProperty(navigator, 'gpu', { configurable: true, value: undefined });
-    const getContext = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function (kind, ...args) {
-      return ['webgl', 'webgl2', 'experimental-webgl'].includes(kind) ? null : getContext.call(this, kind, ...args);
-    };
   });
   await page.goto('/');
   await expect(page.locator('.space')).toHaveAttribute('data-space-renderer', 'fallback');
@@ -154,11 +154,6 @@ test('visibility changes pause and resume backdrop animation clocks', async ({ p
     let hidden = false;
     Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => hidden ? 'hidden' : 'visible' });
     window.__setBackdropHidden = value => { hidden = value; document.dispatchEvent(new Event('visibilitychange')); };
-    Object.defineProperty(navigator, 'gpu', { configurable: true, value: undefined });
-    const getContext = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function (kind, ...args) {
-      return ['webgl', 'webgl2', 'experimental-webgl'].includes(kind) ? null : getContext.call(this, kind, ...args);
-    };
   });
   await page.goto('/');
   const backdrop = await inspectBackdrop(page, 'dark');

@@ -26,6 +26,8 @@ import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { useSwipeBack } from "./hooks/useSwipeBack";
 import { useStageReveal } from "./hooks/useStageReveal";
+import { useSketchUrl } from "./hooks/useSketchUrl";
+import { pathFor } from "./sketchRoutes";
 import { SHOW_STAGE, SHOW_WORK_LIST, SHOW_TOP_BAR, SHOW_RESUME } from "./featureFlags";
 
 // While the stage flag is off, an opened stage splits the row 40 / 60 with the panel.
@@ -50,6 +52,9 @@ function App() {
   const keyboard = useKeyboardShortcuts(stateRef, dispatch, tabActions);
   const isMobile = useIsMobile(dispatch);
   useSwipeBack(stageRef, isMobile, !!state.activeTabId, dispatch);
+  const activeTab = state.openTabs.find((t) => t.id === state.activeTabId) ?? null;
+  const openTabIds = useMemo(() => state.openTabs.map((t) => t.id), [state.openTabs]);
+  useSketchUrl({ ready: state.stateLoaded, activeTab, openIds: openTabIds, openItem: tabActions.openWorkItem, closeAll: tabActions.closeAllTabs });
 
   const { debouncedSave, flush } = useMemo(() => createDebouncedSave(500), []);
 
@@ -221,12 +226,19 @@ function App() {
             <section className="work-feed" aria-labelledby="work-feed-title">
               <h2 className="work-feed-title" id="work-feed-title"><SketchbookIcon size={20} />Laboratory sketchbook</h2>
               {feedItems.map((item) => (
-                <button key={item.id} type="button"
+                // A real link to the sketch's address, so it can be copied, shared or
+                // opened in a new tab; a plain click opens it here (useSketchUrl keeps
+                // the address in step).
+                <a key={item.id} href={pathFor(item)}
                   data-work-item-id={item.id}
                   className={`work-item work-feed-item ${state.activeTabId === item.id ? "work-item--selected" : ""}`}
-                  aria-pressed={state.activeTabId === item.id}
-                  onClick={() => tabActions.openWorkItem(item)}
-                  onMouseDown={(e) => !isMobile && e.button === 0 && handleWorkItemMouseDown(e, item)}
+                  aria-current={state.activeTabId === item.id ? "page" : undefined}
+                  onClick={(e) => {
+                    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+                    e.preventDefault();
+                    tabActions.openWorkItem(item);
+                  }}
+                  onMouseDown={(e) => !isMobile && e.button === 0 && !e.metaKey && !e.ctrlKey && !e.shiftKey && handleWorkItemMouseDown(e, item)}
                 >
                   <EntryIcon className="work-feed-item-icon" size={16} />
                   <span className="work-feed-item-body">
@@ -236,7 +248,7 @@ function App() {
                       {item.date && <time className="work-item-date">{item.date}</time>}
                     </span>
                   </span>
-                </button>
+                </a>
               ))}
             </section>
             )}

@@ -36,9 +36,11 @@ The alchemist-app lives at `/Users/j.wright/git-repos/alchemist-app`. Project da
    - `direction` — "Direction" (vision, strategy, north star work)
    - `sidequests` — "Side quests" (tinkering, experiments, curiosity-driven)
 
-5. **Generate the project JSON** following the template at `.claude/skills/alchemy/template.json`. Read the template first — it defines the tone, structure, and level of detail expected. Write the result to `client/src/data/projects/<repo-name>.json`.
+5. **Add it to the sitemap.** Choose a unique `slug` of lowercase ASCII letters, numbers and hyphens. Add `https://jordanwright.codes/sketch/<slug>` to `client/public/sitemap.xml`. Keep the published slug when editing the title.
 
-6. **Present what you created** — show the user the full JSON in a readable format so they can see what they got.
+6. **Generate the project JSON** following the template at `.claude/skills/alchemy/template.json`. Read the template first — it defines the tone, structure, and level of detail expected. Write the result to `client/src/data/projects/<repo-name>.json`.
+
+7. **Present what you created** — show the user the full JSON in a readable format so they can see what they got.
 
 ### Project JSON schema
 
@@ -47,10 +49,11 @@ The alchemist-app lives at `/Users/j.wright/git-repos/alchemist-app`. Project da
 ```json
 {
   "id": "<repo-name>",
+  "slug": "<permanent-sketch-slug>",
   "section": "trenches|direction|sidequests",
   "title": "Human-readable project title",
   "description": "One-line description for the sidebar",
-  "date": "Month Year or Year",
+  "date": "Mon D, YYYY (a full date, e.g. \"Nov 1, 2026\")",
   "tags": ["Tech1", "Tech2"],
   "repo": "https://github.com/owner/repo",
   "content": {

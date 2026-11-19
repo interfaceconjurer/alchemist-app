@@ -8,7 +8,7 @@ Set `TRUST_PROXY` to the actual proxy addresses or CIDRs (comma separated). A fi
 
 The Express server supplies CSP, anti-framing, MIME-sniffing, referrer, and production HSTS headers. Script sources are restricted to the same origin. Inline styles remain permitted for React and Three; Google Fonts styles/fonts and raw.githubusercontent.com portfolio images have explicit permissions. Keep these policies synchronized with any edge/CDN policy and future content hosts.
 
-Serve the built `client/dist` artifact. Hashed assets use one-year immutable caching; HTML requires revalidation, and unversioned files must revalidate. Missing assets return 404 rather than the SPA shell. Express negotiates Brotli/gzip for compressible responses. Put a CDN in front for shared caching and scalable compression, and keep HTML and hashed-asset cache rules distinct.
+Serve the built `client/dist` artifact. The build generates `sketch/<slug>/index.html` for every published sketch so direct requests and link previews receive its title, description, and canonical URL. Hashed assets use one-year immutable caching; HTML requires revalidation, and unversioned files must revalidate. Missing assets return 404 rather than the SPA shell. Express negotiates Brotli/gzip for compressible responses. Put a CDN in front for shared caching and scalable compression, and keep HTML and hashed-asset cache rules distinct.
 
 The client dependency override selects patched MCP server 2.3.0 only under vgpu 0.6.0. The application uses vgpu's shader/browser exports and does not serve its MCP endpoints. A functional tooling test exercises vgpu's bundled handler against this override; remove the override after upstream adopts a patched release.
 

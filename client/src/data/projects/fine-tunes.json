@@ -1,10 +1,11 @@
 {
   "id": "fine-tunes",
+  "slug": "fine-tunes",
   "section": "sidequests",
   "type": "Tool",
   "title": "Fine Tunes",
   "description": "Curate images, run a prompt, get a trained model. That's it.",
-  "date": "Mar 2026",
+  "date": "Mar 1, 2026",
   "tags": ["Python", "CLI", "Replicate", "Flux LoRA", "Generative AI"],
   "repo": "https://github.com/interfaceconjurer/fine-tunes",
   "content": {

@@ -12,7 +12,7 @@
   },
   "scripts": {
     "start": "vite",
-    "build": "node scripts/patch-three-webgl-disposal.mjs && npm run check:morph && vite build",
+    "build": "node scripts/patch-three-webgl-disposal.mjs && npm run check:morph && vite build && node scripts/build-sketch-pages.mjs",
     "build:clean": "rm -rf dist node_modules/.vite",
     "clean": "npm run build:clean",
     "clean:all": "npm run build:clean && rm -rf node_modules",

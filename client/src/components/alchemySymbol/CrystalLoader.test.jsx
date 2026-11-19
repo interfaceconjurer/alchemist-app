@@ -12,7 +12,6 @@ function Slot({ loading }) {
 }
 const holding = () => document.querySelector('[data-holding]').getAttribute('data-holding');
 const state = () => document.querySelector('.crystal-loader').getAttribute('data-crystal-loader');
-const frame = () => document.querySelector('.crystal-loader-cell').getAttribute('data-frame');
 const advance = (ms) => act(() => { vi.advanceTimersByTime(ms); });
 // The threshold counts from the start of the page load; tests start the clock at 0.
 const startPageClock = () => {
@@ -37,15 +36,10 @@ it('runs two full cycles of the spinner once shown', () => {
   startPageClock();
   const { rerender } = render(<Slot loading />);
   advance(SHOW_AFTER_MS);
-  const seen = [];
   rerender(<Slot loading={false} />); // the crystal is ready the moment the loader appears
-  for (let t = 0; t < MIN_VISIBLE_MS; t += FRAME_MS) {
-    expect(state()).toBe('visible');
-    seen.push(frame());
-    advance(FRAME_MS);
-  }
-  // Every frame twice, in order, starting from the first.
-  expect(seen).toEqual([...FRAMES, ...FRAMES]);
+  advance(MIN_VISIBLE_MS - 1);
+  expect(state()).toBe('visible');
+  advance(1);
   expect(state()).toBe('hidden');
 });
 
@@ -111,17 +105,20 @@ it('hides straight away when it has already been up for the minimum time', () =>
   expect(state()).toBe('hidden');
 });
 
-it('spins through braille frames while visible and is hidden from assistive tech', () => {
-  vi.useFakeTimers();
+it('draws every braille frame for the CSS spin, in order, and is hidden from assistive tech', () => {
   render(<CrystalLoader visible />);
   const loader = document.querySelector('.crystal-loader');
   expect(loader).toHaveAttribute('aria-hidden', 'true');
-  const frames = new Set();
-  for (let i = 0; i < 12; i++) { frames.add(frame()); advance(FRAME_MS); }
-  expect(frames.size).toBeGreaterThan(5);
-  for (const f of frames) expect(FRAMES).toContain(f);
-  // A six-dot (2×3) cell.
-  expect(document.querySelectorAll('.crystal-loader-dot')).toHaveLength(6);
+  // Stacked frames, each offset by its step in the cycle (the spin itself is CSS,
+  // so it keeps turning while the main thread is busy loading the crystal).
+  const frames = [...loader.querySelectorAll('.crystal-loader-frame')];
+  expect(frames.map((f) => f.querySelector('.crystal-loader-cell').getAttribute('data-frame'))).toEqual(FRAMES);
+  expect(frames.map((f) => f.style.getPropertyValue('--frame'))).toEqual(FRAMES.map((_, i) => String(i)));
+  const strip = loader.querySelector('.crystal-loader-frames');
+  expect(strip.style.getPropertyValue('--frame-count')).toBe(String(FRAMES.length));
+  expect(strip.style.getPropertyValue('--frame-ms')).toBe(`${FRAME_MS}ms`);
+  // Each frame is a six-dot (2×3) cell.
+  expect(frames[0].querySelectorAll('.crystal-loader-dot')).toHaveLength(6);
 });
 
 it('places each braille dot in its cell position', () => {
@@ -135,17 +132,6 @@ it('places each braille dot in its cell position', () => {
   expect(lit('⠸')).toEqual([0, 1, 0, 1, 0, 1]);
   expect(lit('⠇')).toEqual([1, 0, 1, 0, 1, 0]); // dots 1, 2, 3: the left column
   expect(lit('⠋')).toEqual([1, 1, 1, 0, 0, 0]); // dots 1, 4, 2: top row and middle-left
-});
-
-it('holds one frame for reduced motion', () => {
-  vi.useFakeTimers();
-  const media = vi.spyOn(window, 'matchMedia').mockImplementation((q) => ({ matches: q.includes('reduce'), addEventListener() {}, removeEventListener() {} }));
-  try {
-    render(<CrystalLoader visible />);
-    const first = frame();
-    advance(1000);
-    expect(frame()).toBe(first);
-  } finally { media.mockRestore(); }
 });
 
 it('reports a graphics failure so the loader stops waiting for the crystal', () => {

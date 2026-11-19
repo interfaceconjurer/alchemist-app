@@ -1,10 +1,11 @@
 {
   "id": "ascii-image-generator",
+  "slug": "pytone",
   "section": "sidequests",
   "type": "Tool",
   "title": "PyTone",
   "description": "Any image, rebuilt from glyphs. Terminal, HTML or SVG.",
-  "date": "Nov 2026",
+  "date": "Nov 1, 2026",
   "tags": ["Python", "CLI", "Pillow", "SVG", "Generative Art"],
   "repo": "https://github.com/interfaceconjurer/ascii-image-generator",
   "content": {

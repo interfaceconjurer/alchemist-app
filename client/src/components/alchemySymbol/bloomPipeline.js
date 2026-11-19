@@ -18,6 +18,22 @@ export function createBloomPipeline(renderer, scene, camera) {
       glow.threshold.value = threshold;
     },
     render() { pipeline.render(); },
+    /**
+     * Compile the scene's shaders ahead of the first draw. Without this the first
+     * render builds every material's pipeline synchronously and the page freezes
+     * for seconds on a slow phone; precompiling yields to the browser between
+     * items, so the loader keeps running. The post-processing pass (bloom) still
+     * compiles on the first render, which is the brief remainder.
+     */
+    async compile() {
+      await scenePass.compileAsync(renderer);
+      if (disposed || !renderer.backend.isWebGPUBackend) return;
+      // In pinned Three r187, WebGPU validation failures resolve compileAsync.
+      // The backend marks the failed pipeline and silently skips its draws.
+      for (const compiled of renderer._pipelines.caches.values()) {
+        if (renderer.backend.get(compiled).error) throw new Error('Crystal GPU pipeline failed to compile');
+      }
+    },
     dispose() {
       if (disposed) return;
       disposed = true;

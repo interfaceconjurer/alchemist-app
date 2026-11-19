@@ -147,9 +147,19 @@ test('hashed assets are immutable while HTML and unversioned files revalidate', 
 
 test('nested navigation receives the shell but missing assets and non-HTML routes remain 404s', async () => {
   const get = await serve();
-  const navigation = await get('/projects/crystal', { Accept: 'text/html' });
-  assert.equal(navigation.status, 200);
-  assert.match(navigation.body.toString(), /Portfolio shell/);
+  for (const route of ['/projects/crystal', '/sketch/pytone', '/sketch/portfolio-review-with-apollo/']) {
+    const navigation = await get(route, { Accept: 'text/html' });
+    assert.equal(navigation.status, 200, route);
+    assert.match(navigation.body.toString(), /Portfolio shell/);
+    // A sketch page is part of the app, never an embeddable artifact.
+    assert.match(navigation.headers['x-frame-options'], /DENY/);
+  }
+  for (const route of ['/sketch/missing.v2', '/sketch/%E0%A4%A']) {
+    const html = await get(route, { Accept: 'text/html' });
+    assert.equal(html.status, 200, route);
+    assert.match(html.body.toString(), /Portfolio shell/);
+    assert.equal((await get(route, { Accept: 'application/json' })).status, 404);
+  }
   for (const url of ['/assets/missing.js', '/missing.png', '/favicon.ico']) {
     const response = await get(url, { Accept: 'text/html' });
     assert.equal(response.status, 404);

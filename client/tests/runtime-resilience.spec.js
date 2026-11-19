@@ -87,13 +87,51 @@ test('graphics initialization failure preserves navigation and a static symbol',
     Object.defineProperty(navigator, 'gpu', { value: undefined, configurable: true });
     const getContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function (kind, ...args) {
-      if (['webgl', 'webgl2', 'experimental-webgl'].includes(kind)) return null;
+      if (['webgl', 'webgl2', 'experimental-webgl'].includes(kind)) {
+        window.__deniedGraphicsContext = true;
+        return null;
+      }
       return getContext.call(this, kind, ...args);
     };
   });
   await page.goto('/');
+  await page.bringToFront();
+  await page.locator('.symbolContainer').scrollIntoViewIfNeeded();
+  // Initialize the lazy scene before timing the response to the rejected context.
+  await page.waitForFunction(() => window.__deniedGraphicsContext === true);
   await expect(page.locator('[data-symbol-fallback="unavailable"]')).toBeVisible();
   await expectUsableShell(page);
+});
+
+test('the CSS loader runs two ordered cycles and holds its first frame for reduced motion', async ({ page }) => {
+  let release;
+  const hold = new Promise(resolve => { release = resolve; });
+  await page.route(/\/assets\/MorphingSolid-[^/]+\.js$/, async route => {
+    await hold;
+    await route.abort();
+  });
+  const loader = page.locator('.crystal-loader');
+  try {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await expect(loader).toHaveAttribute('data-crystal-loader', 'visible');
+    const frames = loader.locator('.crystal-loader-frame');
+    const sequence = await frames.evaluateAll(elements => {
+      const animations = elements.map(el => el.getAnimations()[0]);
+      animations.forEach(animation => animation.pause());
+      return Array.from({ length: 20 }, (_, index) => {
+        animations.forEach(animation => { animation.currentTime = 40 + index * 80; });
+        return elements.flatMap((el, i) => getComputedStyle(el).opacity === '1' ? [i] : []);
+      });
+    });
+    expect(sequence).toEqual(Array.from({ length: 20 }, (_, i) => [i % 10]));
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect(frames.first()).toHaveCSS('opacity', '1');
+    await expect(frames.first()).toHaveCSS('animation-name', 'none');
+    await expect(frames.nth(1)).toHaveCSS('opacity', '0');
+  } finally { release(); }
+  await expect(loader).toHaveAttribute('data-crystal-loader', 'hidden');
+  await expect(page.locator('[data-symbol-fallback]')).toBeVisible();
 });
 
 test('a failed graphics chunk preserves the shell', async ({ page }) => {
@@ -118,7 +156,9 @@ test('reduced motion grows the crystal in, then holds it at rest while the light
   await expect(page.locator('.symbolContainer')).toHaveAttribute('data-render-state', 'reduced-motion');
   await expect(page.locator('.symbolContainer canvas')).toBeVisible();
   await expect(page.locator('[data-symbol-fallback]')).toHaveCount(0);
-  // Wait until the intro is over and the crystal has held for a while.
+  // Software shader compilation can occupy much of the test's startup budget.
+  // Measure the held frames after the intro has actually finished.
+  await page.waitForFunction(() => window.__calmFrames.some(frame => frame.phase === 'hold'));
   await expect.poll(() => page.evaluate(() => window.__calmFrames.filter(f => f.phase === 'hold').length), { timeout: 45_000 }).toBeGreaterThan(20);
   const frames = await page.evaluate(() => window.__calmFrames);
   expect(frames.every(f => f.mode === 'calm')).toBe(true);

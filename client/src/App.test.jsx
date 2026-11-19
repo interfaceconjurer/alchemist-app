@@ -1,9 +1,11 @@
 import React from 'react';
 import { render, act, screen, fireEvent } from '@testing-library/react';
-import { afterEach, vi, expect } from 'vitest';
+import { afterEach, beforeEach, vi, expect } from 'vitest';
 import App from './App';
 
 vi.mock('./components/alchemySymbol/mediator', () => ({ default: () => <div aria-label="Alchemy symbol" /> }));
+// Every test starts at home: the address bar now opens what it points to (useSketchUrl).
+beforeEach(() => window.history.replaceState(null, '', '/'));
 afterEach(() => vi.unstubAllGlobals());
 
 it('renders without crashing', async () => {
@@ -27,6 +29,17 @@ it('keeps the shell usable and follows the system color scheme when storage is d
   expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
 });
 
+it('shows desktop tabs when the viewport widens before the first media query subscription', async () => {
+  const realMatchMedia = window.matchMedia.bind(window);
+  const mobile = vi.fn()
+    .mockReturnValueOnce({ matches: true })
+    .mockReturnValue({ matches: false, addEventListener() {}, removeEventListener() {} });
+  vi.stubGlobal('matchMedia', query => query === '(max-width: 899px)' ? mobile() : realMatchMedia(query));
+  await act(async () => { render(<App />); });
+  fireEvent.click(screen.getByRole('link', { name: /Fine Tunes/ }));
+  expect(screen.getByRole('button', { name: 'Close Fine Tunes', hidden: true })).toBeInTheDocument();
+});
+
 it('restores safely from structurally malformed workspace data', async () => {
   vi.stubGlobal('localStorage', {
     getItem: key => key === 'workspace-state' ? '{}' : null,
@@ -44,12 +57,13 @@ it('lists typed work under the profile links and opens it in the stage', async (
   // Newest first: the Nov 2026 tool, the Oct 2026 presentation, then the Mar 2026 tool.
   const feed = [...document.querySelectorAll('.work-feed-item')].map((el) => el.dataset.workItemId);
   expect(feed).toEqual(['ascii-image-generator', 'apollo-portfolio-review', 'fine-tunes']);
-  const item = screen.getByRole('button', { name: /Portfolio review with Apollo/ });
+  const item = screen.getByRole('link', { name: /Portfolio review with Apollo/ });
+  expect(item).toHaveAttribute('href', '/sketch/portfolio-review-with-apollo');
   expect(item).toHaveTextContent('Presentation');
   expect(item).toHaveTextContent('Oct 21, 2026');
   await act(async () => { fireEvent.click(item); });
   expect(document.querySelector('.main')).not.toHaveClass('main--stage-hidden');
-  expect(item).toHaveAttribute('aria-pressed', 'true');
+  expect(item).toHaveAttribute('aria-current', 'page');
   expect(screen.getByRole('heading', { level: 2, name: 'Portfolio review with Apollo' })).toBeInTheDocument();
   expect(screen.getByTitle('Portfolio review with Apollo slide deck')).toHaveAttribute('src', '/work/apollo-portfolio-review/index.html');
 });
@@ -58,7 +72,7 @@ it('opens the stage while a work item is dragged and closes it again if the drag
   vi.stubGlobal('localStorage', { getItem: () => null, setItem: vi.fn() });
   await act(async () => { render(<App />); });
   const main = document.querySelector('.main');
-  const item = screen.getByRole('button', { name: /Fine Tunes/ });
+  const item = screen.getByRole('link', { name: /Fine Tunes/ });
   expect(main).toHaveClass('main--stage-hidden');
   const now = Date.now();
   const clock = vi.spyOn(Date, 'now').mockReturnValue(now);

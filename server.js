@@ -3,6 +3,8 @@ const compression = require('compression');
 const path = require('node:path');
 const { constants } = require('node:zlib');
 
+const { SKETCH_PREFIX, slugFromPath } = require('./client/src/sketchPath.js');
+
 const YEAR_SECONDS = 365 * 24 * 60 * 60;
 const HASHED_ASSET = /-[a-zA-Z0-9_-]{8,}\.[a-zA-Z0-9]+$/;
 const EMBEDDABLE_PREFIX = '/work/';
@@ -106,6 +108,20 @@ function createApp({ env = process.env, distDir = path.join(__dirname, 'client/d
   app.use('/assets', express.static(path.join(distDir, 'assets'), {
     index: false, redirect: false, fallthrough: false, setHeaders: setAssetCache,
   }));
+  // Inspect the raw pathname before Express decodes wildcard parameters. Unknown
+  // sketch links still reach the app so it can clear a previously saved workspace.
+  app.use((req, res, next) => {
+    if (!['GET', 'HEAD'].includes(req.method) || !req.path.startsWith(SKETCH_PREFIX)) return next();
+    if (!req.accepts('html')) return res.sendStatus(404);
+    res.set('Cache-Control', 'no-cache');
+    const sendHome = () => res.sendFile(path.join(distDir, 'index.html'), error => { if (error) next(error); });
+    const slug = slugFromPath(req.path);
+    if (!slug) return sendHome();
+    res.sendFile(path.join(distDir, 'sketch', slug, 'index.html'), error => {
+      if (error?.status === 404) sendHome();
+      else if (error) next(error);
+    });
+  });
   app.use(express.static(distDir, {
     index: false, redirect: false,
     setHeaders: (res) => res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate'),

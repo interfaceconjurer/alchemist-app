@@ -1,9 +1,10 @@
 {
   "id": "project-slug",
+  "slug": "placeholder-project-alpha",
   "section": "trenches|direction|sidequests",
   "title": "Placeholder Project Alpha",
   "description": "Design & development — day to day.",
-  "date": "January 15, 2024",
+  "date": "Jan 15, 2024",
   "tags": ["React", "TypeScript", "Figma"],
   "repo": "https://github.com/owner/repo",
   "content": {
