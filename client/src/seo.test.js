@@ -8,13 +8,18 @@ const file = (path) => resolve(process.cwd(), path);
 const html = readFileSync(file('index.html'), 'utf8');
 const doc = new DOMParser().parseFromString(html, 'text/html');
 const meta = (selector) => doc.querySelector(selector)?.getAttribute('content');
+const manifest = JSON.parse(readFileSync(file('public/manifest.json'), 'utf8'));
 const ORIGIN = 'https://jordanwright.codes';
 
 describe('site metadata', () => {
-  it('has a title and a description that fits search results', () => {
+  it('uses the homepage title and exact description across preview metadata and the manifest', () => {
     expect(doc.title).toBe('Jordan L. Wright · AI Native Designer & Engineer');
     const description = meta('meta[name="description"]');
-    expect(description.length).toBeLessThanOrEqual(160);
+    expect(description).toBe(
+      'Poised at the intersection between science and art, Jordan L. Wright is an AI native designer and engineer. ' +
+      'This brief crosssection of work contains some small moments captured in the lab.'
+    );
+    expect(manifest.description).toBe(description);
     expect(meta('meta[property="og:description"]')).toBe(description);
     expect(meta('meta[name="twitter:description"]')).toBe(description);
   });
@@ -49,7 +54,6 @@ describe('site metadata', () => {
     const ld = JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent);
     expect(ld['@type']).toBe('Person');
     expect(ld.url).toBe(`${ORIGIN}/`);
-    const manifest = JSON.parse(readFileSync(file('public/manifest.json'), 'utf8'));
     expect(manifest.name).toBe('Jordan L. Wright');
     expect(`${html} ${JSON.stringify(manifest)}`).not.toMatch(/digit\.?\s?al\.?chemist|Digit Alchemist/i);
   });
