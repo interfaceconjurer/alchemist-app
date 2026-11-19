@@ -8,11 +8,11 @@ const home = () => new DOMParser().parseFromString(readFileSync(resolve(process.
 const content = (doc, selector) => doc.querySelector(selector).getAttribute('content');
 const pytone = { title: 'PyTone', slug: 'pytone', description: 'Any image, rebuilt from glyphs. Terminal, HTML or SVG.' };
 
-it('gives a sketch a short preview title, its own description and address, and the full title in the tab', () => {
+it('titles a sketch preview with its name and the site name, and the full title in the tab', () => {
   const doc = home();
   updateSketchMetadata(doc, pytone);
-  expect(content(doc, 'meta[property="og:title"]')).toBe('PyTone');
-  expect(content(doc, 'meta[name="twitter:title"]')).toBe('PyTone');
+  expect(content(doc, 'meta[property="og:title"]')).toBe('PyTone · Jordan L. Wright');
+  expect(content(doc, 'meta[name="twitter:title"]')).toBe('PyTone · Jordan L. Wright');
   expect(doc.title).toBe('PyTone · Jordan L. Wright · AI Native Designer & Engineer');
   expect(content(doc, 'meta[property="og:description"]')).toBe(pytone.description);
   expect(content(doc, 'meta[property="og:url"]')).toBe('https://jordanwright.codes/sketch/pytone');

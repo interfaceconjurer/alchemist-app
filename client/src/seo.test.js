@@ -48,10 +48,10 @@ describe('site metadata', () => {
     expect(size('apple-touch-icon.png')).toEqual([180, 180]);
   });
 
-  it('keeps preview titles short and the full title for search', () => {
-    // Apple: don't put branding in og:title; apps show og:site_name beside it.
-    expect(meta('meta[property="og:title"]')).toBe('Jordan L. Wright');
-    expect(meta('meta[name="twitter:title"]')).toBe('Jordan L. Wright');
+  it('keeps the name in the home preview title, since most apps show only the title and domain', () => {
+    // iMessage, LinkedIn and X ignore og:site_name, so a bare title would drop the name.
+    expect(meta('meta[property="og:title"]')).toBe('Jordan L. Wright · AI Native Designer & Engineer');
+    expect(meta('meta[name="twitter:title"]')).toBe('Jordan L. Wright · AI Native Designer & Engineer');
     expect(meta('meta[property="og:site_name"]')).toBe('Jordan L. Wright');
     expect(doc.title).toBe('Jordan L. Wright · AI Native Designer & Engineer');
   });
