@@ -9,7 +9,7 @@ function pushSketch(path) {
 // Only step back to an adjacent entry created by this app. A long-lived tab
 // can lose its oldest entries, even though their successors still have state.
 function predecessor(path) {
-  if (history.state?.sketchPrevious !== path && !(history.state?.fromHome && path === '/')) return null;
+  if (history.state?.sketchPrevious !== path) return null;
   const navigation = window.navigation;
   if (!navigation?.currentEntry) return { path };
   const entry = navigation.entries()[navigation.currentEntry.index - 1];
